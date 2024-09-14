@@ -5,10 +5,12 @@ import shutil
 import htmlParser
 from SRProject import *
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.action_chains import ActionChains
 from pybtex.database.input import bibtex as bibtex_parser
 import random
 from datetime import datetime
@@ -330,6 +332,13 @@ class SearcherInSource:
                     web_element.click()
                 except:
                     pass
+
+
+                # Sélectionne de rechercher seulement sur les titres d'articles
+                web_element = self.driver.find_element(By.XPATH, '/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-search-home/div[2]/div[2]/app-input-route/app-search-basic/app-search-form/form/div[1]/app-search-row/div/div[1]/app-select-search-field/wos-select/button')
+                web_element.click()
+                web_element = self.driver.find_element(By.XPATH, '/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-search-home/div[2]/div[2]/app-input-route/app-search-basic/app-search-form/form/div[1]/app-search-row/div/div[1]/app-select-search-field/wos-select/div/div[1]/div/div[3]')
+                web_element.click()
 
                 # Insère dans la boîte de texte appropriée le titre de l'article
                 web_element = self.driver.find_element(By.XPATH, '//*[@id="search-option"]')

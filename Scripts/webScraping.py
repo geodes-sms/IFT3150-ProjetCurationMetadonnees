@@ -70,12 +70,14 @@ class WebScraper:
             save_extracted_html(link + "/references#references" + "_00", html)
             new_metadata = htmlParser.get_metadata_from_html_ieee(html)
             update_metadata(metadata, new_metadata)
+            self.searcher.extract_bibtex_in_IEEE(link, link)
 
         elif source == ScienceDirect or source == 'sciencedirect':
             html = self.get_html_from_link(link)
             save_extracted_html(link + "_02", html)
             new_metadata = htmlParser.get_metadata_from_html_sciencedirect(html)
             update_metadata(metadata, new_metadata)
+            self.searcher.extract_bibtex_in_ScienceDirect(link, link)
 
         elif source == ACM or source in ['acm', "Association for Computing Machinery (ACM)", "ACM Press",
                                        "Society for Computer Simulation International"] or "ACM" in source:
@@ -83,12 +85,14 @@ class WebScraper:
             save_extracted_html(link + "_01", html)
             new_metadata = htmlParser.get_metadata_from_html_ACM(html)
             metadata.update(new_metadata)
+            self.searcher.extract_bibtex_in_ACM(link, link)
 
         elif source == SpringerLink or source == 'springer':
             html = self.get_html_from_link(link)
             save_extracted_html(link + "_03", html)
             new_metadata = htmlParser.get_metadata_from_html_springerlink(html)
             metadata.update(new_metadata)
+            self.searcher.extract_bibtex_in_SpringerLink(link, link)
 
         elif source == Scopus or source == 'scopus':
             # i.e.: "https://www.scopus.com/record/display.uri?eid=2-s2.0-85083744459&doi=10.1089%2fg4h.2019.0067&origin=inward&txGid=0d477ca65acc675d5e5d53dc3edac470"
@@ -96,6 +100,7 @@ class WebScraper:
             save_extracted_html(link + "_04", html)
             new_metadata = htmlParser.get_metadata_from_html_scopus(html)
             metadata.update(new_metadata)
+            self.searcher.extract_bibtex_in_scopus_signed_in(link, link)
 
             if all(new_metadata[k] is None for k in new_metadata.keys()):
                 last_half = link[link.find("doi"):]
@@ -112,15 +117,18 @@ class WebScraper:
             save_extracted_html(link + "_05", html)
             new_metadata = htmlParser.get_metadata_from_html_wos(html)
             metadata.update(new_metadata)
+            self.searcher.extract_bibtex_in_WoS(link, link)
 
         elif source == PubMedCentral:
             html = self.get_html_from_link(link)
             save_extracted_html(link + "_08", html)
             new_metadata = htmlParser.get_metadata_from_html_pub_med_central(html)
             metadata.update(new_metadata)
+            self.searcher.extract_bibtex_in_PubMedCentral(link, link)
 
         else:
             print(f'source "{source}" not valid')
+        if metadata: metadata["Link"] = link
         return metadata
 
     def get_metadata_from_title(self, title, author=None, source=None, year=None):

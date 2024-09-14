@@ -162,12 +162,12 @@ def update_dataset(row, metadata):
     return row
     
 
-def main(sr_df, do_web_scraping=False):
+def main(sr_df, do_web_scraping=False, run=999):
     completed_sr_project = sr_df.copy()
     web_scraper = webScraping.WebScraper() if do_web_scraping else None
     metadata_cols = ['title', 'venue', 'authors', 'abstract', 'keywords', 'references', 'doi', 'meta_title']
 
-    run = 111  # <------- partition [0,1,2,3], only without link [111] or complete [999]
+    # run = 111  # <------- partition [0,1,2,3], only without link [111] or complete [999]
     parts = 6
     n = len(list(sr_df.iterrows()))//parts
     i = 0
