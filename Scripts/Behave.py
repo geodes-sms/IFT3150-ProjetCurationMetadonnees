@@ -52,7 +52,7 @@ class Behave(SRProject):
 
     def __init__(self):
         super().__init__()
-        self.path = "Datasets/Behave/Behave-source.xlsx"
+        self.path = "../Datasets/Behave/Behave-source.xlsx"
 
         # converters = {"Title": lambda x: x.encode('utf-8')}
         # All sheets
@@ -82,7 +82,7 @@ class Behave(SRProject):
         self.df["reviewer_count"] = 2  # TODO: verify
 
         self.df['project'] = "Behave"
-        self.export_path = "Datasets/Behave/Behave.tsv"
+        self.export_path = "../Datasets/Behave/Behave.tsv"
         print(self.df)
 
     def find_decision_on_articles(self, sheet_included, sheet_criteria):

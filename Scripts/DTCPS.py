@@ -51,7 +51,7 @@ class DTCPS(SRProject):
 
     def __init__(self):
         super().__init__()
-        self.path = "Datasets/DTCPS/DTCPS-source.xlsx"
+        self.path = "../Datasets/DTCPS/DTCPS-source.xlsx"
 
         # converters = {"Title": lambda x: x.encode('utf-8')}
         # All sheets

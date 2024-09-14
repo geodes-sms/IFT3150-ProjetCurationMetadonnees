@@ -7,7 +7,7 @@ if platform.system() == "Windows":
     DOWNLOAD_PATH = "C:/Users/guill/Downloads"
     FIREFOX_PROFILE_PATH = "C:/Users/guill/AppData/Roaming/Mozilla/Firefox/Profiles/4am1ne92.default-release-1609958750563"
 elif platform.system() == "Linux":
-    MAIN_PATH = "/home/guillaume-genois/PycharmProjects/IFT3150-ProjetCurationMetadonnees"
+    MAIN_PATH = "/"
     EXTRACTED_PATH = "/media/guillaume-genois/Samsung USB/Projet Curation des métadonnées"
     DOWNLOAD_PATH = "/home/guillaume-genois/Downloads"
     FIREFOX_PROFILE_PATH = ""

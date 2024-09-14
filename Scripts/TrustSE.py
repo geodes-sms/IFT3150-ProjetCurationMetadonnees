@@ -51,7 +51,7 @@ class TrustSE(SRProject):
 
     def __init__(self):
         super().__init__()
-        self.path = "Datasets/TrustSE/TrustSE-source.xlsx"
+        self.path = "../Datasets/TrustSE/TrustSE-source.xlsx"
 
         # converters = {"Title": lambda x: x.encode('utf-8')}
         # All sheets

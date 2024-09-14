@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 
+
 import chardet
 
 import findMissingMetadata
@@ -12,6 +13,7 @@ from GameSE import GameSE
 from TestNN import TestNN
 from TrustSE import TrustSE
 from SRProject import *
+from os_path import MAIN_PATH
 
 # Author : Guillaume Genois, 20248507
 # This script is for importing and uniformising data from multiple datasets of SR.
@@ -74,7 +76,6 @@ def cleanDataFrame(df: pd.DataFrame) -> pd.DataFrame:
     new_df = df.replace("â€", "-")
     new_df =df.replace("â€œ", '"')
     new_df = df.replace("â€", '"')
-
     new_df = df.replace("©", '')
     return new_df
 
@@ -144,14 +145,14 @@ def main(args=None):
         elif arg == "TrustSE":
             sr_project = TrustSE()
 
-        sr_project.df.to_excel(f"C:/Users/guill/OneDrive - Universite de Montreal/Projet Curation des métadonnées/Datasets/{arg}/{arg}_pre-extract.xlsx")
+        sr_project.df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}_pre-extract.xlsx")
         # printEncoding(sr_project.path)  # to make sure we use the right encoding if necessary
         completed_df = findMissingMetadata.main(sr_project.df, False)
         # df = pd.read_csv("C:/Users/guill/OneDrive - Universite de Montreal/Projet Curation des métadonnées/Datasets/{arg}/{arg}.tsv", delimiter="\t")
         # print(df)
         # completed_df = find_missing_metadata(df)
         cleaned_df = cleanDataFrame(completed_df)
-        completed_df.to_excel(f"C:/Users/guill/OneDrive - Universite de Montreal/Projet Curation des métadonnées/Datasets/{arg}/{arg}.xlsx")
+        completed_df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}.xlsx")
         # return
         # postProcessing(sr_project)
         sr_project.df = completed_df

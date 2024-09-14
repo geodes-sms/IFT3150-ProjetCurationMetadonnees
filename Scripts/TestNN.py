@@ -21,7 +21,7 @@ class TestNN(SRProject):
 
     def __init__(self):
         super().__init__()
-        self.path = "Datasets/TestNN/TestNN-source.xlsx"
+        self.path = "../Datasets/TestNN/TestNN-source.xlsx"
         sheet_abstract = pd.read_excel(self.path, sheet_name="Stage3(105)")
         sheet_abstract_final = pd.read_excel(self.path, sheet_name="Stage4(27)")
         sheet_snowballing = pd.read_excel(self.path, sheet_name="Stage5_snowballing_inital(70)")
@@ -61,7 +61,7 @@ class TestNN(SRProject):
         # self.df["doi"].astype(str)
 
         self.df['project'] = "TestNN"
-        self.export_path = "Datasets/TestNN/TestNN.tsv"
+        self.export_path = "../Datasets/TestNN/TestNN.tsv"
         print(self.df)
 
     def add_snowballing_articles(self, sheet_snowballing):
