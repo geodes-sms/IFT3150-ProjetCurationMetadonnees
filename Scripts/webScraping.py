@@ -14,6 +14,7 @@ from os_path import MAIN_PATH, FIREFOX_PROFILE_PATH
 
 class WebScraper:
     def __init__(self):
+        service = webdriver.FirefoxService("/home/guillaume-genois/Downloads/geckodriver-v0.35.0-linux64")
         # ua = UserAgent()
         profile = webdriver.FirefoxProfile(FIREFOX_PROFILE_PATH)
         options = webdriver.FirefoxOptions()
@@ -21,7 +22,7 @@ class WebScraper:
         options.set_preference('network.proxy.type', 0)
         # options.set_preference("general.useragent.override", ua.random)
         # options.add_argument("-headless")
-        self.driver = webdriver.Firefox(options=options)
+        self.driver = webdriver.Firefox(options=options, service=service)
         self.driver.get("https://www.webofscience.com/wos/woscc/basic-search")  # WoS
         self.driver.get("https://ieeexplore.ieee.org/Xplore/home.jsp")  # IEEE
         self.driver.get("https://dl.acm.org/")  # ACM

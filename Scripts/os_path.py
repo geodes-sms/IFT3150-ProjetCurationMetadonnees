@@ -10,6 +10,6 @@ elif platform.system() == "Linux":
     MAIN_PATH = "/home/guillaume-genois/PycharmProjects/IFT3150-ProjetCurationMetadonnees"
     EXTRACTED_PATH = "/media/guillaume-genois/Samsung USB/Projet Curation des métadonnées"
     DOWNLOAD_PATH = "/home/guillaume-genois/Downloads"
-    FIREFOX_PROFILE_PATH = "~/snap/firefox/common/.mozilla/firefox/70zft0d5.default"
+    FIREFOX_PROFILE_PATH = "/home/guillaume-genois/snap/firefox/common/.mozilla/firefox/70zft0d5.default"
 else:
     raise Exception("Unsupported system")

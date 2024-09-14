@@ -126,7 +126,7 @@ def ExportToCSV(sr_project):
 
 def main(args=None):
     if args is None or not len(args) > 0:
-        args = ["GameSE"]
+        args = ["Behave", "DTCPS"]
     sr_project = None
 
     for arg in args:
@@ -147,7 +147,7 @@ def main(args=None):
 
         sr_project.df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}_pre-extract.xlsx")
         # printEncoding(sr_project.path)  # to make sure we use the right encoding if necessary
-        completed_df = findMissingMetadata.main(sr_project.df, False, 999)
+        completed_df = findMissingMetadata.main(sr_project.df, True, 999)
         # df = pd.read_csv("C:/Users/guill/OneDrive - Universite de Montreal/Projet Curation des métadonnées/Datasets/{arg}/{arg}.tsv", delimiter="\t")
         # print(df)
         # completed_df = find_missing_metadata(df)
