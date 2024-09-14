@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import re
 from pybtex.database.input import bibtex as bibtex_parser
 
+from os_path import EXTRACTED_PATH
+
 
 def get_source(link):
     source = None
@@ -95,11 +97,11 @@ def get_metadata_from_already_extract(file, source=None):
     #     metadata.update(get_metadata_from_already_extract(file + "%2Fkeywords#keywords", None))
     #     return metadata
     if file[-4:] == "html":
-        with open("D:/Projet Curation des métadonnées/HTML extracted/" + file, 'rb') as f:
+        with open(f"{EXTRACTED_PATH}/HTML extracted/" + file, 'rb') as f:
             html = f.read()
             source = get_source(file) if source is None else source
             if source is None:
-                with open("D:/Projet Curation des métadonnées/HTML extracted/"
+                with open(f"{EXTRACTED_PATH}/HTML extracted/"
                           + file[:11] + "http%3A%2F%2Fapi.crossref.org%2Fworks%2F" + file[file.find("doi.org%2F")+10:-5] + ".html", 'rb') as g:
                     crossref_html = g.read()
                 source = get_venue_from_doi(crossref_html)
@@ -135,7 +137,7 @@ def get_metadata_from_already_extract(file, source=None):
                 print(f'Venue "{source}" not valid')
     elif file[-3:] == "bib":
         parser = bibtex_parser.Parser()
-        bib_data = parser.parse_file(f'D:\\Projet Curation des métadonnées\\Bibtex\\{file}')
+        bib_data = parser.parse_file(f'{EXTRACTED_PATH}\\Bibtex\\{file}')
         metadata.update(get_metadata_from_bibtex(bib_data))
     return metadata
 
@@ -238,15 +240,16 @@ def get_metadata_from_html_ACM(html):
 
 
     # Extract the pages
+    pages = None
     pages_tag = soup.find('span', {'class': 'epub-section__pagerange'})
     pages_text = pages_tag.get_text(strip=True) if pages_tag else None
     if pages_text is None:
         pages_tag = soup.find('div', {'property': 'pagination'})
         pages_text = pages_tag.get_text(strip=True) if pages_tag else None
     if pages_text is not None and "Pages" in pages_text:
-        pages = pages[pages_text.find('Pages')+6:] if pages_text else None
+        pages = pages_text[pages_text.find('Pages')+6:] if pages_text else None
     elif pages_text is not None and "pp" in pages_text:
-        pages = pages[pages_text.find('pp')+3:] if pages_text else None
+        pages = pages_text[pages_text.find('pp')+3:] if pages_text else None
         
     # Extract the abstract
     abstract_tag = soup.find('div', {'class': 'abstractSection abstractInFull'})
@@ -703,7 +706,7 @@ def get_metadata_from_html_arxiv(html):
 
 if __name__ == '__main__':
     print("CrossRef")
-    with open("D:/Projet Curation des métadonnées/HTML extracted/2024-06-09_http%3a%2f%2fapi.crossref.org%2fworks%2f10.1145%2f1486508.1486516.html", 'rb') as f:
+    with open(f"{EXTRACTED_PATH}/HTML extracted/2024-06-09_http%3a%2f%2fapi.crossref.org%2fworks%2f10.1145%2f1486508.1486516.html", 'rb') as f:
         html = f.read()
     results = get_venue_from_doi(html)
     print(results)
@@ -749,7 +752,7 @@ if __name__ == '__main__':
 
     print()
     print("Scopus_signed_in")  # TODO: references
-    with open("D:\\Projet Curation des métadonnées\\HTML extracted\\2024-08-16_ A framework for testing robust autonomy of UAS during design and certification_07.html", 'rb') as f:
+    with open(f"{EXTRACTED_PATH}\\HTML extracted\\2024-08-16_ A framework for testing robust autonomy of UAS during design and certification_07.html", 'rb') as f:
         html = f.read()
     results = get_metadata_from_html_scopus_signed_in(html)
     for key in results.keys():
@@ -766,7 +769,7 @@ if __name__ == '__main__':
     print()
     print("Pub Med Central")  # TODO: references
     # with open("tests/test-pub-med-central.html", 'rb') as f:
-    with open("D:/Projet Curation des métadonnées/HTML extracted/2024-08-21_I-care-an interaction system for the individual activation of people with dementia_08.html", 'rb') as f:
+    with open(f"{EXTRACTED_PATH}/HTML extracted/2024-08-21_I-care-an interaction system for the individual activation of people with dementia_08.html", 'rb') as f:
         html = f.read()
     results = get_metadata_from_html_pub_med_central(html)
     for key in results.keys():
@@ -776,7 +779,7 @@ if __name__ == '__main__':
     print("Bibtex")
     parser = bibtex_parser.Parser()
     bib_data = parser.parse_file(
-        f'D:\\Projet Curation des métadonnées\\Bibtex\\2024-09-05_A Rehabilitation System For Upper Limbs In Adult Patients Using Video Games_00.bib')
+        f'{EXTRACTED_PATH}\\Bibtex\\2024-09-05_A Rehabilitation System For Upper Limbs In Adult Patients Using Video Games_00.bib')
     results = get_metadata_from_bibtex(bib_data)
     for key in results.keys():
         print(key, results[key])

@@ -1,7 +1,7 @@
 import os
 
 import pandas
-from fake_useragent import UserAgent
+# from fake_useragent import UserAgent
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from pybtex.database.input import bibtex as bibtex_parser
@@ -10,14 +10,15 @@ from datetime import datetime
 import htmlParser
 import searchInSource
 from SRProject import *
+from os_path import MAIN_PATH, FIREFOX_PROFILE_PATH
 
 
 # TODO: ajouter filtre article title seulement sur scopus
 
 class WebScraper:
     def __init__(self):
-        ua = UserAgent()
-        profile = webdriver.FirefoxProfile("C:/Users/guill/AppData/Roaming/Mozilla/Firefox/Profiles/4am1ne92.default-release-1609958750563")
+        # ua = UserAgent()
+        profile = webdriver.FirefoxProfile(FIREFOX_PROFILE_PATH)
         options = webdriver.FirefoxOptions()
         options.profile = profile
         options.set_preference('network.proxy.type', 0)
@@ -196,9 +197,8 @@ class WebScraper:
 
 class ManualWebScraper:
     def __init__(self):
-        ua = UserAgent()
-        profile = webdriver.FirefoxProfile(
-            "C:/Users/guill/AppData/Roaming/Mozilla/Firefox/Profiles/4am1ne92.default-release-1609958750563")
+        # ua = UserAgent()
+        profile = webdriver.FirefoxProfile(FIREFOX_PROFILE_PATH)
         options = webdriver.FirefoxOptions()
         options.profile = profile
         options.set_preference('network.proxy.type', 0)
@@ -209,9 +209,9 @@ class ManualWebScraper:
 
     def get_bibtex_from_already_extracted(self):
         links_already_searched = pd.read_csv(
-            'C:/Users/guill/OneDrive - Universite de Montreal/Projet Curation des métadonnées/Scripts/articles_source_links.tsv',
+            f'{MAIN_PATH}/Scripts/articles_source_links.tsv',
             sep='\t', encoding='windows-1252')
-        already_extracted_bibtex = os.listdir("D:/Projet Curation des métadonnées/Bibtex")
+        already_extracted_bibtex = os.listdir(f"{EXTRACTED_PATH}/Bibtex")
         for idx, row in links_already_searched.iterrows():
             try:
                 title = row['Title']
@@ -271,7 +271,7 @@ class ManualWebScraper:
             self.searcher.extract_bibtex_in_IEEE(title, link)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
-                f'D:\\Projet Curation des métadonnées\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_00.bib')
+                f'{EXTRACTED_PATH}\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_00.bib')
             update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == ScienceDirect or source == 'sciencedirect':
@@ -283,7 +283,7 @@ class ManualWebScraper:
             self.searcher.extract_bibtex_in_ScienceDirect(title, link)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
-                f'D:\\Projet Curation des métadonnées\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_02.bib')
+                f'{EXTRACTED_PATH}\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_02.bib')
             update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == ACM or source in ['acm', "Association for Computing Machinery (ACM)", "ACM Press",
@@ -296,7 +296,7 @@ class ManualWebScraper:
             self.searcher.extract_bibtex_in_ACM(title, link)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
-                f'D:\\Projet Curation des métadonnées\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_01.bib')
+                f'{EXTRACTED_PATH}\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_01.bib')
             update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == SpringerLink or source == 'springer':
@@ -308,7 +308,7 @@ class ManualWebScraper:
             self.searcher.extract_bibtex_in_SpringerLink(title, link)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
-                f'D:\\Projet Curation des métadonnées\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_03.bib')
+                f'{EXTRACTED_PATH}\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_03.bib')
             update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == Scopus or source == 'scopus':
@@ -328,7 +328,7 @@ class ManualWebScraper:
             self.searcher.extract_bibtex_in_scopus_signed_in(title, link)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
-                f'D:\\Projet Curation des métadonnées\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_07.bib')
+                f'{EXTRACTED_PATH}\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_07.bib')
             update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == WoS or source == 'wos':
@@ -340,7 +340,7 @@ class ManualWebScraper:
             self.searcher.extract_bibtex_in_WoS(title, link)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
-                f'D:\\Projet Curation des métadonnées\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_05.bib')
+                f'{EXTRACTED_PATH}\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_05.bib')
             update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == PubMedCentral:

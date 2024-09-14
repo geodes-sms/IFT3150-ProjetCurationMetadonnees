@@ -2,6 +2,7 @@ import re
 from datetime import datetime
 import pandas as pd
 
+from os_path import EXTRACTED_PATH, MAIN_PATH
 
 """
   Key               String
@@ -102,7 +103,7 @@ empty_df = pd.DataFrame(columns=["key", "project", "title", "abstract", "keyword
 
 
 def save_link(title, link):
-    with open("C:/Users/guill/OneDrive - Universite de Montreal/Projet Curation des métadonnées/Scripts/articles_source_links.tsv", 'a') as f:
+    with open(f"{MAIN_PATH}/Scripts/articles_source_links.tsv", 'a') as f:
         f.write(title + "\t" + link + "\n")
 
 
@@ -155,7 +156,7 @@ def save_extracted_html(link, html):
     formated_link = link
     for k in special_char_conversion.keys():
         formated_link = formated_link.replace(k, "%" + special_char_conversion[k])
-    with open(f"D:/Projet Curation des métadonnées/HTML extracted/{datetime.today().strftime('%Y-%m-%d')}_{formated_link}.html", 'wb') as f:
+    with open(f"{EXTRACTED_PATH}/HTML extracted/{datetime.today().strftime('%Y-%m-%d')}_{formated_link}.html", 'wb') as f:
         f.write(html.encode("utf-8"))
     print(f"{datetime.today().strftime('%Y-%m-%d')}_{formated_link}.html")
     print(formated_link)

@@ -8,6 +8,7 @@ import pandas as pd
 import htmlParser
 import webScraping
 from SRProject import *
+from os_path import *
 
 
 def extract_without_link(row, already_extracted_files, web_scraper):
@@ -57,7 +58,7 @@ def extract_without_link(row, already_extracted_files, web_scraper):
         # if metadata['DOI'] is None or metadata['DOI'] == "":
         source = metadata['Source']
         authors = metadata['Authors']
-        links_already_searched = pd.read_csv('C:/Users/guill/OneDrive - Universite de Montreal/Projet Curation des métadonnées/Scripts/articles_source_links.tsv', sep='\t', encoding='windows-1252')
+        links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t', encoding='windows-1252')
         if metadata['Title'] in links_already_searched['Title'].values:
             print("link already searched, adding it instead of DOI")
             metadata['Link'] = links_already_searched.loc[links_already_searched['Title'] == metadata['Title']]['Link'].values[0]
@@ -174,8 +175,8 @@ def main(sr_df, do_web_scraping=False):
     i = 0
     erreurs = []
     already_extracted_files = []
-    already_extracted_html = os.listdir("D:/Projet Curation des métadonnées/HTML extracted")
-    already_extracted_bibtex = os.listdir("D:/Projet Curation des métadonnées/Bibtex")
+    already_extracted_html = os.listdir(f"{EXTRACTED_PATH}/HTML extracted")
+    already_extracted_bibtex = os.listdir(f"{EXTRACTED_PATH}/Bibtex")
     already_extracted_files.extend(already_extracted_html)
     already_extracted_files.extend(already_extracted_bibtex)
     for idx, row in sr_df.iterrows():
@@ -225,6 +226,6 @@ def main(sr_df, do_web_scraping=False):
         completed_sr_project.iloc[idx] = row
 
     # for er in erreurs: print(er)
-    pd.DataFrame(erreurs, columns=['index', 'key', 'error']).to_excel("C:/Users/guill/OneDrive - Universite de Montreal/Projet Curation des métadonnées/Datasets/erreurs_"+str(run)+".xlsx")
+    pd.DataFrame(erreurs, columns=['index', 'key', 'error']).to_excel(f"{MAIN_PATH}/Datasets/erreurs_"+str(run)+".xlsx")
     if web_scraper: web_scraper.close()
     return completed_sr_project

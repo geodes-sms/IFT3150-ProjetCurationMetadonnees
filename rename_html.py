@@ -1,7 +1,8 @@
 import os, pandas
 from SRProject import *
+from os_path import EXTRACTED_PATH
 
-path = "D:/Projet Curation des métadonnées/Bibtex"
+path = f"{EXTRACTED_PATH}/Bibtex"
 def rename_files():
     for file in os.listdir(path):
         # print(file)
@@ -43,7 +44,7 @@ def test_keys():
 # test_keys()
 
 def generate_bibtex():
-    df = pandas.read_excel("C:\\Users\\guill\\OneDrive - Universite de Montreal\\Projet Curation des métadonnées\\Datasets\\GameSE\\GameSE_final_2.xlsx")
+    df = pandas.read_excel(f"{MAIN_PATH}\\Datasets\\GameSE\\GameSE_final_2.xlsx")
     for idx, row in df.iterrows():
         bibtex = f"""@article{{{''},
 title = {{{row['title']}}},
@@ -60,6 +61,6 @@ abstract = {{{row['abstract']}}}
 """
         row['bibtex'] = bibtex
         df.iloc[idx] = row
-    df.to_excel("C:\\Users\\guill\\OneDrive - Universite de Montreal\\Projet Curation des métadonnées\\Datasets\\GameSE\\GameSE_final_2-bibtex.xlsx")
+    df.to_excel(f"{MAIN_PATH}\\Datasets\\GameSE\\GameSE_final_2-bibtex.xlsx")
 
 # generate_bibtex()

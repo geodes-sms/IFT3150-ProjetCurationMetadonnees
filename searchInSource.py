@@ -16,6 +16,8 @@ import random
 from datetime import datetime
 import time
 
+from os_path import EXTRACTED_PATH
+
 
 class SearcherInSource:
     def __init__(self, driver):
@@ -29,12 +31,12 @@ class SearcherInSource:
         
     def save_bibtex(self, title, source_id):
         # https://stackoverflow.com/questions/39327032/how-to-get-the-latest-file-in-a-folder
-        list_of_files = glob.glob('C:\\Users\\guill\\Downloads\\*.bib') # * means all if need specific format then *.csv
+        list_of_files = glob.glob(f'{EXTRACTED_PATH}\\*.bib') # * means all if need specific format then *.csv
         latest_file = max(list_of_files, key=os.path.getctime)
         print(latest_file)
 
         shutil.move(latest_file,
-                    f'D:\\Projet Curation des métadonnées\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_{source_id}.bib')
+                    f'{EXTRACTED_PATH}\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_{source_id}.bib')
 
         if os.path.isfile(latest_file):
             os.remove(latest_file)
@@ -396,14 +398,6 @@ class SearcherInSource:
         
         self.save_bibtex(title, '07')
 
-        # shutil.move('C:\\Users\\guill\\Downloads\\scopus.bib',
-        #             f'D:\\Projet Curation des métadonnées\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_07.bib')
-        # time.sleep(2)
-
-        # if os.path.isfile('C:\\Users\\guill\\Downloads\\scopus.bib'):
-        #     os.remove('C:\\Users\\guill\\Downloads\\scopus.bib')
-
-
     def search_in_Scopus_signed_in(self, title):
         tries = 0
         while tries < 5:
@@ -494,7 +488,7 @@ class SearcherInSource:
         self.extract_bibtex_in_scopus_signed_in(title)
 
         parser = bibtex_parser.Parser()
-        bib_data = parser.parse_file(f'D:\\Projet Curation des métadonnées\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{title}_07.bib')
+        bib_data = parser.parse_file(f'{EXTRACTED_PATH}\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{title}_07.bib')
 
         new_metadata = update_metadata(new_metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
