@@ -14,7 +14,9 @@ from os_path import MAIN_PATH, FIREFOX_PROFILE_PATH
 
 class WebScraper:
     def __init__(self):
-        service = webdriver.FirefoxService("/home/guillaume-genois/Downloads/geckodriver-v0.35.0-linux64")
+        # service = webdriver.FirefoxService("/home/guillaume-genois/Downloads/geckodriver-v0.35.0-linux64")
+        # C:\\Users\\guill\\.cache\\selenium\\geckodriver\\win64\\0.35.0\\geckodriver.exe
+        # https://askubuntu.com/questions/870530/how-to-install-geckodriver-in-ubuntu
         # ua = UserAgent()
         profile = webdriver.FirefoxProfile(FIREFOX_PROFILE_PATH)
         options = webdriver.FirefoxOptions()
@@ -22,7 +24,8 @@ class WebScraper:
         options.set_preference('network.proxy.type', 0)
         # options.set_preference("general.useragent.override", ua.random)
         # options.add_argument("-headless")
-        self.driver = webdriver.Firefox(options=options, service=service)
+        self.driver = webdriver.Firefox(options=options)
+        # self.driver = webdriver.Firefox(options=options, service=service)
         self.driver.get("https://www.webofscience.com/wos/woscc/basic-search")  # WoS
         self.driver.get("https://ieeexplore.ieee.org/Xplore/home.jsp")  # IEEE
         self.driver.get("https://dl.acm.org/")  # ACM
@@ -401,12 +404,12 @@ if __name__ == '__main__':
     # title = "Android Malware Detection Based On System Calls Analysis And Cnn Classification"  # IEEE au 2e
     # title = "The explanatory power of playability heuristics"  # WoS
     title = 'Let’s Play: Exploring literacy practices in an emerging videogame paratext'
-    web_scraper = WebScraper()
-    print(web_scraper.get_metadata_from_title(title, None, ScopusSignedIn))
+    # web_scraper = WebScraper()
+    # print(web_scraper.get_metadata_from_title(title, None, ScopusSignedIn))
     # title = "ME3CA: A cognitive assistant for physical exercises that monitors emotions and the environment"
     # link = "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7039382/"
-    # web_scraper = ManualWebScraper()
+    web_scraper = ManualWebScraper()
     # print(web_scraper.get_metadata_from_title(title, PubMedCentral, link))
     # web_scraper.get_bibtex_from_already_extracted()
-    # web_scraper.add_articles_manually()
+    web_scraper.add_articles_manually()
     web_scraper.close()
