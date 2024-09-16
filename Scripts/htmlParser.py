@@ -30,7 +30,7 @@ def clean_authors(authors):
         author = re.sub('â€“', '', author)
         author = re.sub(',;', ';', author)
         author = re.sub(r'[0-9]+', '', author)
-        author = " ".join([x for x in author.split() if x is not "and" or ""])
+        author = " ".join([x for x in author.split() if x != "and" or ""])
         results.append(author)
     return results
 
