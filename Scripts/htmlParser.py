@@ -284,10 +284,13 @@ def get_metadata_from_html_ACM(html):
         references = None
 
     # Extract the DOI
+    doi = None
     doi_tag = soup.find('meta', {'name': 'publication_doi'})
-    doi_tag = soup.find('meta', {'name': 'dc.Identifier', 'scheme': 'doi'}) if doi_tag is None else doi_tag
-    doi = doi_tag['content'].strip() if doi_tag else None
-
+    if not doi_tag:
+        doi_tag = soup.find('meta', {'name': 'dc.Identifier', 'scheme': 'doi'})
+        doi = doi_tag['content'].strip() if doi_tag else None
+    else:
+        doi = doi_tag.get_text(strip=True)
 
     # Extract the publisher
     publisher_tag = soup.find('p', {'class': 'publisher__name'})
