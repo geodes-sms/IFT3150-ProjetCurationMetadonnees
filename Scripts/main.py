@@ -72,12 +72,13 @@ def postProcessing(sr_project):
 
 
 def cleanDataFrame(df: pd.DataFrame) -> pd.DataFrame:
-    new_df = df.replace("â€“", "-")
-    new_df = df.replace("â€", "-")
-    new_df =df.replace("â€œ", '"')
-    new_df = df.replace("â€", '"')
-    new_df = df.replace("©", '')
+    new_df = df.replace("–", "-")
+    new_df = new_df.replace("©", '')
+    # new_df = new_df['keywords'].replace(",", ';')
+    df_obj = new_df.select_dtypes('object')
+    new_df[df_obj.columns] = df_obj.apply(lambda x: x.str.strip())
     return new_df
+
 
 # Function to export to CSV the SRProject object
 def ExportToCSV(sr_project):
@@ -126,7 +127,7 @@ def ExportToCSV(sr_project):
 
 def main(args=None):
     if args is None or not len(args) > 0:
-        args = ["Behave", "DTCPS"]
+        args = ["GameSE"]
     sr_project = None
 
     for arg in args:
@@ -147,15 +148,15 @@ def main(args=None):
 
         sr_project.df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}_pre-extract.xlsx")
         # printEncoding(sr_project.path)  # to make sure we use the right encoding if necessary
-        completed_df = findMissingMetadata.main(sr_project.df, True, 999)
+        completed_df = findMissingMetadata.main(sr_project.df, False, 111)
         # df = pd.read_csv("C:/Users/guill/OneDrive - Universite de Montreal/Projet Curation des métadonnées/Datasets/{arg}/{arg}.tsv", delimiter="\t")
         # print(df)
         # completed_df = find_missing_metadata(df)
         cleaned_df = cleanDataFrame(completed_df)
-        completed_df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}.xlsx")
+        cleaned_df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}.xlsx")
         # return
         # postProcessing(sr_project)
-        sr_project.df = completed_df
+        sr_project.df = cleaned_df
 
         ExportToCSV(sr_project)
         postProcessing(sr_project)

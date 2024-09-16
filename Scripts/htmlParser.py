@@ -2,6 +2,7 @@ from SRProject import *
 from bs4 import BeautifulSoup
 import re
 from pybtex.database.input import bibtex as bibtex_parser
+from unidecode import unidecode
 
 from os_path import EXTRACTED_PATH
 
@@ -27,7 +28,6 @@ def update_metadata(old, new):
 def clean_authors(authors):
     results = []
     for author in authors:
-        author = re.sub('â€“', '', author)
         author = re.sub(',;', ';', author)
         author = re.sub(r'[0-9]+', '', author)
         author = " ".join([x for x in author.split() if x != "and" or ""])
@@ -77,7 +77,7 @@ def get_metadata_from_bibtex(bib_data):
     metadata['Venue'] = bib_dict['journal'] if 'journal' in bib_dict.keys() else ""
     metadata['Authors'] = '; '.join([str(x) for x in bib_data.entries[bib_key].persons['author']]) if 'author' in bib_data.entries[bib_key].persons.keys() else ""
     metadata['Abstract'] = bib_dict['abstract'] if 'abstract' in bib_dict.keys() else ""
-    metadata['Keywords'] = bib_dict['keywords'] if 'keywords' in bib_dict.keys() else ""
+    metadata['Keywords'] = '; '.join(str(x) for x in bib_dict['keywords'].split(',') if x != "") if 'keywords' in bib_dict.keys() else ""
     metadata['References'] = bib_dict['cited-references'] if 'cited-references' in bib_dict.keys() else ""
     metadata['Pages'] = bib_dict['pages'] if 'pages' in bib_dict.keys() else ""
     metadata['Year'] = bib_dict['year'] if 'year' in bib_dict.keys() else ""
@@ -98,7 +98,8 @@ def get_metadata_from_already_extract(file, source=None):
     #     return metadata
     if file[-4:] == "html":
         with open(f"{EXTRACTED_PATH}/HTML extracted/" + file, 'rb') as f:
-            html = f.read()
+            html = unidecode(f.read().decode('utf-8', 'ignore'))
+            # html = f.read().decode('utf-8', 'ignore')
             source = get_source(file) if source is None else source
             if source is None:
                 with open(f"{EXTRACTED_PATH}/HTML extracted/"
@@ -224,7 +225,12 @@ def get_metadata_from_html_ACM(html):
         author_tags = soup.find_all('span', {'property': 'author'})
         if author_tags:
             for tag in author_tags:
-                authors.append(tag.get_text(strip=True))
+                name = tag.find('span', {'property': 'givenName'})
+                family_name = tag.find('span', {'property': 'familyName'})
+                if name and family_name:
+                    authors.append(name.get_text(strip=True) + " " + family_name.get_text(strip=True))
+                else:
+                    authors.append(tag.get_text(strip=True))
         else:
             authors = None
 
@@ -247,9 +253,9 @@ def get_metadata_from_html_ACM(html):
         pages_tag = soup.find('div', {'property': 'pagination'})
         pages_text = pages_tag.get_text(strip=True) if pages_tag else None
     if pages_text is not None and "Pages" in pages_text:
-        pages = pages_text[pages_text.find('Pages')+6:] if pages_text else None
+        pages = pages_text[pages_text.find('Pages')+5:] if pages_text else None
     elif pages_text is not None and "pp" in pages_text:
-        pages = pages_text[pages_text.find('pp')+3:] if pages_text else None
+        pages = pages_text[pages_text.find('pp')+2:] if pages_text else None
         
     # Extract the abstract
     abstract_tag = soup.find('div', {'class': 'abstractSection abstractInFull'})
@@ -259,8 +265,13 @@ def get_metadata_from_html_ACM(html):
         abstract_tag = abstract_section.find('div', {'role': 'paragraph'}) if abstract_section else None
         abstract = abstract_tag.get_text(strip=True) if abstract_tag else None
 
-    # Extract the keywords  ---  need to open PDF
-    keywords = None
+    # Extract the keywords
+    keywords = []
+    keywords_section = soup.find('section', {'property': 'keywords'})
+    if keywords_section:
+        for tag in keywords_section.find_all('li'):
+            keywords.append(tag.get_text(strip=True))
+    if len(keywords) == 0: keywords = None
 
     # Extract the references
     references = []
@@ -273,8 +284,10 @@ def get_metadata_from_html_ACM(html):
         references = None
 
     # Extract the DOI
-    doi_tag = soup.find('meta', {'name': 'dc.Identifier', 'scheme': 'doi'})
+    doi_tag = soup.find('meta', {'name': 'publication_doi'})
+    doi_tag = soup.find('meta', {'name': 'dc.Identifier', 'scheme': 'doi'}) if doi_tag is None else doi_tag
     doi = doi_tag['content'].strip() if doi_tag else None
+
 
     # Extract the publisher
     publisher_tag = soup.find('p', {'class': 'publisher__name'})
@@ -302,7 +315,7 @@ def get_metadata_from_html_sciencedirect(html):
     if pages_section:
         pages_tag = pages_section.find('div', {'class': 'text-xs'})
         pages_text = pages_tag.get_text(strip=True) if pages_tag else None
-        pages = pages_text[pages_text.find("Pages")+6:] if pages_text else None
+        pages = pages_text[pages_text.find("Pages")+5:] if pages_text else None
     else:
         pages = None
 
@@ -432,7 +445,7 @@ def get_metadata_from_html_scopus(html):
     # Extract pages
     pages_tag = soup.find('span', {'id': "journalInfo"})
     pages_text = pages_tag.get_text(strip=True) if pages_tag else None
-    pages = pages_text[pages_text.find("Pages")+6:] if pages_text and "Pages" in pages_text else None
+    pages = pages_text[pages_text.find("Pages")+5:] if pages_text and "Pages" in pages_text else None
 
     # Function to extract authors
     authors = []
@@ -499,7 +512,7 @@ def get_metadata_from_html_scopus_signed_in(html):
     if pages_section:
         pages_tag = pages_section.find('span', {'class': 'Typography-module__lVnit'})
         pages_text = pages_tag.get_text(strip=True) if pages_tag else None
-        pages = pages_text[:pages_text.find("Pages")+6] if pages_text else None
+        pages = pages_text[:pages_text.find("Pages")+5] if pages_text else None
     else:
         pages = None
 
