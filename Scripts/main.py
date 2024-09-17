@@ -148,7 +148,7 @@ def main(args=None):
 
         sr_project.df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}_pre-extract.xlsx")
         # printEncoding(sr_project.path)  # to make sure we use the right encoding if necessary
-        completed_df = findMissingMetadata.main(sr_project.df, False, 111)
+        completed_df = findMissingMetadata.main(sr_project.df, True, 111)
         # df = pd.read_csv("C:/Users/guill/OneDrive - Universite de Montreal/Projet Curation des métadonnées/Datasets/{arg}/{arg}.tsv", delimiter="\t")
         # print(df)
         # completed_df = find_missing_metadata(df)

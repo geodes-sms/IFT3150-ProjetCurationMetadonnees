@@ -14,18 +14,22 @@ from os_path import MAIN_PATH, FIREFOX_PROFILE_PATH
 
 class WebScraper:
     def __init__(self):
-        # service = webdriver.FirefoxService("/home/guillaume-genois/Downloads/geckodriver-v0.35.0-linux64")
-        # C:\\Users\\guill\\.cache\\selenium\\geckodriver\\win64\\0.35.0\\geckodriver.exe
+        install_dir = "/snap/firefox/current/usr/lib/firefox"
+        driver_loc = os.path.join(install_dir, "geckodriver")
+        binary_loc = os.path.join(install_dir, "firefox")
+
+        service = webdriver.FirefoxService(driver_loc)
         # https://askubuntu.com/questions/870530/how-to-install-geckodriver-in-ubuntu
         # ua = UserAgent()
         profile = webdriver.FirefoxProfile(FIREFOX_PROFILE_PATH)
         options = webdriver.FirefoxOptions()
         options.profile = profile
+        options.binary_location = binary_loc
         options.set_preference('network.proxy.type', 0)
         # options.set_preference("general.useragent.override", ua.random)
         # options.add_argument("-headless")
-        self.driver = webdriver.Firefox(options=options)
-        # self.driver = webdriver.Firefox(options=options, service=service)
+        # self.driver = webdriver.Firefox(options=options)
+        self.driver = webdriver.Firefox(options=options, service=service)
         self.driver.get("https://www.webofscience.com/wos/woscc/basic-search")  # WoS
         self.driver.get("https://ieeexplore.ieee.org/Xplore/home.jsp")  # IEEE
         self.driver.get("https://dl.acm.org/")  # ACM
