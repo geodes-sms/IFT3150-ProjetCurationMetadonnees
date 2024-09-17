@@ -240,6 +240,33 @@ class ManualWebScraper:
             except Exception as e:
                 print(e)
                 pass
+
+    def get_bibtex_from_source_link(self):
+        source_link = pd.read_excel(f"{MAIN_PATH}/Datasets/GameSE/GameSE_pre-extract.xlsx")
+        already_extracted_bibtex = os.listdir(f"{EXTRACTED_PATH}/Bibtex")
+        for idx, row in source_link.iterrows():
+            try:
+                link = row['doi']
+                title = link
+                verification_link = link
+                if 'doi' in link:
+                    self.driver.get(link)
+                    verification_link = self.driver.current_url
+                print(title, link)
+                for source in sources_name:
+                    if source in verification_link:
+                        is_already_extracted = False
+                        for file in already_extracted_bibtex:
+                            if file[11:-7] == format_link(title):
+                                print("bibtex déjà extrait")
+                                is_already_extracted = True
+                                break
+                        if not is_already_extracted:
+                            print('extraction...')
+                            print(self.get_metadata_from_title(title, source, link))
+            except Exception as e:
+                print(e)
+                pass
             
     def add_articles_manually(self):
         while True:
@@ -411,5 +438,5 @@ if __name__ == '__main__':
     web_scraper = ManualWebScraper()
     # print(web_scraper.get_metadata_from_title(title, PubMedCentral, link))
     # web_scraper.get_bibtex_from_already_extracted()
-    web_scraper.add_articles_manually()
+    web_scraper.get_bibtex_from_source_link()
     web_scraper.close()
