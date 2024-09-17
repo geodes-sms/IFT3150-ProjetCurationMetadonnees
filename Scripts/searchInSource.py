@@ -169,7 +169,7 @@ class SearcherInSource:
         # if not check_if_right_link(new_metadata, title):
         #     return  # TODO: ajouter plutôt avant le break et changer d'article
         save_extracted_html(title + "/references#references_00", html)
-        self.extract_bibtex_in_IEEE
+        self.extract_bibtex_in_IEEE(title)
         return new_metadata
     
     def extract_bibtex_in_ACM(self, title, link=None):
@@ -278,7 +278,7 @@ class SearcherInSource:
             return  # TODO: ajouter plutôt avant le break et changer d'article
         save_extracted_html(title + '_01', html)
         new_metadata['Link'] = link
-        self.extract_bibtex_in_ACM
+        self.extract_bibtex_in_ACM(title)
         return new_metadata
     
     def extract_bibtex_in_WoS(self, title, link=None):
@@ -380,7 +380,7 @@ class SearcherInSource:
             save_extracted_html(title + '_05', html)
             save_link(title, self.driver.current_url)
             new_metadata['Link'] = self.driver.current_url
-            self.extract_bibtex_in_WoS
+            self.extract_bibtex_in_WoS(title)
             return new_metadata
 
     def search_in_Scopus(self, title):
