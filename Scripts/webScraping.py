@@ -251,23 +251,22 @@ class ManualWebScraper:
         for idx, row in source_link.iterrows():
             try:
                 link = row['doi']
-                title = link
                 verification_link = link
                 if 'doi' in link:
                     self.driver.get(link)
                     verification_link = self.driver.current_url
-                print(title, link)
+                print(link, link)
                 for source in sources_name:
                     if source in verification_link:
                         is_already_extracted = False
                         for file in already_extracted_bibtex:
-                            if file[11:-7] == format_link(title):
+                            if file[11:-7] == format_link(link):
                                 print("bibtex déjà extrait")
                                 is_already_extracted = True
                                 break
                         if not is_already_extracted:
                             print('extraction...')
-                            print(self.get_metadata_from_title(title, source, link))
+                            print(self.get_metadata_from_title(link, source, link))
             except Exception as e:
                 print(e)
                 pass
