@@ -1,5 +1,7 @@
 import os
+import time
 
+import pandas as pd
 # from fake_useragent import UserAgent
 from selenium import webdriver
 from pybtex.database.input import bibtex as bibtex_parser
@@ -211,13 +213,18 @@ class WebScraper:
 class ManualWebScraper:
     def __init__(self):
         # ua = UserAgent()
+        install_dir = "/snap/firefox/current/usr/lib/firefox"
+        driver_loc = os.path.join(install_dir, "geckodriver")
+        binary_loc = os.path.join(install_dir, "firefox")
+        service = webdriver.FirefoxService(driver_loc)
         profile = webdriver.FirefoxProfile(FIREFOX_PROFILE_PATH)
         options = webdriver.FirefoxOptions()
         options.profile = profile
+        options.binary_location = binary_loc
         options.set_preference('network.proxy.type', 0)
         # options.set_preference("general.useragent.override", ua.random)
         # options.add_argument("-headless")
-        self.driver = webdriver.Firefox(options=options)
+        self.driver = webdriver.Firefox(options=options, service=service)
         self.searcher = searchInSource.SearcherInSource(self.driver)
 
     def get_bibtex_from_already_extracted(self):
@@ -247,13 +254,18 @@ class ManualWebScraper:
 
     def get_bibtex_from_source_link(self):
         source_link = pd.read_excel(f"{MAIN_PATH}/Datasets/GameSE/GameSE_pre-extract.xlsx")
+        source_link = source_link.loc[~pd.isna(source_link['doi'])]
         already_extracted_bibtex = os.listdir(f"{EXTRACTED_PATH}/Bibtex")
+        self.driver.get("https://www.scopus.com/inward/record.uri?eid=2-s2.0-85083744459&doi=10.1089%2fg4h.2019.0067&partnerID=40&md5=eeea66fccb18681e9ca573e20ca78c48")
+        input()
         for idx, row in source_link.iterrows():
+            time.sleep(2)
             try:
                 link = row['doi']
                 verification_link = link
                 if 'doi' in link:
                     self.driver.get(link)
+                    time.sleep(2)
                     verification_link = self.driver.current_url
                 print(link, link)
                 for source in sources_name:
@@ -267,6 +279,7 @@ class ManualWebScraper:
                         if not is_already_extracted:
                             print('extraction...')
                             print(self.get_metadata_from_title(link, source, link))
+                            time.sleep(2)
             except Exception as e:
                 print(e)
                 pass

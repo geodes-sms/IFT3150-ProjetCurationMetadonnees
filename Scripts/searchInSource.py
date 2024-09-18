@@ -16,6 +16,7 @@ import random
 from datetime import datetime
 import time
 
+from Scripts.os_path import DOWNLOAD_PATH
 from os_path import EXTRACTED_PATH
 
 
@@ -31,7 +32,7 @@ class SearcherInSource:
         
     def save_bibtex(self, title, source_id):
         # https://stackoverflow.com/questions/39327032/how-to-get-the-latest-file-in-a-folder
-        list_of_files = glob.glob(f'{EXTRACTED_PATH}\\*.bib') # * means all if need specific format then *.csv
+        list_of_files = glob.glob(f'{DOWNLOAD_PATH}\\*.bib') # * means all if need specific format then *.csv
         latest_file = max(list_of_files, key=os.path.getctime)
         print(latest_file)
 
