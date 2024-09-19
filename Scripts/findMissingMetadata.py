@@ -59,6 +59,7 @@ def extract_without_link(row, already_extracted_files, web_scraper):
         source = metadata['Source']
         authors = metadata['Authors']
         links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t', encoding='windows-1252', encoding_errors='ignore')
+        links_already_searched['Title'] = links_already_searched['Title'].astype(str)
         links_already_searched['Title'] = links_already_searched['Title'].apply(unidecode)
         # links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t')
         if unidecode(metadata['Title']) in links_already_searched['Title'].values:
