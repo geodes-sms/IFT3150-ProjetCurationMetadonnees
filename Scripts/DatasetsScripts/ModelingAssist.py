@@ -1,4 +1,4 @@
-from SRProject import *
+from Scripts.SRProject import *
 import pandas as pd
 import openpyxl
 
@@ -35,7 +35,7 @@ class ModelingAssist(SRProject):
 
     def __init__(self):
         super().__init__()
-        self.path = "../Datasets/ModelingAssist/ModelingAssist-source.xlsx"
+        self.path = f"{MAIN_PATH}/Datasets/ModelingAssist/ModelingAssist-source.xlsx"
 
         # converters = {"Title": lambda x: x.encode('utf-8')}
         # All sheets
@@ -65,37 +65,48 @@ class ModelingAssist(SRProject):
         # self.df["year"].astype(int)
         # self.df["references"]
         # self.df["bibtex"]
-        self.df['mode'] = ['snowballing' if s != 'None' else 'new_screen' for s in sheet_without_duplicates['Snowballing']]
+        self.df['mode'] = ['snowballing' if not pd.isna(s) else 'new_screen' for s in sheet_without_duplicates['Strategy']]
 
         # Find all screened decisions
-        self.find_decision_on_articles(sheet_screen_title_and_abstract, sheet_screen_title_and_abstract, 'Title + Abstract')
+        self.find_decision_on_articles(sheet_screen_title, sheet_without_duplicates, 'Not fulfilled inclusion/exclusion criteria')
+        self.find_decision_on_articles(sheet_screen_title_and_abstract, sheet_without_duplicates, 'Not fulfilled inclusion/exclusion criteria')
 
         # Find all final decisions based on which articles are included in different sheets
-        self.find_decision_on_articles(sheet_screen_full_text, sheet_screen_full_text, 'Full Text', True)
+        self.find_decision_on_articles(sheet_screen_final, sheet_without_duplicates, 'Not fulfilled inclusion/exclusion criteria', True)
 
         self.df["reviewer_count"] = 2
 
         self.df["doi"].astype(str)
         self.df["link"].astype(str)
+        self.df['year'] = self.df['year'].astype("Int64")
 
         self.df['project'] = "ModelingAssist"
-        self.export_path = "Datasets/ModelingAssist/ModelingAssist.tsv"
+        self.export_path = f"{MAIN_PATH}/Datasets/ModelingAssist/ModelingAssist.tsv"
         print(self.df)
 
     def find_decision_on_articles(self, sheet_included, sheet_criteria, criteria_column, is_final=False):
         decision = 'screened_decision' if not is_final else 'final_decision'
         # criteria = 'exclusion_criteria' if not is_final else 'inclusion_criteria'
-        criteria = 'exclusion_criteria' if not is_final else 'exclusion_criteria'
         for article_title in self.df['title'].values:
             if article_title in sheet_included["Title"].values:
-                self.df.loc[self.df['title'] == article_title, decision] = "Included"
+                conflicted_decision = "Included"
+                if is_final:
+                    row = sheet_criteria.loc[sheet_criteria['Title'] == article_title]
+                    if row['Include after second reviewer opinion? '].values[0] != row['Include after full-text review?'].values[0]:
+                        conflicted_decision = "ConflictIncluded"
+                self.df.loc[self.df['title'] == article_title, decision] = conflicted_decision
             else:
-                self.df.loc[self.df['title'] == article_title, decision] = "Excluded"
+                conflicted_decision = "Excluded"
+                if is_final and article_title in sheet_criteria['Title'].values:
+                    row = sheet_criteria.loc[sheet_criteria['Title'] == article_title]
+                    if row['Include after second reviewer opinion? '].values[0] != row['Include after full-text review?'].values[0]:
+                        conflicted_decision = "ConflictExcluded"
+                self.df.loc[self.df['title'] == article_title, decision] = conflicted_decision
                 if article_title in sheet_criteria["Title"].values:
                     exclusion_criteria = sheet_criteria.loc[sheet_criteria["Title"] == article_title, [criteria_column]].values[0][0]
                     if not pd.isna(exclusion_criteria):
-                        exclusion_criteria = exclusion_criteria[11:]
-                        self.df.loc[self.df['title'] == article_title, criteria] = exclusion_criteria  # + ": " + excl_crit_desc[exclusion_criteria]
+                        criteria = 'exclusion_criteria' if exclusion_criteria[0] == 'E' else 'inclusion_criteria'
+                        self.df.loc[self.df['title'] == article_title, criteria] = exclusion_criteria + ": " + excl_crit_desc[exclusion_criteria]
 
 
     def find_source(self, publishers):
@@ -114,3 +125,9 @@ class ModelingAssist(SRProject):
             else:
                 results.append(pub)
         return results
+
+
+if __name__ == '__main__':
+    sr_project = ModelingAssist()
+    print(sr_project.df)
+    sr_project.df.to_csv(sr_project.export_path, sep='\t')
