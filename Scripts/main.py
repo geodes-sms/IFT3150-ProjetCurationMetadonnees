@@ -10,6 +10,8 @@ from Scripts.DatasetsScripts.CodeClone import CodeClone
 from Scripts.DatasetsScripts.DTCPS import DTCPS
 from Scripts.DatasetsScripts.ESM_2 import ESM_2
 from Scripts.DatasetsScripts.GameSE import GameSE
+from Scripts.DatasetsScripts.GameSE_abstract import GameSE_abstract
+from Scripts.DatasetsScripts.GameSE_title import GameSE_title
 from Scripts.DatasetsScripts.TestNN import TestNN
 from Scripts.DatasetsScripts.TrustSE import TrustSE
 from SRProject import *
@@ -127,7 +129,7 @@ def ExportToCSV(sr_project):
 
 def main(args=None):
     if args is None or not len(args) > 0:
-        args = ["Behave", "DTCPS"]
+        args = ["GameSE", "GameSE_abstract", "GameSE_title"]
     sr_project = None
 
     for arg in args:
@@ -141,6 +143,10 @@ def main(args=None):
             sr_project = ESM_2()
         elif arg == "GameSE":
             sr_project = GameSE()
+        elif arg == "GameSE_title":
+            sr_project = GameSE_title()
+        elif arg == "GameSE_abstract":
+            sr_project = GameSE_abstract()
         elif arg == "TestNN":
             sr_project = TestNN()
         elif arg == "TrustSE":
@@ -148,7 +154,7 @@ def main(args=None):
 
         sr_project.df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}_pre-extract.xlsx")
         # printEncoding(sr_project.path)  # to make sure we use the right encoding if necessary
-        completed_df = findMissingMetadata.main(sr_project.df, True, 999)
+        completed_df = findMissingMetadata.main(sr_project.df, False, 999)
         # df = pd.read_csv("C:/Users/guill/OneDrive - Universite de Montreal/Projet Curation des métadonnées/Datasets/{arg}/{arg}.tsv", delimiter="\t")
         # print(df)
         # completed_df = find_missing_metadata(df)

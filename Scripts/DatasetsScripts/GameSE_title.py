@@ -1,7 +1,6 @@
 from Scripts.SRProject import *
 import pandas as pd
 
-
 # Author : Guillaume Genois, 20248507
 # This script is for the GameSE SR project
 
@@ -22,6 +21,8 @@ excl_crit_desc = {
     "Not related to Video Games": "Studies that were not focused on software engineering applied to industry-scale computer games development.",
     "Not sure": ""
 }
+
+
 # TODO: in methodology, articles excluded if not meeting inclusion criterias
 # TODO: verify meaning of proceedings and not sure
 
@@ -35,7 +36,7 @@ def convert(x):
 convert_dict = {"Title": convert}  # TODO: add other columns
 
 
-class GameSE(SRProject):
+class GameSE_title(SRProject):
     """
     The consolidation of game software engineering: A systematic literature review of software engineering for
     industry-scale computer games
@@ -60,13 +61,17 @@ class GameSE(SRProject):
         with open(self.path, 'rb') as f:
             sheet_all = pd.read_excel(f, sheet_name="TotalArticles")  # 3491 rows
             print(sheet_all)
-            sheet_without_duplicates = pd.read_excel(f, sheet_name="ReviewByTitle", converters=convert_dict)  # 2974 rows
+            sheet_without_duplicates = pd.read_excel(f, sheet_name="ReviewByTitle",
+                                                     converters=convert_dict)  # 2974 rows
             print(sheet_without_duplicates)
-            sheet_title_keywords_included = pd.read_excel(f, sheet_name="RevisionByTitle", converters=convert_dict)  # 1539 rows
+            sheet_title_keywords_included = pd.read_excel(f, sheet_name="RevisionByTitle",
+                                                          converters=convert_dict)  # 1539 rows
             print(sheet_title_keywords_included)
-            sheet_abstract_included = pd.read_excel(f, sheet_name="ReviewAndRevisionByAbstract", converters=convert_dict)  # 614 rows
+            sheet_abstract_included = pd.read_excel(f, sheet_name="ReviewAndRevisionByAbstract",
+                                                    converters=convert_dict)  # 614 rows
             print(sheet_abstract_included)
-            sheet_text_included = pd.read_excel(f, sheet_name="ReviewAndRevisionByFullText", converters=convert_dict)  # 252 rows
+            sheet_text_included = pd.read_excel(f, sheet_name="ReviewAndRevisionByFullText",
+                                                converters=convert_dict)  # 252 rows
             print(sheet_text_included)
             sheet_snowballing = pd.read_excel(f, sheet_name="Snowballing", converters=convert_dict)  # 591 rows
             print(sheet_snowballing)
@@ -75,21 +80,19 @@ class GameSE(SRProject):
 
         # Add columns
         # self.df["key"]
-        self.df['title'] = sheet_without_duplicates["Title"]
-        self.df['abstract'] = sheet_without_duplicates["Abstract"]
-        self.df["keywords"] = sheet_without_duplicates["Keywords"]
-        self.df["authors"] = sheet_without_duplicates["Author"]
-        self.df['venue'] = sheet_without_duplicates["Journal"]
-        self.df["doi"] = sheet_without_duplicates["URL"]
-        self.df["year"] = sheet_without_duplicates["Year"]
+        self.df['title'] = sheet_abstract_included["Title"]
+        self.df['abstract'] = sheet_abstract_included["Abstract"]
+        self.df["keywords"] = sheet_abstract_included["Keywords"]
+        self.df["authors"] = sheet_abstract_included["Author"]
+        self.df['venue'] = sheet_abstract_included["Journal"]
+        self.df["doi"] = sheet_abstract_included["URL"]
+        self.df["year"] = sheet_abstract_included["Year"]
         # self.df["year"].astype(int)
         # self.df["references"]
         # self.df["bibtex"]
         self.df['mode'] = "new_screen"
 
         # Find all screened decisions
-        self.find_decision_on_articles(sheet_title_keywords_included, sheet_without_duplicates)
-        self.find_decision_on_articles(sheet_abstract_included, sheet_title_keywords_included)
         self.find_decision_on_articles(sheet_text_included, sheet_abstract_included)
 
         # Add snowballing articles
@@ -104,14 +107,15 @@ class GameSE(SRProject):
         self.df['year'] = self.df['year'].astype("Int64")
         # self.df['year'] = self.df['year'].round(0)
 
-        self.df['project'] = "GameSE"
-        self.export_path = "../../Datasets/GameSE/GameSE.tsv"
-        
+        self.df['project'] = "GameSE_title"
+        self.export_path = "../../Datasets/GameSE/GameSE_title.tsv"
+
         print(self.df)
 
     def add_snowballing_articles(self, sheet_snowballing):
         snowball_df = empty_df.copy()
-        snowball_df[['title', 'abstract', 'authors', 'venue', 'year']] = sheet_snowballing[["Title", "Abstract", "Author", "Journal", "Year"]]
+        snowball_df[['title', 'abstract', 'authors', 'venue', 'year']] = sheet_snowballing[
+            ["Title", "Abstract", "Author", "Journal", "Year"]]
         snowball_df['mode'] = "snowballing"
         decision = 'screened_decision'
         criteria = 'exclusion_criteria'
@@ -121,11 +125,10 @@ class GameSE(SRProject):
                     sheet_snowballing["Title"] == article_title, ["Exclusion Criteria by Title"]].values[0][0]
                 if not pd.isna(exclusion_criteria):
                     self.df.loc[self.df['title'] == article_title, criteria] = exclusion_criteria + ": " + \
-                                                                                   excl_crit_desc[exclusion_criteria]
+                                                                               excl_crit_desc[exclusion_criteria]
         self.df = pd.concat([self.df, snowball_df], ignore_index=True)
         # TODO: missing keywords, url for these articles
         # TODO: missing exclusion criteria on different page than other articles
-
 
     def find_decision_on_articles(self, sheet_included, sheet_criteria, is_final=False):
         decision = 'screened_decision' if not is_final else 'final_decision'
@@ -137,7 +140,9 @@ class GameSE(SRProject):
             else:
                 self.df.loc[self.df['title'] == article_title, decision] = "Excluded"
                 if article_title in sheet_criteria["Title"].values:
-                    exclusion_criteria = sheet_criteria.loc[sheet_criteria["Title"] == article_title, ["Exclusion Criteria by Title"]].values[0][0]
+                    exclusion_criteria = sheet_criteria.loc[
+                        sheet_criteria["Title"] == article_title, ["Exclusion Criteria by Title"]].values[0][0]
                     if not pd.isna(exclusion_criteria):
-                        self.df.loc[self.df['title'] == article_title, criteria] = exclusion_criteria + ": " + excl_crit_desc[exclusion_criteria]
+                        self.df.loc[self.df['title'] == article_title, criteria] = exclusion_criteria + ": " + \
+                                                                                   excl_crit_desc[exclusion_criteria]
 
