@@ -73,7 +73,7 @@ class GameSE_abstract(SRProject):
             sheet_text_included = pd.read_excel(f, sheet_name="ReviewAndRevisionByFullText",
                                                 converters=convert_dict)  # 252 rows
             print(sheet_text_included)
-            sheet_snowballing = pd.read_excel(f, sheet_name="Snowballing", converters=convert_dict)  # 591 rows
+            sheet_snowballing = pd.read_excel(f, sheet_name="Snowballing", converters=convert_dict)  # 591 rows - 70 duplicates
             print(sheet_snowballing)
             sheet_final_selection = pd.read_excel(f, sheet_name="FinalSelection", converters=convert_dict)  # 98 rows
             print(sheet_final_selection)
