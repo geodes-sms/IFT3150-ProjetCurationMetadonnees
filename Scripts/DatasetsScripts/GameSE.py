@@ -113,6 +113,7 @@ class GameSE(SRProject):
     def add_snowballing_articles(self, sheet_snowballing):
         snowball_df = empty_df.copy()
         snowball_df[['title', 'abstract', 'authors', 'venue', 'year']] = sheet_snowballing[["Title", "Abstract", "Author", "Journal", "Year"]]
+        snowball_df = snowball_df.loc[snowball_df['Duplications'] == 0]
         snowball_df['mode'] = "snowballing"
         decision = 'screened_decision'
         criteria = 'exclusion_criteria'
