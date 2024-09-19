@@ -5,13 +5,13 @@ import sys
 import chardet
 
 import findMissingMetadata
-from Behave import Behave
-from CodeClone import CodeClone
-from DTCPS import DTCPS
-from ESM_2 import ESM_2
-from GameSE import GameSE
-from TestNN import TestNN
-from TrustSE import TrustSE
+from Scripts.DatasetsScripts.Behave import Behave
+from Scripts.DatasetsScripts.CodeClone import CodeClone
+from Scripts.DatasetsScripts.DTCPS import DTCPS
+from Scripts.DatasetsScripts.ESM_2 import ESM_2
+from Scripts.DatasetsScripts.GameSE import GameSE
+from Scripts.DatasetsScripts.TestNN import TestNN
+from Scripts.DatasetsScripts.TrustSE import TrustSE
 from SRProject import *
 from os_path import MAIN_PATH
 

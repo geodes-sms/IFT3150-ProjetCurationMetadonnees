@@ -1,18 +1,11 @@
 # -*- coding: utf-8 -*-
 import chardet
-import pandas as pd
 import sys
-import re
 
-import htmlParser
 from SRProject import *
-from ESM_2 import ESM_2
-from CodeClone import CodeClone
-from GameSE import GameSE
-import webScraping
-import time
-import random
-import os
+from Scripts.DatasetsScripts.ESM_2 import ESM_2
+from Scripts.DatasetsScripts.CodeClone import CodeClone
+from Scripts.DatasetsScripts.GameSE import GameSE
 
 # Author : Guillaume Genois, 20248507
 # This script is for importing and uniformising data from multiple datasets of SR.
