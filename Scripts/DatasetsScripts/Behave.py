@@ -83,7 +83,7 @@ class Behave(SRProject):
         self.df["reviewer_count"] = 2  # TODO: verify
 
         self.df['project'] = "Behave"
-        self.export_path = "../../Datasets/Behave/Behave.tsv"
+        self.export_path = f"{MAIN_PATH}/Datasets/Behave/Behave.tsv"
         print(self.df)
 
     def find_decision_on_articles(self, sheet_included, sheet_criteria):
