@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 import pandas as pd
 
-from os_path import EXTRACTED_PATH, MAIN_PATH
+from Scripts.os_path import EXTRACTED_PATH, MAIN_PATH
 
 """
   Key               String
