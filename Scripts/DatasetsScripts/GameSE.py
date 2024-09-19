@@ -96,6 +96,7 @@ class GameSE(SRProject):
         self.add_snowballing_articles(sheet_snowballing)
 
         # Find all final decisions based on which articles are included in different sheets
+        self.find_decision_on_articles(sheet_final_selection, sheet_snowballing, True)
         self.find_decision_on_articles(sheet_final_selection, sheet_text_included, True)
 
         self.df["reviewer_count"] = 2  # TODO: not indicated in Excel which are conflicted
