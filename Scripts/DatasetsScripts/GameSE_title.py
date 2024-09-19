@@ -80,25 +80,27 @@ class GameSE_title(SRProject):
 
         # Add columns
         # self.df["key"]
-        self.df['title'] = sheet_abstract_included["Title"]
-        self.df['abstract'] = sheet_abstract_included["Abstract"]
-        self.df["keywords"] = sheet_abstract_included["Keywords"]
-        self.df["authors"] = sheet_abstract_included["Author"]
-        self.df['venue'] = sheet_abstract_included["Journal"]
-        self.df["doi"] = sheet_abstract_included["URL"]
-        self.df["year"] = sheet_abstract_included["Year"]
+        self.df['title'] = sheet_without_duplicates["Title"]
+        self.df['abstract'] = sheet_without_duplicates["Abstract"]
+        self.df["keywords"] = sheet_without_duplicates["Keywords"]
+        self.df["authors"] = sheet_without_duplicates["Author"]
+        self.df['venue'] = sheet_without_duplicates["Journal"]
+        self.df["doi"] = sheet_without_duplicates["URL"]
+        self.df["year"] = sheet_without_duplicates["Year"]
         # self.df["year"].astype(int)
         # self.df["references"]
         # self.df["bibtex"]
         self.df['mode'] = "new_screen"
 
         # Find all screened decisions
-        self.find_decision_on_articles(sheet_text_included, sheet_abstract_included)
+        self.find_decision_on_articles(sheet_title_keywords_included, sheet_without_duplicates)
+        self.find_decision_on_articles(sheet_abstract_included, sheet_title_keywords_included)
 
         # Add snowballing articles
         self.add_snowballing_articles(sheet_snowballing)
 
         # Find all final decisions based on which articles are included in different sheets
+        self.find_decision_on_articles(sheet_final_selection, sheet_abstract_included, True)
         self.find_decision_on_articles(sheet_final_selection, sheet_text_included, True)
 
         self.df["reviewer_count"] = 2  # TODO: not indicated in Excel which are conflicted
