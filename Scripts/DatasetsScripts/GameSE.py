@@ -105,7 +105,7 @@ class GameSE(SRProject):
         # self.df['year'] = self.df['year'].round(0)
 
         self.df['project'] = "GameSE"
-        self.export_path = "../../Datasets/GameSE/GameSE.tsv"
+        self.export_path = f"{MAIN_PATH}/Datasets/GameSE/GameSE.tsv"
         
         print(self.df)
 
