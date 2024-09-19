@@ -93,7 +93,7 @@ class DTCPS(SRProject):
         self.df["link"].astype(str)
 
         self.df['project'] = "DTCPS"
-        self.export_path = "Datasets/DTCPS/DTCPS.tsv"
+        self.export_path = f"{MAIN_PATH}/DTCPS/DTCPS.tsv"
         print(self.df)
 
     def find_decision_on_articles(self, sheet_included, sheet_criteria, criteria_column, is_final=False):
