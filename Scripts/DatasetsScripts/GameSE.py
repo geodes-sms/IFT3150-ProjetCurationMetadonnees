@@ -1,4 +1,4 @@
-from SRProject import *
+from Scripts.SRProject import *
 import pandas as pd
 
 
@@ -53,7 +53,7 @@ class GameSE(SRProject):
 
     def __init__(self):
         super().__init__()
-        self.path = "../../Datasets/GameSE/GameSE-source.xlsx"
+        self.path = f"{MAIN_PATH}/Datasets/GameSE/GameSE-source.xlsx"
 
         # converters = {"Title": lambda x: x.encode('utf-8')}
         # All sheets

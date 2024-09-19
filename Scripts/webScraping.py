@@ -259,15 +259,16 @@ class ManualWebScraper:
         self.driver.get("https://www.scopus.com/inward/record.uri?eid=2-s2.0-85083744459&doi=10.1089%2fg4h.2019.0067&partnerID=40&md5=eeea66fccb18681e9ca573e20ca78c48")
         input()
         for idx, row in source_link.iterrows():
-            time.sleep(2)
+            print(row[['doi']])
             try:
                 link = row['doi']
                 verification_link = link
+                if 'scopus' in link:
+                    continue
                 if 'doi' in link:
                     self.driver.get(link)
                     time.sleep(2)
                     verification_link = self.driver.current_url
-                print(link, link)
                 for source in sources_name:
                     if source in verification_link:
                         is_already_extracted = False
@@ -323,7 +324,7 @@ class ManualWebScraper:
             self.searcher.extract_bibtex_in_IEEE(title, link)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_00.bib')
+                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_00.bib')
             update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == ScienceDirect or source == 'sciencedirect':
@@ -335,7 +336,7 @@ class ManualWebScraper:
             self.searcher.extract_bibtex_in_ScienceDirect(title, link)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_02.bib')
+                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_02.bib')
             update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == ACM or source in ['acm', "Association for Computing Machinery (ACM)", "ACM Press",
@@ -348,7 +349,7 @@ class ManualWebScraper:
             self.searcher.extract_bibtex_in_ACM(title, link)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_01.bib')
+                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_01.bib')
             update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == SpringerLink or source == 'springer':
@@ -360,7 +361,7 @@ class ManualWebScraper:
             self.searcher.extract_bibtex_in_SpringerLink(title, link)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_03.bib')
+                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_03.bib')
             update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == Scopus or source == 'scopus':
@@ -380,7 +381,7 @@ class ManualWebScraper:
             self.searcher.extract_bibtex_in_scopus_signed_in(title, link)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_07.bib')
+                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_07.bib')
             update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == WoS or source == 'wos':
@@ -392,7 +393,7 @@ class ManualWebScraper:
             self.searcher.extract_bibtex_in_WoS(title, link)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_05.bib')
+                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_05.bib')
             update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == PubMedCentral:

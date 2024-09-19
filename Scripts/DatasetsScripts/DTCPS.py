@@ -1,4 +1,4 @@
-from SRProject import *
+from Scripts.SRProject import *
 import pandas as pd
 
 
@@ -51,7 +51,8 @@ class DTCPS(SRProject):
 
     def __init__(self):
         super().__init__()
-        self.path = "../../Datasets/DTCPS/DTCPS-source.xlsx"
+        # self.path = "../../Datasets/DTCPS/DTCPS-source.xlsx"
+        self.path = f"{MAIN_PATH}/Datasets/DTCPS/DTCPS-source.xlsx"
 
         # converters = {"Title": lambda x: x.encode('utf-8')}
         # All sheets

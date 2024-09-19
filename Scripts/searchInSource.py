@@ -32,12 +32,13 @@ class SearcherInSource:
         
     def save_bibtex(self, title, source_id):
         # https://stackoverflow.com/questions/39327032/how-to-get-the-latest-file-in-a-folder
-        list_of_files = glob.glob(f'{DOWNLOAD_PATH}\\*.bib') # * means all if need specific format then *.csv
+        print('moving bibtex')
+        list_of_files = glob.glob(f'{DOWNLOAD_PATH}/*.bib') # * means all if need specific format then *.csv
         latest_file = max(list_of_files, key=os.path.getctime)
         print(latest_file)
 
         shutil.move(latest_file,
-                    f'{EXTRACTED_PATH}\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_{source_id}.bib')
+                    f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_{source_id}.bib')
 
         if os.path.isfile(latest_file):
             os.remove(latest_file)

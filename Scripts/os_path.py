@@ -9,9 +9,9 @@ if platform.system() == "Windows":
 # C:\\Users\\guill\\.cache\\selenium\\geckodriver\\win64\\0.35.0\\geckodriver.exe
 
 elif platform.system() == "Linux":
-    MAIN_PATH = "/home/guillaume-genois/PycharmProjects/IFT3150-ProjetCurationMetadonnees"
-    EXTRACTED_PATH = "/media/guillaume-genois/Samsung USB/Projet Curation des métadonnées"
-    DOWNLOAD_PATH = "/home/guillaume-genois/Downloads"
-    FIREFOX_PROFILE_PATH = "/home/guillaume-genois/snap/firefox/common/.mozilla/firefox/70zft0d5.default"
+    MAIN_PATH = "/home/ggenois/PycharmProjects/IFT3150-ProjetCurationMetadonnees"
+    EXTRACTED_PATH = "/media/ggenois/Samsung USB/Projet Curation des métadonnées"
+    DOWNLOAD_PATH = "/home/ggenois/Downloads"
+    FIREFOX_PROFILE_PATH = "/home/ggenois/snap/firefox/common/.mozilla/firefox/er60u9dx.default"
 else:
     raise Exception("Unsupported system")

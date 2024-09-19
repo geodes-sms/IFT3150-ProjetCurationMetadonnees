@@ -1,4 +1,4 @@
-from SRProject import *
+from Scripts.SRProject import *
 import pandas as pd
 
 
@@ -52,7 +52,8 @@ class Behave(SRProject):
 
     def __init__(self):
         super().__init__()
-        self.path = "../../Datasets/Behave/Behave-source.xlsx"
+        # self.path = "../../Datasets/Behave/Behave-source.xlsx"
+        self.path = f"{MAIN_PATH}/Datasets/Behave/Behave-source.xlsx"
 
         # converters = {"Title": lambda x: x.encode('utf-8')}
         # All sheets
