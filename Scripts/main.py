@@ -130,7 +130,7 @@ def ExportToCSV(sr_project):
 def main(args=None):
     if args is None or not len(args) > 0:
         args = ["GameSE", "GameSE_abstract", "GameSE_title"]
-        args = ["GameSE_abstract"]
+        args = ["GameSE"]
     sr_project = None
 
     for arg in args:
