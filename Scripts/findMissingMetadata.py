@@ -56,7 +56,8 @@ def extract_without_link(row, already_extracted_files, web_scraper):
         # if metadata['DOI'] is None or metadata['DOI'] == "":
         source = metadata['Source']
         authors = metadata['Authors']
-        links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t', encoding='windows-1252')
+        # links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t', encoding='windows-1252')
+        links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t')
         if metadata['Title'] in links_already_searched['Title'].values:
             print("link already searched, adding it instead of DOI")
             metadata['Link'] = links_already_searched.loc[links_already_searched['Title'] == metadata['Title']]['Link'].values[0]
