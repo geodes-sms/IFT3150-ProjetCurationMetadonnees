@@ -768,7 +768,7 @@ if __name__ == '__main__':
 
     print()
     print("Scopus_signed_in")  # TODO: references
-    with open(f"{EXTRACTED_PATH}\\HTML extracted\\2024-08-16_ A framework for testing robust autonomy of UAS during design and certification_07.html", 'rb') as f:
+    with open(f"{EXTRACTED_PATH}/HTML extracted/2024-08-16_ A framework for testing robust autonomy of UAS during design and certification_07.html", 'rb') as f:
         html = f.read()
     results = get_metadata_from_html_scopus_signed_in(html)
     for key in results.keys():
@@ -795,7 +795,7 @@ if __name__ == '__main__':
     print("Bibtex")
     parser = bibtex_parser.Parser()
     bib_data = parser.parse_file(
-        f'{EXTRACTED_PATH}\\Bibtex\\2024-09-05_A Rehabilitation System For Upper Limbs In Adult Patients Using Video Games_00.bib')
+        f'{EXTRACTED_PATH}/Bibtex/2024-09-05_A Rehabilitation System For Upper Limbs In Adult Patients Using Video Games_00.bib')
     results = get_metadata_from_bibtex(bib_data)
     for key in results.keys():
         print(key, results[key])
