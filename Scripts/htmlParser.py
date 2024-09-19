@@ -138,7 +138,7 @@ def get_metadata_from_already_extract(file, source=None):
                 print(f'Venue "{source}" not valid')
     elif file[-3:] == "bib":
         parser = bibtex_parser.Parser()
-        bib_data = parser.parse_file(f'{EXTRACTED_PATH}\\Bibtex\\{file}')
+        bib_data = parser.parse_file(f'{EXTRACTED_PATH}/Bibtex/{file}')
         metadata.update(get_metadata_from_bibtex(bib_data))
     return metadata
 
