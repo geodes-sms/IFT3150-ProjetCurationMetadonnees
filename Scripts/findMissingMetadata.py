@@ -7,6 +7,8 @@ import htmlParser
 import webScraping
 from SRProject import *
 from os_path import *
+from unidecode import unidecode
+
 
 
 def extract_without_link(row, already_extracted_files, web_scraper):
@@ -56,11 +58,12 @@ def extract_without_link(row, already_extracted_files, web_scraper):
         # if metadata['DOI'] is None or metadata['DOI'] == "":
         source = metadata['Source']
         authors = metadata['Authors']
-        # links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t', encoding='windows-1252')
-        links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t')
-        if metadata['Title'] in links_already_searched['Title'].values:
+        links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t', encoding='windows-1252', encoding_errors='ignore')
+        links_already_searched['Title'] = links_already_searched['Title'].apply(unidecode)
+        # links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t')
+        if unidecode(metadata['Title']) in links_already_searched['Title'].values:
             print("link already searched, adding it instead of DOI")
-            metadata['Link'] = links_already_searched.loc[links_already_searched['Title'] == metadata['Title']]['Link'].values[0]
+            metadata['Link'] = links_already_searched.loc[links_already_searched['Title'] == unidecode(metadata['Title'])]['Link'].values[0]
             if metadata['DOI'] is None or metadata['DOI'] == "":
                 print("missing DOI")
                 metadata['DOI'] = metadata['Link']
