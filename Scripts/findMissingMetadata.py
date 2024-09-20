@@ -10,7 +10,6 @@ from os_path import *
 from unidecode import unidecode
 
 
-
 def extract_without_link(row, already_extracted_files, web_scraper):
     metadata = None
     source, year, authors = None, None, None
@@ -29,27 +28,30 @@ def extract_without_link(row, already_extracted_files, web_scraper):
             formated_name = formated_name.replace(k, "%" + special_char_conversion[k])
         print("formated_name", formated_name)
         for file in already_extracted_files:
-            new_metadata = None
             try:
-                tmp_source = code_source[file[-7:-5]]
-            except:
+                new_metadata = None
                 try:
-                    tmp_source = code_source[file[-6:-4]]
+                    tmp_source = code_source[file[-7:-5]]
                 except:
-                    tmp_source = None
-            if tmp_source == IEEE:
-                if file[11:-8] == formated_name + "%2Freferences#references":
+                    try:
+                        tmp_source = code_source[file[-6:-4]]
+                    except:
+                        tmp_source = None
+                if tmp_source == IEEE:
+                    if file[11:-8] == formated_name + "%2Freferences#references":
+                        print(file)
+                        new_metadata = htmlParser.get_metadata_from_already_extract(file, IEEE)
+                    elif file[11:-8] == formated_name + "%2Fkeywords#keywords":
+                        print(file)
+                        new_metadata = htmlParser.get_metadata_from_already_extract(file, IEEE)
+                elif tmp_source is not None and (file[11:-8] == formated_name or file[11:-7] == formated_name):
                     print(file)
-                    new_metadata = htmlParser.get_metadata_from_already_extract(file, IEEE)
-                elif file[11:-8] == formated_name + "%2Fkeywords#keywords":
-                    print(file)
-                    new_metadata = htmlParser.get_metadata_from_already_extract(file, IEEE)
-            elif tmp_source is not None and (file[11:-8] == formated_name or file[11:-7] == formated_name):
-                print(file)
-                new_metadata = htmlParser.get_metadata_from_already_extract(file, tmp_source)
-            if new_metadata:
-                if metadata: update_metadata(metadata, new_metadata)
-                else: metadata = new_metadata
+                    new_metadata = htmlParser.get_metadata_from_already_extract(file, tmp_source)
+                if new_metadata:
+                    if metadata: update_metadata(metadata, new_metadata)
+                    else: metadata = new_metadata
+            except:
+                pass  # probleme avec doc
 
     # TODO: check if link already get through search
     if metadata:
