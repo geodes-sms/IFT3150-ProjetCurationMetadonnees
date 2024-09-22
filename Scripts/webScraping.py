@@ -247,7 +247,7 @@ class ManualWebScraper:
                                 break
                         if not is_already_extracted:
                             print('extraction...')
-                            print(self.get_metadata_from_title(title, source, link))
+                            print(self.get_metadata_from_link(title, source, link))
             except Exception as e:
                 print(e)
                 pass
@@ -279,23 +279,99 @@ class ManualWebScraper:
                                 break
                         if not is_already_extracted:
                             print('extraction...')
-                            print(self.get_metadata_from_title(link, source, link))
+                            print(self.get_metadata_from_link(link, source, link))
                             time.sleep(2)
             except Exception as e:
                 print(e)
                 pass
-            
+
+    def search_missing_links_for_articles(self):
+        extracted_articles = pd.read_csv(f"{MAIN_PATH}/Datasets/GameSE/GameSE.tsv", sep='\t', encoding='utf-8')
+        for idx, row in extracted_articles.iterrows():
+            try:
+                if (pd.isna(row['doi']) or pd.isna(row['link'])) and not pd.isna(row['meta_title']):
+                    self.get_metadata_from_title(row['meta_title'], source=row['source'])
+            except Exception as e:
+                print(e. __traceback__)
+
     def add_articles_manually(self):
         while True:
             try:
                 title = input('title:\n')
                 link = input('link:\n')
                 source = input('source:\n')
-                print(self.get_metadata_from_title(title, source, link))
+                print(self.get_metadata_from_link(title, source, link))
             except Exception as e:
                 print(e, e.__traceback__)
+
+    def get_metadata_from_title(self, title, author=None, source=None, year=None):
+        # TODO: mettre link website si pas doi
+        tries = 0
+        # research to find link and get metadata
+        print("source", source)
+        if source not in all_sources_name and source is not None:
+            for name in all_sources_name:
+                if name in str(source):
+                    source = name
+        print("title", title)
+        print("new source", source)
+        print("author", author)
+        print("year", year)
+
+        metadata = metadata_base.copy()
+        # driver.get("https://www.crossref.org/guestquery/")
+        if source == IEEE or source == 'ieee':
+            new_metadata = self.searcher.search_in_IEEE(title)
+            if not new_metadata: new_metadata = metadata_base.copy()
+            update_metadata(metadata, new_metadata)
+
+        elif source == ScienceDirect or source in ['sciencedirect', 'ScienceDirect']:
+            new_metadata = self.searcher.search_in_ScienceDirect(title)
+            if not new_metadata: new_metadata = metadata_base.copy()
+            update_metadata(metadata, new_metadata)
+
+        elif source == ACM or source in ['acm', "Association for Computing Machinery (ACM)", "ACM Press"]:
+            new_metadata = self.searcher.search_in_ACM(title)
+            if not new_metadata: new_metadata = metadata_base.copy()
+            update_metadata(metadata, new_metadata)
+
+        elif source == SpringerLink or source in ['springer', 'Springer', 'SpringerLink']:
+            new_metadata = self.searcher.search_in_SpringerLink(title)
+            if not new_metadata: new_metadata = metadata_base.copy()
+            update_metadata(metadata, new_metadata)
+
+        elif source == Scopus or source == 'scopus':
+            new_metadata = self.searcher.search_in_Scopus(title)
+            if not new_metadata: new_metadata = metadata_base.copy()
+            update_metadata(metadata, new_metadata)
+
+        elif source == ScopusSignedIn:
+            new_metadata = self.searcher.search_in_Scopus_signed_in(title)
+            if not new_metadata: new_metadata = metadata_base.copy()
+            update_metadata(metadata, new_metadata)
+
+        elif source == WoS or source == 'wos':
+            new_metadata = self.searcher.search_in_WoS(title)
+            if not new_metadata: new_metadata = metadata_base.copy()
+            update_metadata(metadata, new_metadata)
+
+        elif source == PubMedCentral:
+            new_metadata = self.searcher.search_in_PubMedCentral(title)
+            if not new_metadata: new_metadata = metadata_base.copy()
+            update_metadata(metadata, new_metadata)
+
+        else:
+            print(f'Source "{source}" not valid')
+            print("searching in all options")
+            for name in sources_name:
+                new_metadata = self.get_metadata_from_title(title, author, name)
+                if check_if_right_link(new_metadata, title):
+                    update_metadata(metadata, new_metadata)
+                    break
+
+        return metadata
         
-    def get_metadata_from_title(self, title, source, link):
+    def get_metadata_from_link(self, title, source, link):
         # TODO: mettre link website si pas doi
         global driver
         tries = 0
@@ -455,5 +531,6 @@ if __name__ == '__main__':
     web_scraper = ManualWebScraper()
     # print(web_scraper.get_metadata_from_title(title, PubMedCentral, link))
     # web_scraper.get_bibtex_from_already_extracted()
-    web_scraper.get_bibtex_from_source_link()
+    # web_scraper.get_bibtex_from_source_link()
+    web_scraper.search_missing_links_for_articles()
     web_scraper.close()

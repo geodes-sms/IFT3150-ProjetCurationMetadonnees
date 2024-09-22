@@ -81,7 +81,7 @@ def extract_without_link(row, already_extracted_files, web_scraper):
         print("author", authors)
         print("year", year)
         if web_scraper:
-            metadata = web_scraper.get_metadata_from_title(row['title'], authors, source, year)
+            metadata = web_scraper.get_metadata_from_link(row['title'], authors, source)
         print("extracted without link")
 
     return metadata

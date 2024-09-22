@@ -62,13 +62,13 @@ class ModelGuidance(SRProject):
 
         # Add columns
         # self.df["key"]
-        self.df['title'] = sheet_abstract["Title"]
-        self.df['abstract'] = sheet_abstract["Abstract"]
+        self.df['title'] = sheet_all["Title"]
+        # self.df['abstract'] = sheet_all["Abstract"]
         # self.df["keywords"] = sheet_abstract["Keywords"]
-        self.df["authors"] = sheet_abstract["Author"]
-        self.df['venue'] = sheet_abstract["Venue"]
+        self.df["authors"] = sheet_all["Author"]
+        self.df['venue'] = sheet_all["Venue"]
         # self.df["doi"] = sheet_abstract["doi"]
-        self.df["year"] = sheet_abstract["Year"]
+        self.df["year"] = sheet_all["Year"]
         # self.df["link"] = sheet_abstract["url"]
         # self.df["pages"] = sheet_abstract["pages"]
         # self.df["publisher"] = sheet_abstract["publisher"]
@@ -80,6 +80,7 @@ class ModelGuidance(SRProject):
         self.df['mode'] = 'new_screen'
 
         # Find all screened decisions
+        # self.find_decision_on_articles(sheet_abstract, sheet_all)
         self.find_decision_on_articles(sheet_text, sheet_abstract)
 
         # Find all final decisions based on which articles are included in different sheets
@@ -89,7 +90,7 @@ class ModelGuidance(SRProject):
 
         self.df["doi"].astype(str)
         self.df["link"].astype(str)
-        self.df['year'] = self.df['year'].astype("Int64")
+        # self.df['year'] = self.df['year'].astype("Int64")
 
         self.df['project'] = "ModelGuidance"
         self.export_path = f"{MAIN_PATH}/Datasets/ModelGuidance/ModelGuidance.tsv"
