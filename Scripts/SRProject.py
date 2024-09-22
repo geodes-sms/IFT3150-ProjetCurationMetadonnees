@@ -103,7 +103,7 @@ empty_df = pd.DataFrame(columns=["key", "project", "title", "abstract", "keyword
 
 
 def save_link(title, link):
-    with open(f"{MAIN_PATH}/Scripts/articles_source_links.tsv", 'a') as f:
+    with open(f"{MAIN_PATH}/Scripts/articles_source_links.tsv", 'a', encoding='windows-1252') as f:
         f.write(title + "\t" + link + "\n")
 
 
