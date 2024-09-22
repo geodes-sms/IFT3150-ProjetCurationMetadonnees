@@ -97,13 +97,13 @@ def get_metadata_from_already_extract(file, source=None):
     #     metadata.update(get_metadata_from_already_extract(file + "%2Fkeywords#keywords", None))
     #     return metadata
     if file[-4:] == "html":
-        with open(f"{EXTRACTED_PATH}/HTML extracted/" + file, 'rb', encoding='windows-1252') as f:
+        with open(f"{EXTRACTED_PATH}/HTML extracted/" + file, 'rb', encoding='utf-8') as f:
             html = unidecode(f.read().decode('utf-8', 'ignore'))
             # html = f.read().decode('utf-8', 'ignore')
             source = get_source(file) if source is None else source
             if source is None:
                 with open(f"{EXTRACTED_PATH}/HTML extracted/"
-                          + file[:11] + "http%3A%2F%2Fapi.crossref.org%2Fworks%2F" + file[file.find("doi.org%2F")+10:-5] + ".html", 'rb', encoding='windows-1252') as g:
+                          + file[:11] + "http%3A%2F%2Fapi.crossref.org%2Fworks%2F" + file[file.find("doi.org%2F")+10:-5] + ".html", 'rb', encoding='utf-8') as g:
                     crossref_html = g.read()
                 source = get_venue_from_doi(crossref_html)
             if source == IEEE or source == 'ieee':
