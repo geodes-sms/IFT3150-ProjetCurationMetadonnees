@@ -497,7 +497,7 @@ class SearcherInSource:
         self.extract_bibtex_in_scopus_signed_in(title)
 
         parser = bibtex_parser.Parser()
-        bib_data = parser.parse_file(f'{EXTRACTED_PATH}\\Bibtex\\{datetime.today().strftime("%Y-%m-%d")}_{title}_07.bib')
+        bib_data = parser.parse_file(f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{title}_07.bib')
 
         new_metadata = update_metadata(new_metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 

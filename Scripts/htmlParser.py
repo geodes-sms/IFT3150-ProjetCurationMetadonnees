@@ -48,6 +48,13 @@ def assign_metadata(title, venue, authors, pages, abstract, keywords, references
     metadata['DOI'] = doi
     metadata['Publisher'] = publisher
     metadata['Source'] = source
+
+    # verify if contains symbols not accepted
+    for key in ['Authors']:
+        for s in ['{', '}', '\\']:
+            if s in metadata[key]:
+                metadata[key] = None
+
     return metadata
 
 
@@ -97,7 +104,7 @@ def get_metadata_from_already_extract(file, source=None):
     #     metadata.update(get_metadata_from_already_extract(file + "%2Fkeywords#keywords", None))
     #     return metadata
     if file[-4:] == "html":
-        with open(f"{EXTRACTED_PATH}/HTML extracted/" + file, 'rb', encoding='utf-8') as f:
+        with open(f"{EXTRACTED_PATH}/HTML extracted/" + file, 'rb') as f:
             html = unidecode(f.read().decode('utf-8', 'ignore'))
             # html = f.read().decode('utf-8', 'ignore')
             source = get_source(file) if source is None else source

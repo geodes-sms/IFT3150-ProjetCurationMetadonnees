@@ -1,6 +1,11 @@
 import os, pandas
+
+import pandas as pd
+
 from SRProject import *
 from os_path import EXTRACTED_PATH
+from bs4 import BeautifulSoup
+
 
 path = f"{EXTRACTED_PATH}/Bibtex"
 def rename_files():
@@ -61,6 +66,25 @@ abstract = {{{row['abstract']}}}
 """
         row['bibtex'] = bibtex
         df.iloc[idx] = row
-    df.to_excel(f"{MAIN_PATH}\\Datasets\\GameSE\\GameSE_final_2-bibtex.xlsx")
+    df.to_excel(f"{MAIN_PATH}/Datasets/GameSE/GameSE_final_2-bibtex.xlsx")
 
 # generate_bibtex()
+
+def get_url_from_html():
+    extract = pd.read_excel(f"{MAIN_PATH}/Datasets/GameSE/GameSE.xlsx")
+    extract_missing_links = extract.loc[pd.isna(extract['link']), pd.isna(extract['doi'])]
+    for idx, row in extract_missing_links:
+        file_to_search = None
+        for file in os.listdir(f"{EXTRACTED_PATH}/HTML extracted"):
+            if file[11:-8] == format_link(row['meta_title']):
+                file_to_search = file
+                break
+        if not file_to_search:
+            continue
+        with open(f"{EXTRACTED_PATH}/HTML extracted/{file_to_search}") as f:
+            soup = BeautifulSoup(f)
+        if file_to_search[-7:-5] == '05':
+            suffix = soup.find('span', {'id': 'HiddenSecTa-accessionNo'})
+            url = "https://www.webofscience.com/wos/woscc/full-record/" + suffix
+            save_link(row['meta_title'], url)
+
