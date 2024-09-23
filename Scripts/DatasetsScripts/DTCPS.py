@@ -75,17 +75,17 @@ class DTCPS(SRProject):
         self.df["link"] = sheet_without_duplicates["url"]
         self.df["pages"] = sheet_without_duplicates["pages"]
         self.df["publisher"] = sheet_without_duplicates["publisher"]
-        self.df["source"] = self.find_source(sheet_without_duplicates["publisher"])
+        # self.df["source"] = self.find_source(sheet_without_duplicates["publisher"])
         # self.df["year"].astype(int)
         # self.df["references"]
         # self.df["bibtex"]
-        self.df['mode'] = ['snowballing' if s != 'None' else 'new_screen' for s in sheet_without_duplicates['Snowballing']]
+        # self.df['mode'] = ['snowballing' if s != 'None' else 'new_screen' for s in sheet_without_duplicates['Snowballing']]
 
         # Find all screened decisions
-        self.find_decision_on_articles(sheet_screen_title_and_abstract, sheet_screen_title_and_abstract, 'Title + Abstract')
+        # self.find_decision_on_articles(sheet_screen_title_and_abstract, sheet_screen_title_and_abstract, 'Title + Abstract')
 
         # Find all final decisions based on which articles are included in different sheets
-        self.find_decision_on_articles(sheet_screen_full_text, sheet_screen_full_text, 'Full Text', True)
+        # self.find_decision_on_articles(sheet_screen_full_text, sheet_screen_full_text, 'Full Text', True)
 
         self.df["reviewer_count"] = 2  # TODO: not indicated in Excel which are conflicted
 
@@ -93,7 +93,7 @@ class DTCPS(SRProject):
         self.df["link"].astype(str)
 
         self.df['project'] = "DTCPS"
-        self.export_path = f"{MAIN_PATH}/DTCPS/DTCPS.tsv"
+        self.export_path = f"{MAIN_PATH}/Datasets/DTCPS/DTCPS.tsv"
         print(self.df)
 
     def find_decision_on_articles(self, sheet_included, sheet_criteria, criteria_column, is_final=False):
