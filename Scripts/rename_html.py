@@ -27,10 +27,10 @@ def rename_files():
         # rightly_formatted_file = "2024-08-20_" + rightly_formatted_file
         rightly_formatted_file = rightly_formatted_file[:-7] + "_07" + rightly_formatted_file[-4:]
         print(rightly_formatted_file)
-        os.rename(path + "/" + file, path + "/" + rightly_formatted_file)
+        # os.rename(path + "/" + file, path + "/" + rightly_formatted_file)
 
 
-rename_files()
+# rename_files()
 
 def test_keys():
     name= "2024-06-25_Adaptive Behavior Control Model Of Non Player Character_05.html"
@@ -72,11 +72,12 @@ abstract = {{{row['abstract']}}}
 
 def get_url_from_html():
     extract = pd.read_excel(f"{MAIN_PATH}/Datasets/GameSE/GameSE.xlsx")
-    extract_missing_links = extract.loc[pd.isna(extract['link']), pd.isna(extract['doi'])]
-    for idx, row in extract_missing_links:
+    for idx, row in extract.iterrows():
+        if not pd.isna(row['link']) or not pd.isna(row['doi']):
+            continue
         file_to_search = None
         for file in os.listdir(f"{EXTRACTED_PATH}/HTML extracted"):
-            if file[11:-8] == format_link(row['meta_title']):
+            if file[11:-8] == format_link(str(row['meta_title'])):
                 file_to_search = file
                 break
         if not file_to_search:
@@ -87,4 +88,4 @@ def get_url_from_html():
             suffix = soup.find('span', {'id': 'HiddenSecTa-accessionNo'})
             url = "https://www.webofscience.com/wos/woscc/full-record/" + suffix
             save_link(row['meta_title'], url)
-
+get_url_from_html()
