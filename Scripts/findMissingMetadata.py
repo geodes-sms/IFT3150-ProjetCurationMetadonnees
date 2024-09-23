@@ -3,6 +3,8 @@ import random
 import time
 import traceback
 
+import pandas as pd
+
 import htmlParser
 import webScraping
 from SRProject import *
@@ -53,16 +55,17 @@ def extract_without_link(row, already_extracted_files, web_scraper):
             except:
                 pass  # probleme avec doc
 
-    # TODO: check if link already get through search
     if metadata:
         print("already extracted without link")
         print("metadata", metadata['DOI'])
         # if metadata['DOI'] is None or metadata['DOI'] == "":
         source = metadata['Source']
         authors = metadata['Authors']
+
+        # check if title is in articles_source_links.tsv
         links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t', encoding='windows-1252', encoding_errors='ignore')
         links_already_searched['Title'] = links_already_searched['Title'].astype(str)
-        links_already_searched['Title'] = links_already_searched['Title'].apply(unidecode)
+        # links_already_searched['Title'] = links_already_searched['Title'].apply(unidecode)
         # links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t')
         if metadata['Title'] in links_already_searched['Title'].values:
             print("link already searched, adding it instead of DOI")
@@ -70,7 +73,28 @@ def extract_without_link(row, already_extracted_files, web_scraper):
             if metadata['DOI'] is None or metadata['DOI'] == "":
                 print("missing DOI")
                 metadata['DOI'] = metadata['Link']
-                
+
+        if metadata['Link'] is None or metadata['Link'] == "":
+            metadata['Link'] = metadata['DOI']
+
+        # check if title is in articles_extract_manually.tsv
+        articles_extract_manually = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_extract_manually.tsv', sep='\t', encoding='windows-1252', encoding_errors='ignore')
+        if metadata['Title'] in articles_extract_manually['meta_title'].values:
+            print("link already extracted manually, adding it")
+            row = articles_extract_manually.loc[articles_extract_manually['meta_title'] == metadata['Title']].iloc[0]
+            metadata['Title'] = row['title']
+            metadata['Abstract'] = row['abstract']
+            metadata['Keywords'] = row['keywords']
+            metadata['Authors'] = row['authors']
+            metadata['Venue'] = row['venue']
+            metadata['DOI'] = row['doi']
+            metadata['References'] = row['references']
+            metadata['Pages'] = row['pages']
+            metadata['Bibtex'] = row['bibtex']
+            metadata['Source'] = row['source']
+            metadata['Year'] = row['year']
+            metadata['Link'] = row['link']
+            metadata['Publisher'] = row['publisher']
 
     # need to extract without link
     if not metadata or metadata['DOI'] is None or metadata['DOI'] == "":
