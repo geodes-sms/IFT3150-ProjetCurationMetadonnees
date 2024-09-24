@@ -155,7 +155,10 @@ def extract_with_link(row, already_extracted_files, web_scraper):
         metadata['Link'] = url
         print("extracted from link")
         time.sleep(random.randint(1, 5))
-        
+
+    if not metadata or not metadata['Title']:
+        metadata = extract_without_link(row, already_extracted_files, web_scraper)
+
     return metadata
 
 
