@@ -52,7 +52,7 @@ def assign_metadata(title, venue, authors, pages, abstract, keywords, references
     # verify if contains symbols not accepted
     for key in ['Authors']:
         for s in ['{', '}', '\\']:
-            if s in metadata[key]:
+            if metadata[key] and s in metadata[key]:
                 metadata[key] = None
 
     return metadata
