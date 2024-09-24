@@ -587,7 +587,6 @@ class SearcherInSource:
     def search_in_ScienceDirect(self, title):
         print("in the searcher")
         # self.driver.get("https://www.sciencedirect.com/search/entry")
-        time.sleep(360)
         tries = 0
         try:
             # aller sur basic search
