@@ -291,6 +291,8 @@ class ManualWebScraper:
             try:
                 if (pd.isna(row['doi']) or pd.isna(row['link'])) and not pd.isna(row['meta_title']):
                     self.get_metadata_from_title(row['meta_title'], source=row['source'])
+                elif pd.isna(row['meta_title']):
+                    self.get_metadata_from_title(row['title'])
             except Exception as e:
                 print(e. __traceback__)
 
