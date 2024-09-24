@@ -81,7 +81,7 @@ def extract_without_link(row, already_extracted_files, web_scraper):
         articles_extract_manually = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_extract_manually.tsv', sep='\t', encoding='windows-1252', encoding_errors='ignore')
         if metadata['Title'] in articles_extract_manually['meta_title'].values:
             print("link already extracted manually, adding it")
-            row = articles_extract_manually.loc[articles_extract_manually['meta_title'] == metadata['Title']].iloc[0]
+            row = articles_extract_manually.loc[articles_extract_manually['meta_title'] == metadata['Title']].values[0]
             metadata['Title'] = row['title']
             metadata['Abstract'] = row['abstract']
             metadata['Keywords'] = row['keywords']
@@ -217,7 +217,7 @@ def main(sr_df, do_web_scraping=False, run=999):
             print(i)
             if run < parts and not (n * run <= i <= n * (run+1)):
                 continue  # seulement partition
-            if run == 111 and not (2651 <= i <= 2970):
+            if run == 111 and not (2938 <= i <= 3492):
                 continue  # on veut extraire sans link
             # if row['source'] in ["IEEE", "ACM", "Web of Science", "Scopus"]:
             #     continue
