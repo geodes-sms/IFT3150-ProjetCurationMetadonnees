@@ -22,6 +22,29 @@ def extract_without_link(row, already_extracted_files, web_scraper):
 
     print(source, authors, year)
 
+    # check if title is in articles_extract_manually.tsv
+    articles_extract_manually = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_extract_manually.tsv', sep='\t',
+                                            encoding='windows-1252', encoding_errors='ignore')
+    breakpoint()
+    if row['title'] in articles_extract_manually['meta_title'].values:
+        print("link already extracted manually, adding it")
+        extract_row = articles_extract_manually.loc[articles_extract_manually['meta_title'] == row['title']].iloc[0]
+        metadata = metadata_base.copy()
+        metadata['Title'] = extract_row['title']
+        metadata['Abstract'] = extract_row['abstract']
+        metadata['Keywords'] = extract_row['keywords']
+        metadata['Authors'] = extract_row['authors']
+        metadata['Venue'] = extract_row['venue']
+        metadata['DOI'] = extract_row['doi']
+        metadata['References'] = extract_row['references']
+        metadata['Pages'] = extract_row['pages']
+        metadata['Bibtex'] = extract_row['bibtex']
+        metadata['Source'] = extract_row['source']
+        metadata['Year'] = extract_row['year']
+        metadata['Link'] = extract_row['link']
+        metadata['Publisher'] = extract_row['publisher']
+        return metadata
+
     # check if already extracted without link
     for column in ['title']:
         # for column in ['title', 'authors', 'abstract']:
@@ -76,25 +99,6 @@ def extract_without_link(row, already_extracted_files, web_scraper):
 
         if metadata['Link'] is None or metadata['Link'] == "":
             metadata['Link'] = metadata['DOI']
-
-        # check if title is in articles_extract_manually.tsv
-        articles_extract_manually = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_extract_manually.tsv', sep='\t', encoding='windows-1252', encoding_errors='ignore')
-        if metadata['Title'] in articles_extract_manually['meta_title'].values:
-            print("link already extracted manually, adding it")
-            row = articles_extract_manually.loc[articles_extract_manually['meta_title'] == metadata['Title']].values[0]
-            metadata['Title'] = row['title']
-            metadata['Abstract'] = row['abstract']
-            metadata['Keywords'] = row['keywords']
-            metadata['Authors'] = row['authors']
-            metadata['Venue'] = row['venue']
-            metadata['DOI'] = row['doi']
-            metadata['References'] = row['references']
-            metadata['Pages'] = row['pages']
-            metadata['Bibtex'] = row['bibtex']
-            metadata['Source'] = row['source']
-            metadata['Year'] = row['year']
-            metadata['Link'] = row['link']
-            metadata['Publisher'] = row['publisher']
 
     # need to extract without link
     if not metadata or metadata['DOI'] is None or metadata['DOI'] == "":
@@ -152,7 +156,7 @@ def extract_with_link(row, already_extracted_files, web_scraper):
     if not metadata:
         if web_scraper:
             metadata = web_scraper.get_metadata_from_link(url, source)
-        metadata['Link'] = url
+            metadata['Link'] = url
         print("extracted from link")
         time.sleep(random.randint(1, 5))
 
@@ -217,7 +221,7 @@ def main(sr_df, do_web_scraping=False, run=999):
             print(i)
             if run < parts and not (n * run <= i <= n * (run+1)):
                 continue  # seulement partition
-            if run == 111 and not (2938 <= i <= 3492):
+            if run == 111 and not (324 <= i <= 324):
                 continue  # on veut extraire sans link
             # if row['source'] in ["IEEE", "ACM", "Web of Science", "Scopus"]:
             #     continue
