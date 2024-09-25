@@ -272,12 +272,12 @@ class SearcherInSource:
 
         # Parse la page web pour extraire le metadata
         link = self.driver.current_url
-        save_link(title, link)
         self.driver.get(link)
         html = self.driver.page_source
         new_metadata = htmlParser.get_metadata_from_html_ACM(html)
         if not check_if_right_link(new_metadata, title):
             return  # TODO: ajouter plutôt avant le break et changer d'article
+        save_link(title, link)
         save_extracted_html(title + '_01', html)
         new_metadata['Link'] = link
         self.extract_bibtex_in_ACM(title)
