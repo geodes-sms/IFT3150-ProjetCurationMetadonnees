@@ -39,6 +39,7 @@ class SearcherInSource:
 
         shutil.move(latest_file,
                     f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_{source_id}.bib')
+        print(f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_{source_id}.bib')
 
         if os.path.isfile(latest_file):
             os.remove(latest_file)
