@@ -1,4 +1,4 @@
-from SRProject import *
+from Scripts.SRProject import *
 import pandas as pd
 
 
@@ -51,57 +51,46 @@ class TrustSE(SRProject):
 
     def __init__(self):
         super().__init__()
-        self.path = "../../Datasets/TrustSE/TrustSE-source.xlsx"
+        self.path = f"{MAIN_PATH}/Datasets/TrustSE/TrustSE-source.xlsx"
 
         # converters = {"Title": lambda x: x.encode('utf-8')}
         # All sheets
         with open(self.path, 'rb') as f:
-            sheet_all = pd.read_excel(f, sheet_name="TotalArticles")  # 3491 rows
+            sheet_all = pd.read_excel(f, sheet_name="Selected manuscripts", header=1)  # 3491 rows
             print(sheet_all)
-            sheet_without_duplicates = pd.read_excel(f, sheet_name="ReviewByTitle", converters=convert_dict)  # 2974 rows
-            print(sheet_without_duplicates)
-            sheet_title_keywords_included = pd.read_excel(f, sheet_name="RevisionByTitle", converters=convert_dict)  # 1539 rows
-            print(sheet_title_keywords_included)
-            sheet_abstract_included = pd.read_excel(f, sheet_name="ReviewAndRevisionByAbstract", converters=convert_dict)  # 614 rows
-            print(sheet_abstract_included)
-            sheet_text_included = pd.read_excel(f, sheet_name="ReviewAndRevisionByFullText", converters=convert_dict)  # 252 rows
-            print(sheet_text_included)
-            sheet_snowballing = pd.read_excel(f, sheet_name="Snowballing", converters=convert_dict)  # 591 rows
-            print(sheet_snowballing)
-            sheet_final_selection = pd.read_excel(f, sheet_name="FinalSelection", converters=convert_dict)  # 98 rows
-            print(sheet_final_selection)
+
 
         # Add columns
         # self.df["key"]
-        self.df['title'] = sheet_without_duplicates["Title"]
-        self.df['abstract'] = sheet_without_duplicates["Abstract"]
-        self.df["keywords"] = sheet_without_duplicates["Keywords"]
-        self.df["authors"] = sheet_without_duplicates["Author"]
-        self.df['venue'] = sheet_without_duplicates["Journal"]
-        self.df["doi"] = sheet_without_duplicates["URL"]
-        self.df["year"] = sheet_without_duplicates["Year"]
-        # self.df["year"].astype(int)
-        # self.df["references"]
-        # self.df["bibtex"]
-        self.df['mode'] = "new_screen"
+        self.df['title'] = sheet_all["Title"]
+        # self.df['abstract'] = sheet_without_duplicates["Abstract"]
+        # self.df["keywords"] = sheet_without_duplicates["Keywords"]
+        # self.df["authors"] = sheet_without_duplicates["Author"]
+        # self.df['venue'] = sheet_without_duplicates["Journal"]
+        # self.df["doi"] = sheet_without_duplicates["URL"]
+        # self.df["year"] = sheet_without_duplicates["Year"]
+        # # self.df["year"].astype(int)
+        # # self.df["references"]
+        # # self.df["bibtex"]
+        # self.df['mode'] = "new_screen"
 
         # Find all screened decisions
-        self.find_decision_on_articles(sheet_title_keywords_included, sheet_without_duplicates)
-        self.find_decision_on_articles(sheet_abstract_included, sheet_title_keywords_included)
-
-        # Add snowballing articles
-        self.add_snowballing_articles(sheet_snowballing)
-
-        # Find all final decisions based on which articles are included in different sheets
-        self.find_decision_on_articles(sheet_final_selection, sheet_abstract_included, True)
-        self.find_decision_on_articles(sheet_final_selection, sheet_text_included, True)
+        # self.find_decision_on_articles(sheet_title_keywords_included, sheet_without_duplicates)
+        # self.find_decision_on_articles(sheet_abstract_included, sheet_title_keywords_included)
+        #
+        # # Add snowballing articles
+        # self.add_snowballing_articles(sheet_snowballing)
+        #
+        # # Find all final decisions based on which articles are included in different sheets
+        # self.find_decision_on_articles(sheet_final_selection, sheet_abstract_included, True)
+        # self.find_decision_on_articles(sheet_final_selection, sheet_text_included, True)
 
         self.df["reviewer_count"] = 2  # TODO: not indicated in Excel which are conflicted
 
         self.df["doi"].astype(str)
 
         self.df['project'] = "TrustSE"
-        self.export_path = "Datasets/TrustSE/TrustSE.tsv"
+        self.export_path = f"{MAIN_PATH}/Datasets/TrustSE/TrustSE.tsv"
         print(self.df)
 
     def add_snowballing_articles(self, sheet_snowballing):
