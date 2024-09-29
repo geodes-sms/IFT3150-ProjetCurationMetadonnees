@@ -62,7 +62,7 @@ ACM = "ACM"
 SpringerLink = "Springer Science and Business Media LLC"
 Scopus = "scopus"
 ScopusSignedIn = "ScopusSignedIn"
-WoS = "wos"
+WoS = "Web of Science"
 PubMedCentral = "PubMedCentral"
 arXiv = "arXiv"
 
@@ -140,7 +140,7 @@ class SRProject:
 def update_metadata(old, new):
     tmp = {}
     for k, v in new.items():
-        if v is not None or v != "":
+        if v is not None and v != "":
             tmp[k] = v
     old.update(tmp)
 
