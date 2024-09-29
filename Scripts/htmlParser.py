@@ -80,19 +80,19 @@ def get_metadata_from_bibtex(bib_data):
     metadata = metadata_base.copy()
     bib_key = list(bib_data.entries.keys())[0]
     bib_dict = bib_data.entries[bib_key].fields
-    metadata['Title'] = bib_dict['title'] if 'title' in bib_dict.keys() else ""
-    metadata['Venue'] = bib_dict['journal'] if 'journal' in bib_dict.keys() else ""
-    metadata['Authors'] = '; '.join([str(x) for x in bib_data.entries[bib_key].persons['author']]) if 'author' in bib_data.entries[bib_key].persons.keys() else ""
-    metadata['Abstract'] = bib_dict['abstract'] if 'abstract' in bib_dict.keys() else ""
-    metadata['Keywords'] = '; '.join(str(x) for x in bib_dict['keywords'].split(',') if x != "") if 'keywords' in bib_dict.keys() else ""
-    metadata['References'] = bib_dict['cited-references'] if 'cited-references' in bib_dict.keys() else ""
-    metadata['Pages'] = bib_dict['pages'] if 'pages' in bib_dict.keys() else ""
-    metadata['Year'] = bib_dict['year'] if 'year' in bib_dict.keys() else ""
+    metadata['Title'] = bib_dict['title'] if 'title' in bib_dict.keys() else None
+    metadata['Venue'] = bib_dict['journal'] if 'journal' in bib_dict.keys() else None
+    metadata['Authors'] = '; '.join([str(x) for x in bib_data.entries[bib_key].persons['author']]) if 'author' in bib_data.entries[bib_key].persons.keys() else None
+    metadata['Abstract'] = bib_dict['abstract'] if 'abstract' in bib_dict.keys() else None
+    metadata['Keywords'] = '; '.join(str(x) for x in bib_dict['keywords'].split(',') if x != "") if 'keywords' in bib_dict.keys() else None
+    metadata['References'] = bib_dict['cited-references'] if 'cited-references' in bib_dict.keys() else None
+    metadata['Pages'] = bib_dict['pages'] if 'pages' in bib_dict.keys() else None
+    metadata['Year'] = bib_dict['year'] if 'year' in bib_dict.keys() else None
     metadata['Bibtex'] = bib_data.to_string("bibtex")
-    metadata['DOI'] = bib_dict['doi'] if 'doi' in bib_dict.keys() else ""
-    metadata['Source'] = bib_dict['source'] if 'source' in bib_dict.keys() else ""
-    metadata['Link'] = bib_dict['url'] if 'url' in bib_dict.keys() else ""
-    metadata['Publisher'] = bib_dict['publisher'] if 'publisher' in bib_dict.keys() else ""
+    metadata['DOI'] = bib_dict['doi'] if 'doi' in bib_dict.keys() else None
+    metadata['Source'] = bib_dict['source'] if 'source' in bib_dict.keys() else None
+    metadata['Link'] = bib_dict['url'] if 'url' in bib_dict.keys() else None
+    metadata['Publisher'] = bib_dict['publisher'] if 'publisher' in bib_dict.keys() else None
     return metadata
 
 
@@ -146,8 +146,8 @@ def get_metadata_from_already_extract(file, source=None):
     elif file[-3:] == "bib":
         parser = bibtex_parser.Parser()
         bib_data = parser.parse_file(f'{EXTRACTED_PATH}/Bibtex/{file}')
-        metadata.update(get_metadata_from_bibtex(bib_data))
-        metadata['Source'] = code_source[file[-7:-5]]
+        metadata = get_metadata_from_bibtex(bib_data)
+        metadata['Source'] = code_source[file[-6:-4]]
     return metadata
 
 
@@ -161,8 +161,10 @@ def get_metadata_from_html_ieee(html):
     title = title_tag.get_text(strip=True) if title_tag else None
 
     # Extract the pages
-    # TODO: pas dessus page normale
-    pages = None
+    pages_anchor = soup.find('div', {'class': 'doc-abstract-pubdate'})
+    pages_section = pages_anchor.parent.find('div', {'class': 'u-pb-1'}) if pages_anchor else None
+    pages_tag = pages_section.find('span') if pages_section else None
+    pages = pages_tag.get_text(strip=True) if pages_tag else None
 
     # Extract the venue
     venue_section = soup.find('div', {'class': 'stats-document-abstract-publishedIn'})
@@ -175,6 +177,10 @@ def get_metadata_from_html_ieee(html):
     # Extract the abstract
     abstract_tag = soup.find('meta', {'property': 'og:description'})
     abstract = abstract_tag.get_text(strip=True) if abstract_tag else None
+    if not abstract:
+        abstract_section = soup.find('div', {'class': 'abstract-text'})
+        abstract_tag = abstract_section.find('div').find('div').find('div') if abstract_section else None
+        abstract = abstract_tag.get_text(strip=True) if abstract_tag else None
 
     # Extract the authors
     # author_tag = soup.find('meta', {'name': 'parsely-author'})
@@ -447,9 +453,14 @@ def get_metadata_from_html_scopus(html):
     # Function to extract title
     title_tag = soup.find('h2', {'class': 'h3'})
     title = title_tag.get_text()[:title_tag.get_text().find("(")] if title_tag else None
+    if title and (' | Signed in' in title or 'Document details - ' in title or 'Scopus - ' in title):
+        title = re.sub('Scopus - ', '', title)
+        title = re.sub('Document details - ', '', title)
+        title = re.sub(' | Signed in', '', title)
 
     # Extract venue
-    venue = ""
+    venue_tag = soup.find('span', {'id': 'noSourceTitleLink'})
+    venue = venue_tag.get_text(strip=True) if venue_tag else None
     # TODO: prend avant le : de la 3e section
 
     # Extract publisher
@@ -475,8 +486,9 @@ def get_metadata_from_html_scopus(html):
     if abstract_section:
         abstract_tag = abstract_section.find('p')
         abstract = abstract_tag.get_text(strip=True) if abstract_tag else None
-    else:
-        abstract = None
+    if not abstract_section:
+        abstract_section = soup.find('div', {'class': 'Abstract-module__pTWiT'})
+        abstract = abstract_section.get_text(strip=True) if abstract_section else None
 
     # Function to extract keywords
     keywords = []
@@ -484,8 +496,10 @@ def get_metadata_from_html_scopus(html):
     if keywords_section:
         keywords_tag = keywords_section.find_all('span', {'class', 'badges'})
         for keyword in keywords_tag:
-            keywords.append(keyword.get_text(strip=True))
-    keywords = keywords if keywords else None
+            key_text = keyword.get_text(strip=True)
+            key_text = re.sub(';', '', key_text)
+            keywords.append(key_text)
+    keywords = keywords if len(keywords) > 0 else None
 
     # Function to extract references
     references = []
@@ -516,6 +530,10 @@ def get_metadata_from_html_scopus_signed_in(html):
     # Extract the title
     title_tag = soup.find('title')
     title = title_tag.get_text(strip=True) if title_tag else None
+    if title and (' | Signed in' in title or 'Document details - ' in title or 'Scopus - ' in title):
+        title = re.sub('Scopus - ', '', title)
+        title = re.sub('Document details - ', '', title)
+        title = re.sub(' | Signed in', '', title)
 
     # Extract the venue
     venue_tag = soup.find('a', {'class': 'source-preview-flyout'})
@@ -533,6 +551,7 @@ def get_metadata_from_html_scopus_signed_in(html):
     # Extract the abstract
     abstract_tag = soup.find('div', {'class': 'Abstract-module__pTWiT'})
     abstract = abstract_tag if abstract_tag else None
+
 
     # Extract the authors
     authors = []
@@ -565,7 +584,7 @@ def get_metadata_from_html_scopus_signed_in(html):
     doi = doi_tag.get_text(strip=True) if doi_tag else None
 
     # Extract the publisher
-    publisher = "?"
+    publisher = None
 
     # Return the metadata
     return assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher,
@@ -596,6 +615,8 @@ def get_metadata_from_html_wos(html):
     # Extract the venue
     venue_tag = soup.find('a', {'class': 'summary-source-title-link'})
     venue = venue_tag.get_text(strip=True) if venue_tag else None
+    if venue and 'arrow_drop_down' in venue:
+        venue = re.sub('arrow_drop_down', '', venue)
 
     # Extract the pages
     pages_tag = soup.find('span', {'id': 'FullRTa-pageNo'})
@@ -659,6 +680,8 @@ def get_metadata_from_html_pub_med_central(html):
     # Extract the abstract
     abstract_tag = soup.find('div', {'id': 'abstract'})
     abstract = abstract_tag.get_text(strip=True) if abstract_tag else None
+    if abstract and abstract[:8] == 'Abstract':
+        abstract = abstract[8:]
 
     # Extract the keywords
     keywords = None
