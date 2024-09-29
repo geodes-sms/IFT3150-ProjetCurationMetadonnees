@@ -25,7 +25,6 @@ def extract_without_link(row, already_extracted_files, web_scraper):
     # check if title is in articles_extract_manually.tsv
     articles_extract_manually = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_extract_manually.tsv', sep='\t',
                                             encoding='windows-1252', encoding_errors='ignore')
-    breakpoint()
     if row['title'] in articles_extract_manually['meta_title'].values:
         print("link already extracted manually, adding it")
         extract_row = articles_extract_manually.loc[articles_extract_manually['meta_title'] == row['title']].iloc[0]
@@ -75,8 +74,10 @@ def extract_without_link(row, already_extracted_files, web_scraper):
                 if new_metadata:
                     if metadata: update_metadata(metadata, new_metadata)
                     else: metadata = new_metadata
-            except:
-                pass  # probleme avec doc
+                    print(metadata)
+            except Exception as e:
+                print("Error", e)
+                raise Exception(e)
 
     if metadata:
         print("already extracted without link")
@@ -97,9 +98,6 @@ def extract_without_link(row, already_extracted_files, web_scraper):
                 print("missing DOI")
                 metadata['DOI'] = metadata['Link']
 
-        if metadata['Link'] is None or metadata['Link'] == "":
-            metadata['Link'] = metadata['DOI']
-
     # need to extract without link
     if not metadata or metadata['DOI'] is None or metadata['DOI'] == "":
 
@@ -112,6 +110,7 @@ def extract_without_link(row, already_extracted_files, web_scraper):
             metadata = web_scraper.get_metadata_from_link(row['title'], authors, source)
         print("extracted without link")
 
+    print(metadata)
     return metadata
 
 
@@ -189,11 +188,16 @@ def update_dataset(row, metadata):
     if metadata['Publisher']:
         row['publisher'] = metadata['Publisher']
     print(metadata['DOI'])
-    if (pd.isna(row['doi']) or row['doi'][:15] != "https://doi.org") and metadata['DOI'] is not None and metadata[
-        'DOI'] not in ["", "None"]:
+    # if (pd.isna(row['doi']) or row['doi'][:15] != "https://doi.org") and metadata['DOI'] is not None and metadata[
+    #     'DOI'] not in ["", "None"]:
+    if metadata['DOI']:
         row['doi'] = "https://doi.org/" + str(metadata['DOI']) if "http" not in metadata['DOI'] else metadata['Link']
     if metadata['Link']:
         row['link'] = metadata['Link']
+    if (metadata['DOI'] is None or metadata['DOI'] == "") and metadata['Link']:
+        row['doi'] = row['link']
+    elif (metadata['Link'] is None or metadata['Link'] == "") and metadata['DOI']:
+        row['link'] = row['doi']
     for key in metadata.keys():
         if metadata[key] is None or metadata[key] == "":
             row['metadata_missing'] = str(row['metadata_missing']) + '; ' + str(key)
@@ -208,7 +212,7 @@ def main(sr_df, do_web_scraping=False, run=999):
     # run = 111  # <------- partition [0,1,2,3], only without link [111] or complete [999]
     parts = 6
     n = len(list(sr_df.iterrows()))//parts
-    i = 0
+    i = -1
     erreurs = []
     already_extracted_files = []
     already_extracted_html = os.listdir(f"{EXTRACTED_PATH}/HTML extracted")
@@ -221,7 +225,7 @@ def main(sr_df, do_web_scraping=False, run=999):
             print(i)
             if run < parts and not (n * run <= i <= n * (run+1)):
                 continue  # seulement partition
-            if run == 111 and not (324 <= i <= 324):
+            if run == 111 and not (1900 <= i <= 2100):
                 continue  # on veut extraire sans link
             # if row['source'] in ["IEEE", "ACM", "Web of Science", "Scopus"]:
             #     continue
@@ -232,6 +236,7 @@ def main(sr_df, do_web_scraping=False, run=999):
             for col in metadata_cols:
                 if pd.isna(row[col]):
                     need_web_scraping = True
+                    break
             
             # there is missing at least one metadata
             if need_web_scraping:
@@ -240,7 +245,7 @@ def main(sr_df, do_web_scraping=False, run=999):
                 # link exists in source data
                 if not metadata and not pd.isna(url) and url[:4] == 'http':
                     metadata = extract_with_link(row, already_extracted_files, web_scraper)
-                    
+
                 # no link
                 if not metadata:
                     print(row[['title', 'source']])
