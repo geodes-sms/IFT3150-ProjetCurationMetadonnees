@@ -88,4 +88,29 @@ def get_url_from_html():
             suffix = soup.find('span', {'id': 'HiddenSecTa-accessionNo'})
             url = "https://www.webofscience.com/wos/woscc/full-record/" + suffix
             save_link(row['meta_title'], url)
-get_url_from_html()
+# get_url_from_html()
+
+def extract_from_manual():
+    metadata = metadata_base.copy()
+    metadata['Title'] = "Role-Playing Computer Game To Improve Speech Ability Of Down Syndrome Children"
+    articles_extract_manually = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_extract_manually.tsv', sep='\t',
+                                            encoding='windows-1252', encoding_errors='ignore')
+    if metadata['Title'] in articles_extract_manually['meta_title'].values:
+        print("link already extracted manually, adding it")
+        row = articles_extract_manually.loc[articles_extract_manually['meta_title'] == metadata['Title']].iloc[0]
+        print(row)
+        metadata['Title'] = row['title']
+        metadata['Abstract'] = row['abstract']
+        metadata['Keywords'] = row['keywords']
+        metadata['Authors'] = row['authors']
+        metadata['Venue'] = row['venue']
+        metadata['DOI'] = row['doi']
+        metadata['References'] = row['references']
+        metadata['Pages'] = row['pages']
+        metadata['Bibtex'] = row['bibtex']
+        metadata['Source'] = row['source']
+        metadata['Year'] = row['year']
+        metadata['Link'] = row['link']
+        metadata['Publisher'] = row['publisher']
+    print(metadata)
+extract_from_manual()
