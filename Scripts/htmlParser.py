@@ -179,8 +179,11 @@ def get_metadata_from_html_ieee(html):
     abstract = abstract_tag.get_text(strip=True) if abstract_tag else None
     if not abstract:
         abstract_section = soup.find('div', {'class': 'abstract-text'})
-        abstract_tag = abstract_section.find('div').find('div').find('div') if abstract_section else None
-        abstract = abstract_tag.get_text(strip=True) if abstract_tag else None
+        try:
+            abstract_tag = abstract_section.find('div').find('div').find('div') if abstract_section else None
+            abstract = abstract_tag.get_text(strip=True) if abstract_tag else None
+        except:
+            abstract = None
 
     # Extract the authors
     # author_tag = soup.find('meta', {'name': 'parsely-author'})
