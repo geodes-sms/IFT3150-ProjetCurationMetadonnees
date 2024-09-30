@@ -91,9 +91,9 @@ def extract_without_link(row, already_extracted_files, web_scraper):
         links_already_searched['Title'] = links_already_searched['Title'].astype(str)
         # links_already_searched['Title'] = links_already_searched['Title'].apply(unidecode)
         # links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t')
-        if metadata['Title'] in links_already_searched['Title'].values:
+        if row['title'] in links_already_searched['Title'].values:
             print("link already searched, adding it instead of DOI")
-            metadata['Link'] = links_already_searched.loc[links_already_searched['Title'] == metadata['Title']]['Link'].values[0]
+            metadata['Link'] = links_already_searched.loc[links_already_searched['Title'] == row['title']]['Link'].values[0]
             if metadata['DOI'] is None or metadata['DOI'] == "":
                 print("missing DOI")
                 metadata['DOI'] = metadata['Link']
@@ -225,7 +225,7 @@ def main(sr_df, do_web_scraping=False, run=999):
             print(i)
             if run < parts and not (n * run <= i <= n * (run+1)):
                 continue  # seulement partition
-            if run == 111 and not (1900 <= i <= 2100):
+            if run == 111 and not (1942 <= i <= 1942):
                 continue  # on veut extraire sans link
             # if row['source'] in ["IEEE", "ACM", "Web of Science", "Scopus"]:
             #     continue
