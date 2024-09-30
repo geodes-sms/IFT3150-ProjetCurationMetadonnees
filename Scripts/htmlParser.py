@@ -43,7 +43,7 @@ def assign_metadata(title, venue, authors, pages, abstract, keywords, references
     metadata['Pages'] = pages
     metadata['Authors'] = "; ".join(clean_authors(authors)) if authors is not None else None
     metadata['Abstract'] = abstract
-    metadata['Keywords'] = "; ".join(keywords) if keywords is not None else None
+    metadata['Keywords'] = "; ".join(str.strip(keywords)) if keywords is not None else None
     metadata['References'] = "; ".join(references) if references is not None else None
     metadata['DOI'] = doi
     metadata['Publisher'] = publisher
@@ -501,6 +501,7 @@ def get_metadata_from_html_scopus(html):
         for keyword in keywords_tag:
             key_text = keyword.get_text(strip=True)
             key_text = re.sub(';', '', key_text)
+            key_text = key_text.replace(';', '')
             keywords.append(key_text)
     keywords = keywords if len(keywords) > 0 else None
 
@@ -618,6 +619,9 @@ def get_metadata_from_html_wos(html):
     # Extract the venue
     venue_tag = soup.find('a', {'class': 'summary-source-title-link'})
     venue = venue_tag.get_text(strip=True) if venue_tag else None
+    if not venue:
+        venue_tag = soup.find('span', {'class': 'summary-source-title'})
+        venue = venue_tag.get_text(strip=True) if venue_tag else None
     if venue and 'arrow_drop_down' in venue:
         venue = re.sub('arrow_drop_down', '', venue)
 
