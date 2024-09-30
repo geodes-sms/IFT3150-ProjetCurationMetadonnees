@@ -43,7 +43,7 @@ def assign_metadata(title, venue, authors, pages, abstract, keywords, references
     metadata['Pages'] = pages
     metadata['Authors'] = "; ".join(clean_authors(authors)) if authors is not None else None
     metadata['Abstract'] = abstract
-    metadata['Keywords'] = "; ".join(str.strip(keywords)) if keywords is not None else None
+    metadata['Keywords'] = "; ".join(keywords) if keywords is not None else None
     metadata['References'] = "; ".join(references) if references is not None else None
     metadata['DOI'] = doi
     metadata['Publisher'] = publisher
