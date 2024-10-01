@@ -468,7 +468,7 @@ def get_metadata_from_html_scopus(html):
         title = re.sub(' | Signed in', '', title)
 
     # Extract venue
-    venue_tag = soup.find('div', {'id': 'articleTitleInfo'})
+    venue_tag = soup.find('section', {'id': 'articleTitleInfo'})
     venue = venue_tag.find('span', {'id': 'guestAccessSourceTitle'}) if venue_tag else None
     if not venue:
         venue_tag = soup.find('span', {'id': 'noSourceTitleLink'})
