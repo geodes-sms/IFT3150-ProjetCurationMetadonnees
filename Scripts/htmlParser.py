@@ -468,8 +468,11 @@ def get_metadata_from_html_scopus(html):
         title = re.sub(' | Signed in', '', title)
 
     # Extract venue
-    venue_tag = soup.find('span', {'id': 'noSourceTitleLink'})
-    venue = venue_tag.get_text(strip=True) if venue_tag else None
+    venue_tag = soup.find('div', {'id': 'articleTitleInfo'})
+    venue = venue_tag.find('span', {'id': 'guestAccessSourceTitle'}) if venue_tag else None
+    if not venue:
+        venue_tag = soup.find('span', {'id': 'noSourceTitleLink'})
+        venue = venue_tag.get_text(strip=True) if venue_tag else None
     # TODO: prend avant le : de la 3e section
 
     # Extract publisher
@@ -655,15 +658,17 @@ def get_metadata_from_html_wos(html):
     doi = doi_tag.get_text(strip=True) if doi_tag else None
 
     # Extract the publisher
-    publisher_section = soup.find('div', {'id': 'snJournalData'})
-    publisher_section_text = publisher_section.get_text(strip=True) if publisher_section else None
-    publisher_start_index = publisher_section_text.find('Publisher name') + len('Publisher name') if publisher_section_text else None
-    publisher_end_index = publisher_section_text[publisher_start_index:].find('Journal') + publisher_start_index if publisher_start_index else None
-    publisher = publisher_section_text[publisher_start_index:publisher_end_index] if publisher_end_index else None
+    publisher_section = soup.find('div', {'class': 'journal-content-row'})
+    publisher_tag = publisher_section.find('span', {'class': 'value'}) if publisher_section else None
+    publisher = publisher_tag.get_text(strip=True) if publisher_tag else None
     if not publisher:
-        publisher_section = soup.find('div', {'class': 'journal-content-row'})
-        publisher_tag = publisher_section.find('span', {'class': 'value'}) if publisher_section else None
-        publisher = publisher_tag.get_text(strip=True) if publisher_tag else None
+        publisher_section = soup.find('div', {'id': 'snJournalData'})
+        publisher_section_text = publisher_section.get_text(strip=True) if publisher_section else None
+        publisher_start_index = publisher_section_text.find('Publisher name') + len(
+            'Publisher name') if publisher_section_text else None
+        publisher_end_index = publisher_section_text[publisher_start_index:].find(
+            'Journal') + publisher_start_index if publisher_start_index else None
+        publisher = publisher_section_text[publisher_start_index:publisher_end_index] if publisher_end_index else None
 
     # Return the metadata
     return assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher,
