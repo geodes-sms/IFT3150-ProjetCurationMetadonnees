@@ -655,7 +655,6 @@ def get_metadata_from_html_wos(html):
     publisher_start_index = publisher_section_text.find('Publisher name') + len('Publisher name') if publisher_section_text else None
     publisher_end_index = publisher_section_text[publisher_start_index:].find('Journal') + publisher_start_index if publisher_start_index else None
     publisher = publisher_section_text[publisher_start_index:publisher_end_index] if publisher_end_index else None
-    breakpoint()
     if not publisher:
         publisher_section = soup.find('div', {'class': 'journal-content-row'})
         try:
