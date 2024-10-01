@@ -662,11 +662,8 @@ def get_metadata_from_html_wos(html):
     publisher = publisher_section_text[publisher_start_index:publisher_end_index] if publisher_end_index else None
     if not publisher:
         publisher_section = soup.find('div', {'class': 'journal-content-row'})
-        try:
-            publisher_tag = publisher_section.find('span', {'class': 'value'}) if publisher_section else None
-            publisher = publisher_tag.get_text(strip=True) if publisher_tag else None
-        except:
-            raise Exception("erreur avec publisher wos")
+        publisher_tag = publisher_section.find('span', {'class': 'value'}) if publisher_section else None
+        publisher = publisher_tag.get_text(strip=True) if publisher_tag else None
 
     # Return the metadata
     return assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher,
