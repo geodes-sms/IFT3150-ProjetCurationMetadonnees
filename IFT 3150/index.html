@@ -4,19 +4,37 @@
 IFT 3150 - Guillaume Genois
 </title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
-</head>
-
-<-- dans css:
+<style>
 table, th, td {
   border: 1px solid black;
    border-collapse: collapse;
 }
--->
+p, ul {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-right: 150px;
+  margin-left: 80px;
+}
+h2, h3 {
+  margin-top: 30px;
+  margin-bottom: 20px;
+  margin-right: 150px;
+  margin-left: 80px;
+}
+
+th, tr, td {
+  padding-top: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+}
+</style>
+</head>
 
 <body bgcolor="#ffffff" text="#000000">
-<h1 align=center>IFT 3150 - Guillaume Genois</h1>
+<h1 align="center">IFT 3150 - Guillaume Genois</h1>
 
-<hr size=2>
+<hr size="2">
 
 <p>
 <b>Étudiant:</b> Guillaume Genois
@@ -67,80 +85,115 @@ l'outil pour évaluer les LLM avec cet ensemble de données. L'analyse d'article
 <h2>Description détaillée</h2>
 <p>
 <b>Titre:</b> Curation de métadonnées pour évaluer l’utilisation de l’apprentissage machine dans le cadre de revues systématiques
-<br>
-<b>Spécification fonctionnelle:</b>
-<br>
-<b>Environnement et contraintes techniques:</b> plusieurs journaux différents, 
-<br>
-<b>Architecture logicielle:</b> 
-<br>
+<br><br>
+<b>Spécification fonctionnelle:</b> Livraison de 16 jeux de données venant répliquer les processus de sélection de leur revue systématique. Chaque jeu de données contient les informations suivantes:<br>
+project, title, abstract, keywords, authors, venue, doi, references, pages, bibtex, screened_decision, final_decision, mode, inclusion_criteria, exclusion_criteria, reviewer_count, source, year, meta_title, link, publisher, metadata_missing.
+
+<br><br>
+<b>Environnement et contraintes techniques:</b> plusieurs journaux différents avec structures différentes, chaque revue systématique avec méthodologie différente, article avec métadonnées manquantes, article pas présent sur aucun principal moteur de recherche, formatage des données, sécurité des sites web des moteurs de recherche. Développement fait en Python avec comme librairies principales Pandas, Selenium et BeautifulSoup.
+<br><br>
+<b>Architecture logicielle:</b> <i>schéma</i>
+<br><br>
 <b>Modules principaux de travail:</b>
+</p><ul>
 <table>
-	<tr>
-		<th>Analyse de la méthodologie des revues systématiques</th>
-		<td></td>
+	<tbody><tr>
+		<td><b>Analyse de la méthodologie des revues systématiques</b></td>
+		<td>Chaque revue systématique a un ou plus jeu de données avec leur propre méthodologie. Un travail d'analyse pour chaque revue systématique est donc nécessaire pour extraire les informations utiles de leurs données sources disponibles. </td>
 	</tr>
 	<tr>
-		<th>Extraction des informations utiles du jeu de données fourni</th>
-		<td></td>
+		<td><b>Extraction des informations utiles du jeu de données fourni</b></td>
+		<td>Le but est d'extraire toutes les informations nécessaire à la reproductivité du processus de sélection d'articles. En particulier, les informations sur le mode de récupération de l'article, leur critère d'exclusion et/ou d'inclusion, leur décision après les premières phases de sélection par l'abstract et leur décision finale.</td>
 	</tr>
 	<tr>
-		<th>Extracteur de métadonnées des HTML (parser)</th>
-		<td> des principaux moteurs de recherche tels que IEEE, ACM, Science Direct, Springer Link, Web of Science, Scopus</td>
+		<td><b>Extraction de métadonnées des HTML (parser)</b></td>
+		<td>Un système d'extraction des métadonnées voulues est nécessaire. Celui-ci devra venir extraire les informations des articles présents sur les principaux moteurs de recherche tels que IEEE, ACM, Science Direct, Springer Link, Web of Science et Scopus. Ce système est indépendant des autres. Il ne demande qu'un fichier HTML en paramètre avec sa provenance afin de retourner les métadonnées.</td>
 	</tr>
 	<tr>
-		<th>Recherche automatique dans les principaux moteurs de recherche</th>
-		<td> pour trouver les HTML manquants</td>
+		<td><b>Recherche automatique dans les principaux moteurs de recherche</b></td>
+		<td>Afin de récupérer les articles présents sur les principaux moteurs de recherche, un système automatisé vient lancer les requêtes sur les sites web des moteurs de recherche. Sur chaque requête, le système vérifie si un des articles trouvés est l'article recherché en comparant les titres. Une fois un article trouvé, le système enregistre la page HTML courante et télécharge le Bibtex offert par le moteur de recherche.</td>
 	</tr>
 	<tr>
-		<th>Nettoyage et compilation des données de chaque jeu de données</th>
-		<td></td>
+		<td><b>Nettoyage et compilation des données de chaque jeu de données</b></td>
+		<td>Avec les HTML et les Bibtex extraits et enregistrés, pour chaque article présent dans un jeu de données, tous les HTML et les Bibtex lui étant associés, provenants de plusieurs ou non moteurs de recherche, sont envoyés au système d'extraction de métadonnées. Les informations sont donc compilés en essayant de récupérer le maximum d'informations à travers les sources extraites.</td>
 	</tr>
 	<tr>
-		<th>Intégration à ReLiS</th>
-		<td></td>
+		<td><b>Intégration à ReLiS</b></td>
+		<td>Détails à être confirmés vers la fin de la session si le temps le permet.</td>
 	</tr>
 	
-</table>
-</p>
+</tbody></table>
+</ul>
+<p></p>
 
 <h2>Plan de développement</h2>
 <p>
 <b>Date de début du projet:</b> Début été 2024
 <br>
 <b>Date de fin du projet:</b> Fin automne 2024
-<br>
+<br><br>
 <b>Échéancier des modules principaux:</b>
+</p><ul>
 <table>
-	<tr>
-		<th></th>
+	<tbody><tr>
+		<td><b>Analyse de la méthodologie des revues systématiques</b></td>
+		<td>En continue</td>
 	</tr>
 	<tr>
-		<td></td>
+		<td><b>Extraction des informations utiles du jeu de données fourni</b></td>
+		<td>Été 2024</td>
 	</tr>
-</table>
-</p>
+	<tr>
+		<td><b>Extraction de métadonnées des HTML (parser)</b></td>
+		<td>Été 2024</td>
+	</tr>
+	<tr>
+		<td><b>Recherche automatique dans les principaux moteurs de recherche</b></td>
+		<td>Été 2024</td>
+	</tr>
+	<tr>
+		<td><b>Nettoyage et compilation des données de chaque jeu de données</b></td>
+		<td>En continue (le plus vite possible). 1-2 jeux de données par semaine ou en lot.</td>
+	</tr>
+	<tr>
+		<td><b>Intégration à Bibler</b></td>
+		<td>Fin AUT 2024 (si le temps le permet)</td>
+	</tr>
+	
+</tbody></table>
+</ul>
+<p></p>
 
-<hr size=2>
+<hr size="2">
 
-<--description du travail accompli et évaluation de la correspondance des travaux au plan de développement. Ces rapports doivent être objectifs, exposer et expliquer les écarts du plan et en donner les raisons-->
 <h2>Rapports d'avancement</h2>
 <h3>0 - Été 2024</h3>
 <p>
-Lors de l'été, j'ai commencé le travail pour le projet d'informatique afin de pouvoir livrer plus rapidement les jeux de données. Cela était en entente avec Prof. Eugene Syriani. J'ai donc commencé par développer 
+Lors de l'été, j'ai commencé le travail pour le projet d'informatique afin de pouvoir livrer plus rapidement les jeux de données. Cela était en entente avec Prof. Eugene Syriani. J'ai donc commencé par développer le système d'extraction de métadonnées des HTML (parser). Pour le tester, j'ai développé un mini-version de l'outil de recherche automatique qui venait simplement récupérer les HTML des articles dans le jeu de données GameSE ayant un lien vers leur source. L'outil de recherche automatique a été complémenté par la suite. 7 jeux de données ont été analysés et deux jeux de données ont été complètement livrés.
+<br><br>
+L'objectif était de livrer plusieurs jeux de données pendant l'été. Cependant, je n'ai pas été en mesure d'atteindre cet objectif. J'ai fait plusieurs erreurs au cours de mon développement par mon inexpérience avec le "web scrapping". L'objectif pendant la session d'automne 2024 sera de livrer complètement les jeux de données restants.
 </p>
-<h3>1 - Semaines du 2 et 9 septembre</h3>
-<p>
-Lors de ces 2 semaines, j'ai fait la mise en place du site web ci-présent en créant mon compte DIRO et en accédant à mon répertoire.
-<br>
-J'ai complété l'ajout manuel des métadonnées des articles manquants dans le jeu de données de GameSE. Autour de 180 articles étaient manquants au jeu de données de plus de 3600 articles. Après les recherches manuelles, j'ai du ajouter autour de 50 articles manuellement alors que les autres, j'ai pu trouver l'article dans un des journaux principaux dont l'extraction des métadonnées se fait automatiquement. Ces articles ont donc été ajoutés à la banque d'articles extraits. 
-<br>
 
-</p>
-<h3>2 - Semaines du 16 et 23 septembre</h3>
+<h3>1 - Semaines du 2 et 9 septembre</h3>
+<ul>
+<li>Mise en place du site web ci-présent en créant mon compte DIRO et en accédant à mon répertoire.</li>
+<li>Complétion de l'ajout manuel des métadonnées des articles manquants dans le jeu de données de GameSE. Autour de 180 articles étaient manquants au jeu de données de plus de 3600 articles. Après les recherches manuelles, j'ai du compléter autour de 50 articles manuellement alors que les autres, j'ai pu trouver l'article dans un des journaux principaux dont l'extraction des métadonnées se fait automatiquement. Ces articles ont donc été ajoutés à la banque d'articles extraits.</li>
+<li>Amélioration de la précision du système de recherche automatique en utilisant les filtres des moteurs de recherche.</li>
+<li>Récupération des Bibtex des articles déjà extraits, mais dont le Bibtex manquait (fonctionnalité ajoutée plus tard).</li>
+<li>Retrait des accents dans les jeux de données. Ainsi, cela règle plusieurs problèmes de formatage.</li>
+</ul>
 <p>
-Compléter recherches Behave et DTCPS, ajout interopérabilité entre linux et Windows
+Le travail accompli est en correspondance au plan de développement. Cependant, la livraison du jeu de données GameSE tarde depuis un bon moment. Celui-ci est le premier sur lequel j'ai expérimenté les outils de recherche automatique et d'extraction des métadonnées, alors plusieurs erreurs ont été commises sur celui-ci. Beaucoup de temps a du être alloué pour réparer et récupérer les articles extraits au tout début.
 </p>
+
+<h3>2 - Semaines du 16 et 23 septembre</h3>
+<ul>
+<li>Complétion des recherches pour les jeux de données Behave et DTCPS</li>
+<li>Ajout interopérabilité entre Linux et Windows</li>
+<li>Analyse des jeux de données ModelingAssist et ModelGuidance</li>
+</ul>
+<p></p>
+
 <h3>3 - Semaines du 30 septembre et 7 octobre</h3>
 <h3>4 - Semaines du 14 et 21 octobre</h3>
 <h3>5 - Semaines du 28 octobre et 4 novembre</h3>
@@ -148,7 +201,7 @@ Compléter recherches Behave et DTCPS, ajout interopérabilité entre linux et W
 <h3>7 - Semaines du 25 novembre et 2 décembre</h3>
 <h3>8 - Semaines du 9 et 16 décembre</h3>
 
-<hr size=2>
+<hr size="2">
 
 <h2>Rapport final</h2>
 <h3>Résumé</h3>
@@ -156,7 +209,8 @@ Compléter recherches Behave et DTCPS, ajout interopérabilité entre linux et W
 <p>Anglais</p>
 <h3>Rapport format pdf</h3>
 
-<hr size=2>
+<hr size="2">
 <p>Guillaume Genois<br>20248507<br>guillaume.genois@umontreal.ca</p>
-</body>
-</html>
+
+
+</body></html>
