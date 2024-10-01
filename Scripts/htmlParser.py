@@ -559,7 +559,7 @@ def get_metadata_from_html_scopus_signed_in(html):
     if pages_section:
         pages_tag = pages_section.find('span', {'class': 'Typography-module__lVnit'})
         pages_text = pages_tag.get_text(strip=True) if pages_tag else None
-        pages = pages_text[:pages_text.find("Pages")+5] if pages_text else None
+        pages = pages_text[:pages_text.find("Pages")+5] if pages_text and "Pages" in pages_text else None
     else:
         pages = None
 
