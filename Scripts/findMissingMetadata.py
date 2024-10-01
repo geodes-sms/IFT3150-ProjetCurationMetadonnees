@@ -28,6 +28,7 @@ def extract_without_link(row, already_extracted_files, web_scraper):
     if row['title'] in articles_extract_manually['meta_title'].values:
         print("link already extracted manually, adding it")
         extract_row = articles_extract_manually.loc[articles_extract_manually['meta_title'] == row['title']].iloc[0]
+        extract_row = extract_row.apply(unidecode)
         metadata = metadata_base.copy()
         metadata['Title'] = extract_row['title']
         metadata['Abstract'] = extract_row['abstract']
