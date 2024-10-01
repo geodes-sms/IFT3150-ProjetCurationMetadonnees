@@ -95,9 +95,9 @@ def get_metadata_from_bibtex(bib_data):
     metadata['Link'] = bib_dict['url'] if 'url' in bib_dict.keys() else None
     metadata['Publisher'] = bib_dict['publisher'] if 'publisher' in bib_dict.keys() else None
 
-    for k,v in metadata.items():
-        if v:
-            metadata[k] = unidecode(v)
+    for key in metadata.keys():
+        if metadata[key]:
+            metadata[key] = unidecode(metadata[key])
 
     return metadata
 
