@@ -225,7 +225,7 @@ def main(sr_df, do_web_scraping=False, run=999):
             print(i)
             if run < parts and not (n * run <= i <= n * (run+1)):
                 continue  # seulement partition
-            if run == 111 and not (1942 <= i <= 1942):
+            if run == 111 and not (i in [1922]):
                 continue  # on veut extraire sans link
             # if row['source'] in ["IEEE", "ACM", "Web of Science", "Scopus"]:
             #     continue
