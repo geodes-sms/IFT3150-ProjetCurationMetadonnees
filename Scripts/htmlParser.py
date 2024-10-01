@@ -496,6 +496,7 @@ def get_metadata_from_html_scopus(html):
     authors = authors if authors else None
 
     # Function to extract abstract
+    abstract = None
     abstract_section = soup.find('section', {'id': 'abstractSection'})
     if abstract_section:
         abstract_tag = abstract_section.find('p')
@@ -531,7 +532,10 @@ def get_metadata_from_html_scopus(html):
     # Extract the publisher
     publisher_section = soup.find('ul', {'id': 'documentInfo'})
     publisher_section_text = publisher_section.get_text(strip=True) if publisher_section else None
-    publisher = publisher_section_text[publisher_section_text.find('Publisher:')+10:] if publisher_section_text else None
+    publisher = publisher_section_text[publisher_section_text.find('Publisher:')+10:] if publisher_section_text and 'Publisher' in publisher_section_text else None
+    if not publisher and abstract and '(c)' in abstract:
+        publisher_candidate = abstract[abstract.find('(c)')+3:]
+        publisher = publisher_candidate if any(src in publisher_candidate for src in all_sources_name) else None
 
     # Return the metadata
     return assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher, "Scopus")
@@ -660,8 +664,10 @@ def get_metadata_from_html_wos(html):
     doi = doi_tag.get_text(strip=True) if doi_tag else None
 
     # Extract the publisher
-    publisher_section = soup.find('div', {'class': 'journal-content-row'})
+    publisher_section = soup.find(lambda tag: tag.name=='div' and tag.attrs['class'] == 'journal-content-row' and 'Publisher' in tag.text)
     publisher_tag = publisher_section.find('span', {'class': 'value'}) if publisher_section else None
+    if not publisher_tag:
+        publisher_tag = publisher_section.find('span', {'class': 'cdx-grid-data'}) if publisher_section else None
     publisher = publisher_tag.get_text(strip=True) if publisher_tag else None
     if not publisher:
         publisher_section = soup.find('div', {'id': 'snJournalData'})
