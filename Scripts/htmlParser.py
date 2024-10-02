@@ -470,11 +470,12 @@ def get_metadata_from_html_scopus(html):
         title = re.sub(' | Signed in', '', title)
 
     # Extract venue
-    venue_tag = soup.find('section', {'id': 'articleTitleInfo'})
-    venue = venue_tag.find('span', {'id': 'guestAccessSourceTitle'}) if venue_tag else None
-    if not venue:
-        venue_tag = soup.find('span', {'id': 'noSourceTitleLink'})
-        venue = venue_tag.get_text(strip=True) if venue_tag else None
+    venue_section = soup.find('section', {'id': 'articleTitleInfo'})
+    venue_tag = venue_section.find('span', {'id': 'guestAccessSourceTitle'}) if venue_section else None
+    venue = venue_tag.get_text(strip=True) if venue_tag else None
+    # if not venue:
+    #     venue_tag = soup.find('span', {'id': 'noSourceTitleLink'})
+    #     venue = venue_tag.get_text(strip=True) if venue_tag else None
     # TODO: prend avant le : de la 3e section
 
     # Extract publisher
