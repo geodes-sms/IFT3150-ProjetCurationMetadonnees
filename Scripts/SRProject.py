@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 import pandas as pd
+from unidecode import unidecode
 
 from Scripts.os_path import EXTRACTED_PATH, MAIN_PATH
 
@@ -167,10 +168,10 @@ def clean_title(title):
     # tmp_title = title[title.index(":"):] if ":" in title else title
     # print(title)
     # tmp_title = title[title.index("-"):] if "-" in title else title
-    tmp_title = title
+    tmp_title = unidecode(title)
     print(tmp_title)
     # tmp_title = str.lower(tmp_title)
-    tmp_title = re.sub(r":|/|-|—|,|\.|<.*>|³N|\?|\*|&|;|â€“|‘|'|\"", " ", str.lower(tmp_title))
+    tmp_title = re.sub(r":|/|-|—|,|\.|<.*>|³N|\?|\*|&|;|â€“|‘|'|\"|’|–|”|“|±|\+", " ", str.lower(tmp_title))
     print(tmp_title)
     print([e for e in tmp_title.split(" ") if e != ""])
     return " ".join([e for e in tmp_title.split(" ") if e != ""])
