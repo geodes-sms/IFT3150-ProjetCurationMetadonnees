@@ -36,7 +36,7 @@ def extract_without_link(row, already_extracted_files, web_scraper):
         metadata['Authors'] = unidecode(extract_row['authors'])
         metadata['Venue'] = unidecode(extract_row['venue'])
         metadata['DOI'] = extract_row['doi']
-        metadata['References'] = extract_row['references']
+        metadata['References'] = unidecode(extract_row['references'])
         metadata['Pages'] = unidecode(extract_row['pages'])
         metadata['Bibtex'] = unidecode(extract_row['bibtex'])
         metadata['Source'] = unidecode(extract_row['source'])
@@ -108,7 +108,7 @@ def extract_without_link(row, already_extracted_files, web_scraper):
         print("author", authors)
         print("year", year)
         if web_scraper:
-            metadata = web_scraper.get_metadata_from_link(row['title'], authors, source)
+            metadata = web_scraper.get_metadata_from_title(row['title'], authors, ScopusSignedIn)
         print("extracted without link")
 
     print(metadata)
@@ -266,6 +266,7 @@ def main(sr_df, do_web_scraping=False, run=999):
             erreurs.append((idx, e, traceback.format_exc()))
         print(completed_sr_project.iloc[idx])
         completed_sr_project.iloc[idx] = row
+        print(row)
 
     # for er in erreurs: print(er)
     pd.DataFrame(erreurs, columns=['index', 'key', 'error']).to_excel(f"{MAIN_PATH}/Datasets/erreurs_"+str(run)+".xlsx")
