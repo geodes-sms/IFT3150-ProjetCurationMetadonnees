@@ -28,21 +28,20 @@ def extract_without_link(row, already_extracted_files, web_scraper):
     if row['title'] in articles_extract_manually['meta_title'].values:
         print("link already extracted manually, adding it")
         extract_row = articles_extract_manually.loc[articles_extract_manually['meta_title'] == row['title']].iloc[0]
-        extract_row = extract_row.apply(unidecode)
         metadata = metadata_base.copy()
-        metadata['Title'] = extract_row['title']
-        metadata['Abstract'] = extract_row['abstract']
-        metadata['Keywords'] = extract_row['keywords']
-        metadata['Authors'] = extract_row['authors']
-        metadata['Venue'] = extract_row['venue']
+        metadata['Title'] = unidecode(extract_row['title'])
+        metadata['Abstract'] = unidecode(extract_row['abstract'])
+        metadata['Keywords'] = unidecode(extract_row['keywords'])
+        metadata['Authors'] = unidecode(extract_row['authors'])
+        metadata['Venue'] = unidecode(extract_row['venue'])
         metadata['DOI'] = extract_row['doi']
-        metadata['References'] = extract_row['references']
-        metadata['Pages'] = extract_row['pages']
-        metadata['Bibtex'] = extract_row['bibtex']
-        metadata['Source'] = extract_row['source']
+        metadata['References'] = unidecode(extract_row['references'])
+        metadata['Pages'] = unidecode(extract_row['pages'])
+        metadata['Bibtex'] = unidecode(extract_row['bibtex'])
+        metadata['Source'] = unidecode(extract_row['source'])
         metadata['Year'] = extract_row['year']
         metadata['Link'] = extract_row['link']
-        metadata['Publisher'] = extract_row['publisher']
+        metadata['Publisher'] = unidecode(extract_row['publisher'])
         return metadata
 
     # check if already extracted without link
