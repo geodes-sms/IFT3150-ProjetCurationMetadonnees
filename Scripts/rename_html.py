@@ -1,4 +1,5 @@
 import os, pandas
+import time
 
 import pandas as pd
 
@@ -125,29 +126,58 @@ def compare_titles_and_metatitles():
         if title not in meta_title and meta_title not in title:
             print("erreur")
             errors.append((idx, title, meta_title))
+            print((idx, title, meta_title))
             # errors.append((idx, row['title'], row['meta_title']))
+            if abs(len(title.split()) - len(meta_title.split())) > 4 or abs(len(title) - len(meta_title)) > 10: decision = 'y'
+            else: decision = input("delete?")
+            if decision == "y":
+                n = 0
+                for file in os.listdir(f"{EXTRACTED_PATH}/HTML extracted"):
+                    if file[11:-8] == format_link(str(row['meta_title'])):
+                        os.rename(f"{EXTRACTED_PATH}/HTML extracted/{file}", f"{EXTRACTED_PATH}/Error/{file}")
+                        print(file)
+                        n += 1
+                for file in os.listdir(f"{EXTRACTED_PATH}/Bibtex"):
+                    if file[11:-7] == format_link(str(row['meta_title'])):
+                        os.rename(f"{EXTRACTED_PATH}/Bibtex/{file}", f"{EXTRACTED_PATH}/Error/{file}")
+                        print(file)
+                        n += 1
+                print('nb deplace:', n)
+                time.sleep(1)
         else:
             print("correct")
     print("====================================")
     for er in errors: print(er)
     print(len(errors))
-# compare_titles_and_metatitles()
+compare_titles_and_metatitles()
+# TODO: supprimer liens de articles source links
 
 def clean_bad_html():
-    # TODO: delete ACM search
-    # TODO: delete IEEE search
+    n = 0
     for file in os.listdir(f"{EXTRACTED_PATH}/HTML extracted"):
-        if 'scopus' in file:
+        if 'http' in file:
             continue
         if file[-7:-5] == '00':
-            with open(f"{EXTRACTED_PATH}/HTML extracted/{file}") as f:
-                metadata = htmlParser.get_metadata_from_html_ieee(f.read())
+            with open(f"{EXTRACTED_PATH}/HTML extracted/{file}", 'rb') as f:
+                doc = f.read().decode('utf-8')
+                metadata = htmlParser.get_metadata_from_html_ieee(doc)
                 if not metadata or not metadata['Title']:
                     print(file)
+                    print(metadata)
+                    if "Getting results..." in doc:
+                        os.rename(f"{EXTRACTED_PATH}/HTML extracted/{file}",f"{EXTRACTED_PATH}/Error/{file}")
+                        print('deplace...')
+                        n += 1
         if file[-7:-5] == '01':
-            with open(f"{EXTRACTED_PATH}/HTML extracted/{file}") as f:
-                metadata = htmlParser.get_metadata_from_html_ACM(f.read())
+            with open(f"{EXTRACTED_PATH}/HTML extracted/{file}", 'rb') as f:
+                doc = f.read().decode('utf-8')
+                metadata = htmlParser.get_metadata_from_html_ACM(doc)
                 if not metadata or not metadata['Title']:
                     print(file)
-
-clean_bad_html()
+                    print(metadata)
+                    if "Search Results" in doc:
+                        os.rename(f"{EXTRACTED_PATH}/HTML extracted/{file}",f"{EXTRACTED_PATH}/Error/{file}")
+                        print('deplace...')
+                        n += 1
+    print('nb deplace:', n)
+# clean_bad_html()
