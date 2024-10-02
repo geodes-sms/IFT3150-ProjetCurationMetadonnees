@@ -137,6 +137,8 @@ def clean_bad_html():
     # TODO: delete ACM search
     # TODO: delete IEEE search
     for file in os.listdir(f"{EXTRACTED_PATH}/HTML extracted"):
+        if 'scopus' in file:
+            continue
         if file[-7:-5] == '00':
             with open(f"{EXTRACTED_PATH}/HTML extracted/{file}") as f:
                 metadata = htmlParser.get_metadata_from_html_ieee(f.read())
