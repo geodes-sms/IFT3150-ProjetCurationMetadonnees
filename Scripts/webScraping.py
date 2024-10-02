@@ -64,7 +64,7 @@ class WebScraper:
         html = driver.page_source
         return html
 
-    def get_metadata_from_link(self, link, source=None):
+    def get_metadata_from_link(self, title, link, source=None):
         if source is None:  # is DOI
             source = htmlParser.get_venue_from_doi(self.get_html_from_link("http://api.crossref.org/works/" + link[16:]))
         metadata = metadata_base.copy()
@@ -72,45 +72,45 @@ class WebScraper:
 
         if source == IEEE or source == 'ieee':
             html = self.get_html_from_link(link + "/keywords#keywords")
-            save_extracted_html(link + "/keywords#keywords" + "_00", html)
+            save_extracted_html(title + "/keywords#keywords" + "_00", html)
             new_metadata = htmlParser.get_metadata_from_html_ieee(html)
             update_metadata(metadata, new_metadata)
 
             html = self.get_html_from_link(link + "/references#references")
-            save_extracted_html(link + "/references#references" + "_00", html)
+            save_extracted_html(title + "/references#references" + "_00", html)
             new_metadata = htmlParser.get_metadata_from_html_ieee(html)
             update_metadata(metadata, new_metadata)
-            self.searcher.extract_bibtex_in_IEEE(link, link)
+            self.searcher.extract_bibtex_in_IEEE(title, link)
 
         elif source == ScienceDirect or source == 'sciencedirect':
             html = self.get_html_from_link(link)
-            save_extracted_html(link + "_02", html)
+            save_extracted_html(title + "_02", html)
             new_metadata = htmlParser.get_metadata_from_html_sciencedirect(html)
             update_metadata(metadata, new_metadata)
-            self.searcher.extract_bibtex_in_ScienceDirect(link, link)
+            self.searcher.extract_bibtex_in_ScienceDirect(title, link)
 
         elif source == ACM or source in ['acm', "Association for Computing Machinery (ACM)", "ACM Press",
                                        "Society for Computer Simulation International"] or "ACM" in source:
             html = self.get_html_from_link(link)
-            save_extracted_html(link + "_01", html)
+            save_extracted_html(title + "_01", html)
             new_metadata = htmlParser.get_metadata_from_html_ACM(html)
             metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_ACM(link, link)
+            self.searcher.extract_bibtex_in_ACM(title, link)
 
         elif source == SpringerLink or source == 'springer':
             html = self.get_html_from_link(link)
-            save_extracted_html(link + "_03", html)
+            save_extracted_html(title + "_03", html)
             new_metadata = htmlParser.get_metadata_from_html_springerlink(html)
             metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_SpringerLink(link, link)
+            self.searcher.extract_bibtex_in_SpringerLink(title, link)
 
         elif source == Scopus or source == 'scopus':
             # i.e.: "https://www.scopus.com/record/display.uri?eid=2-s2.0-85083744459&doi=10.1089%2fg4h.2019.0067&origin=inward&txGid=0d477ca65acc675d5e5d53dc3edac470"
             html = self.get_html_from_link(link)
-            save_extracted_html(link + "_04", html)
+            save_extracted_html(title + "_04", html)
             new_metadata = htmlParser.get_metadata_from_html_scopus(html)
             metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_scopus_signed_in(link, link)
+            self.searcher.extract_bibtex_in_scopus_signed_in(title, link)
 
             if all(new_metadata[k] is None for k in new_metadata.keys()):
                 last_half = link[link.find("doi"):]
@@ -119,22 +119,22 @@ class WebScraper:
                 html = self.get_html_from_link(doi)
                 save_extracted_html(doi + "_06", html)
                 new_source = htmlParser.get_venue_from_doi(html)
-                new_metadata = self.get_metadata_from_link(doi, new_source)
+                new_metadata = self.get_metadata_from_link(title, doi, new_source)
                 metadata.update(new_metadata)
 
         elif source == WoS or source == 'wos':
             html = self.get_html_from_link(link)
-            save_extracted_html(link + "_05", html)
+            save_extracted_html(title + "_05", html)
             new_metadata = htmlParser.get_metadata_from_html_wos(html)
             metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_WoS(link, link)
+            self.searcher.extract_bibtex_in_WoS(title, link)
 
         elif source == PubMedCentral:
             html = self.get_html_from_link(link)
-            save_extracted_html(link + "_08", html)
+            save_extracted_html(title + "_08", html)
             new_metadata = htmlParser.get_metadata_from_html_pub_med_central(html)
             metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_PubMedCentral(link, link)
+            self.searcher.extract_bibtex_in_PubMedCentral(title, link)
 
         else:
             print(f'source "{source}" not valid')

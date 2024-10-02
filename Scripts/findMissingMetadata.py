@@ -12,6 +12,43 @@ from os_path import *
 from unidecode import unidecode
 
 
+def get_from_already_extract(formated_name, already_extracted_files):
+    metadata = metadata_base.copy()
+    for k in special_char_conversion.keys():
+        formated_name = formated_name.replace(k, "%" + special_char_conversion[k])
+    print("formated_name", formated_name)
+    for file in already_extracted_files:
+        try:
+            new_metadata = None
+            try:
+                tmp_source = code_source[file[-7:-5]]
+            except:
+                try:
+                    tmp_source = code_source[file[-6:-4]]
+                except:
+                    tmp_source = None
+            if tmp_source == IEEE:
+                if file[11:-8] == formated_name + "%2Freferences#references":
+                    print(file)
+                    new_metadata = htmlParser.get_metadata_from_already_extract(file, IEEE)
+                elif file[11:-8] == formated_name + "%2Fkeywords#keywords":
+                    print(file)
+                    new_metadata = htmlParser.get_metadata_from_already_extract(file, IEEE)
+            elif tmp_source is not None and (file[11:-8] == formated_name or file[11:-7] == formated_name):
+                print(file)
+                new_metadata = htmlParser.get_metadata_from_already_extract(file, tmp_source)
+            if new_metadata:
+                if metadata:
+                    update_metadata(metadata, new_metadata)
+                else:
+                    metadata = new_metadata
+                print(metadata)
+        except Exception as e:
+            print("Error", e)
+            raise Exception(e)
+    return metadata
+
+
 def extract_without_link(row, already_extracted_files, web_scraper):
     metadata = None
     source, year, authors = None, None, None
@@ -49,36 +86,7 @@ def extract_without_link(row, already_extracted_files, web_scraper):
     for column in ['title']:
         # for column in ['title', 'authors', 'abstract']:
         formated_name = str(row[column])
-        for k in special_char_conversion.keys():
-            formated_name = formated_name.replace(k, "%" + special_char_conversion[k])
-        print("formated_name", formated_name)
-        for file in already_extracted_files:
-            try:
-                new_metadata = None
-                try:
-                    tmp_source = code_source[file[-7:-5]]
-                except:
-                    try:
-                        tmp_source = code_source[file[-6:-4]]
-                    except:
-                        tmp_source = None
-                if tmp_source == IEEE:
-                    if file[11:-8] == formated_name + "%2Freferences#references":
-                        print(file)
-                        new_metadata = htmlParser.get_metadata_from_already_extract(file, IEEE)
-                    elif file[11:-8] == formated_name + "%2Fkeywords#keywords":
-                        print(file)
-                        new_metadata = htmlParser.get_metadata_from_already_extract(file, IEEE)
-                elif tmp_source is not None and (file[11:-8] == formated_name or file[11:-7] == formated_name):
-                    print(file)
-                    new_metadata = htmlParser.get_metadata_from_already_extract(file, tmp_source)
-                if new_metadata:
-                    if metadata: update_metadata(metadata, new_metadata)
-                    else: metadata = new_metadata
-                    print(metadata)
-            except Exception as e:
-                print("Error", e)
-                raise Exception(e)
+        metadata = get_from_already_extract(formated_name, already_extracted_files)
 
     if metadata:
         print("already extracted without link")
@@ -124,36 +132,15 @@ def extract_with_link(row, already_extracted_files, web_scraper):
         formated_url = formated_url.replace(k, "%" + special_char_conversion[k])
     print(formated_url)
     source = htmlParser.get_source(formated_url)
-    for file in already_extracted_files:
-        if not source:  # is a doi
-            if file[11:-5] == formated_url:
-                print(file)
-                print(file[file.find("doi.org%2F") + 10:-5])
-                for f in already_extracted_files:
-                    if f[11:-5] == "http%3A%2F%2Fapi.crossref.org%2Fworks%2F" + file[file.find(
-                            "doi.org%2F") + 10:-5]:
-                        print(file)
-                        print(f)
-                        metadata = htmlParser.get_metadata_from_already_extract(file)
-                        break
-        elif source == "ieee":
-            if file[11:-5] == formated_url + "%2Freferences#references":
-                print(file)
-                metadata = htmlParser.get_metadata_from_already_extract(file)
-            elif file[11:-5] == formated_url + "%2Fkeywords#keywords":
-                print(file)
-                metadata = htmlParser.get_metadata_from_already_extract(file)
-        else:
-            if file[11:-5] == formated_url:
-                print(file)
-                metadata = htmlParser.get_metadata_from_already_extract(file)
-        if metadata:
-            metadata['Link'] = url
-            print("already extracted from link")
-            break
+
+    formated_name = str(row['title'])
+    metadata = get_from_already_extract(formated_name, already_extracted_files)
+    if metadata:
+        metadata['Link'] = url
+        print("already extracted from link")
 
     # if not already extracted
-    if not metadata:
+    elif not metadata:
         if web_scraper:
             metadata = web_scraper.get_metadata_from_link(url, source)
             metadata['Link'] = url
