@@ -5,6 +5,7 @@ import pandas as pd
 from SRProject import *
 from os_path import EXTRACTED_PATH
 from bs4 import BeautifulSoup
+import htmlParser
 
 
 path = f"{EXTRACTED_PATH}/Bibtex"
@@ -136,8 +137,15 @@ def clean_bad_html():
     # TODO: delete ACM search
     # TODO: delete IEEE search
     for file in os.listdir(f"{EXTRACTED_PATH}/HTML extracted"):
-        if file[-7:-5] == '00' or file[-7:-5] == '01':
+        if file[-7:-5] == '00':
             with open(f"{EXTRACTED_PATH}/HTML extracted/{file}") as f:
-                if "search" in f.read():
+                metadata = htmlParser.get_metadata_from_html_ieee(f.read())
+                if not metadata or not metadata['Title']:
                     print(file)
+        if file[-7:-5] == '01':
+            with open(f"{EXTRACTED_PATH}/HTML extracted/{file}") as f:
+                metadata = htmlParser.get_metadata_from_html_ACM(f.read())
+                if not metadata or not metadata['Title']:
+                    print(file)
+
 clean_bad_html()
