@@ -632,10 +632,9 @@ def get_metadata_from_html_wos(html):
 
     # Extract the authors
     authors_tag = soup.find_all('span', {'id': re.compile(r"SumAuthTa-FrAuthStandard-author-en-.*")})
-    if authors_tag:
-        authors = [author.get_text(strip=True)[1:-1] for author in authors_tag]
-    else:
-        authors = None
+    if not authors_tag:
+        authors_tag = soup.find_all('span', {'id': re.compile(r"SumAuthTa-DisplayName-author-en-.*")})
+    authors = [author.get_text(strip=True)[1:-1] for author in authors_tag] if authors_tag else None
 
     # Extract the venue
     venue_tag = soup.find('a', {'class': 'summary-source-title-link'})
