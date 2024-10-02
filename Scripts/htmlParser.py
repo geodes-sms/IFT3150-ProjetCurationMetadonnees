@@ -35,6 +35,8 @@ def clean_authors(authors):
     return results
 
 def clean_publisher(publisher: str):
+    if not publisher:
+        return publisher
     publisher = publisher.replace('All rights reserved.', '')
     # publisher = ''.join(x for x in publisher if not x.isdigit())
     return publisher
