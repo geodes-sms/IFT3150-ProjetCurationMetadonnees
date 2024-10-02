@@ -70,7 +70,7 @@ class Behave(SRProject):
         self.df["keywords"] = sheet_all["keywords"]
         self.df["authors"] = sheet_all["authors"]
         self.df['venue'] = sheet_all["journal"]
-        # self.df["doi"] = sheet_all["URL"]
+        self.df["doi"] = sheet_all["abstract"]
         # self.df["year"] = sheet_all["Year"]
         # self.df["year"].astype(int)
         # self.df["references"]
