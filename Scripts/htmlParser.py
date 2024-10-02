@@ -34,6 +34,11 @@ def clean_authors(authors):
         results.append(author)
     return results
 
+def clean_publisher(publisher: str):
+    publisher = publisher.replace('All rights reserved.', '')
+    # publisher = ''.join(x for x in publisher if not x.isdigit())
+    return publisher
+
 
 # TODO: strip les keywords individuellement (dans postprocessing remplacer r'space*;space*' par '')
 def assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher, source):
@@ -47,7 +52,7 @@ def assign_metadata(title, venue, authors, pages, abstract, keywords, references
     metadata['Keywords'] = "; ".join(keywords) if keywords is not None else None
     metadata['References'] = "; ".join(references) if references is not None else None
     metadata['DOI'] = doi
-    metadata['Publisher'] = publisher
+    metadata['Publisher'] = clean_publisher(publisher)
     metadata['Source'] = source
 
     # verify if contains symbols not accepted
