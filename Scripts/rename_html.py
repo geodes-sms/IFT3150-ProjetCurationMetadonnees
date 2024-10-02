@@ -113,4 +113,31 @@ def extract_from_manual():
         metadata['Link'] = row['link']
         metadata['Publisher'] = row['publisher']
     print(metadata)
-extract_from_manual()
+# extract_from_manual()
+
+def compare_titles_and_metatitles():
+    errors = []
+    df = pd.read_csv(f"{MAIN_PATH}/Datasets/GameSE/GameSE.tsv", sep='\t')
+    for idx, row in df.iterrows():
+        title = clean_title(str(row['title']))
+        meta_title = clean_title(str(row['meta_title']))
+        if title not in meta_title and meta_title not in title:
+            print("erreur")
+            errors.append((idx, title, meta_title))
+            # errors.append((idx, row['title'], row['meta_title']))
+        else:
+            print("correct")
+    print("====================================")
+    for er in errors: print(er)
+    print(len(errors))
+# compare_titles_and_metatitles()
+
+def clean_bad_html():
+    # TODO: delete ACM search
+    # TODO: delete IEEE search
+    for file in os.listdir(f"{EXTRACTED_PATH}/HTML extracted"):
+        if file[-7:-5] == '00' or file[-7:-5] == '01':
+            with open(f"{EXTRACTED_PATH}/HTML extracted/{file}") as f:
+                if "search" in f.read():
+                    print(file)
+clean_bad_html()
