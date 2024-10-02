@@ -169,8 +169,8 @@ def get_metadata_from_html_ieee(html):
     # Extract the pages
     pages_anchor = soup.find('div', {'class': 'doc-abstract-pubdate'})
     pages_section = pages_anchor.parent.find('div', {'class': 'u-pb-1'}) if pages_anchor else None
-    pages_text = pages_section.get_text(strip=True)
-    pages = pages_text[pages_text.find('Page(s):')+len('Page(s):'):]
+    pages_text = pages_section.get_text(strip=True) if pages_section else None
+    pages = pages_text[pages_text.find('Page(s):')+len('Page(s):'):] if pages_text else None
     # pages_tag = pages_section.find('span') if pages_section else None
     # pages = pages_tag.get_text(strip=True) if pages_tag else None
 
