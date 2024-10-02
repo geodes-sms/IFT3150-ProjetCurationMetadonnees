@@ -535,7 +535,7 @@ def get_metadata_from_html_scopus(html):
     publisher = publisher_section_text[publisher_section_text.find('Publisher:')+10:] if publisher_section_text and 'Publisher' in publisher_section_text else None
     if not publisher and abstract and '(c)' in abstract:
         publisher_candidate = abstract[abstract.find('(c)')+3:]
-        publisher = publisher_candidate if any(src in publisher_candidate for src in all_sources_name) else None
+        publisher = publisher_candidate if any(src in publisher_candidate.lower() for src in all_sources_name) else None
 
     # Return the metadata
     return assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher, "Scopus")
