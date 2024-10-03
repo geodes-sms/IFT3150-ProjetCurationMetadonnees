@@ -1,4 +1,5 @@
 import os, pandas
+import shutil
 import time
 
 import pandas as pd
@@ -149,8 +150,7 @@ def compare_titles_and_metatitles():
     print("====================================")
     for er in errors: print(er)
     print(len(errors))
-compare_titles_and_metatitles()
-# TODO: supprimer liens de articles source links
+# compare_titles_and_metatitles()
 
 def clean_bad_html():
     n = 0
@@ -181,3 +181,13 @@ def clean_bad_html():
                         n += 1
     print('nb deplace:', n)
 # clean_bad_html()
+
+def clean_and_duplicate_good_scopus_html():
+    n = 0
+    for file in os.listdir(f"{EXTRACTED_PATH}/HTML extracted"):
+        if not 'scopus' in file:
+            continue
+        # if file[-8:-5] == '_04':
+        #     os.remove(f"{EXTRACTED_PATH}/HTML extracted/{file}")
+        shutil.copy(f"{EXTRACTED_PATH}/HTML extracted/{file}", f"{EXTRACTED_PATH}/HTML extracted/{file[:-5] + '_04' + file[-5:]}")
+clean_and_duplicate_good_scopus_html()

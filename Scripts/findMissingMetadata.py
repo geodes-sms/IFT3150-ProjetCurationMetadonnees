@@ -12,10 +12,8 @@ from os_path import *
 from unidecode import unidecode
 
 
-def get_from_already_extract(formated_name, already_extracted_files):
+def get_from_already_extract(formated_name, already_extracted_files, source=None):
     metadata = None
-    for k in special_char_conversion.keys():
-        formated_name = formated_name.replace(k, "%" + special_char_conversion[k])
     print("formated_name", formated_name)
     for file in already_extracted_files:
         try:
@@ -26,7 +24,7 @@ def get_from_already_extract(formated_name, already_extracted_files):
                 try:
                     tmp_source = code_source[file[-6:-4]]
                 except:
-                    tmp_source = None
+                    tmp_source = source
             if tmp_source == IEEE:
                 if file[11:-8] == formated_name + "%2Freferences#references":
                     print(file)
@@ -85,7 +83,7 @@ def extract_without_link(row, already_extracted_files, web_scraper):
     # check if already extracted without link
     for column in ['title']:
         # for column in ['title', 'authors', 'abstract']:
-        formated_name = str(row[column])
+        formated_name = format_link(str(row[column]))
         metadata = get_from_already_extract(formated_name, already_extracted_files)
 
     if metadata:
@@ -116,7 +114,7 @@ def extract_without_link(row, already_extracted_files, web_scraper):
         print("author", authors)
         print("year", year)
         if web_scraper:
-            metadata = web_scraper.get_metadata_from_title(row['title'], authors, SpringerLink)
+            metadata = web_scraper.get_metadata_from_title(row['title'], authors, ScopusSignedIn)
         print("extracted without link")
 
     print(metadata)
@@ -127,14 +125,14 @@ def extract_with_link(row, already_extracted_files, web_scraper):
     metadata = None
     # check if already extracted
     url = row['doi']
-    formated_url = str(url)
-    for k in special_char_conversion.keys():
-        formated_url = formated_url.replace(k, "%" + special_char_conversion[k])
-    print(formated_url)
+    formated_url = format_link(str(url))
     source = htmlParser.get_source(formated_url)
+    metadata = get_from_already_extract(formated_url, already_extracted_files, source)
 
     formated_name = format_link(str(row['title']))
-    metadata = get_from_already_extract(formated_name, already_extracted_files)
+    if not metadata:
+        metadata = get_from_already_extract(formated_name, already_extracted_files)
+
     if metadata:
         metadata['Link'] = url
         print("already extracted from link")
@@ -144,8 +142,8 @@ def extract_with_link(row, already_extracted_files, web_scraper):
         if web_scraper:
             metadata = web_scraper.get_metadata_from_link(row['title'], url, source)
             metadata['Link'] = url
-        print("extracted from link")
-        time.sleep(random.randint(1, 5))
+            print("extracted from link")
+            # time.sleep(random.randint(1, 5))
 
     if not metadata or not metadata['Title']:
         metadata = extract_without_link(row, already_extracted_files, web_scraper)
@@ -220,8 +218,8 @@ def main(sr_df, do_web_scraping=False, run=999):
             #     continue
 
             # check if it is missing at least one metadata
-            url = row['doi']
-            if url[:4] != 'http':continue
+            url = str(row['doi'])
+            # if url[:4] != 'http':continue
             need_web_scraping = False
             for col in metadata_cols:
                 if pd.isna(row[col]):
