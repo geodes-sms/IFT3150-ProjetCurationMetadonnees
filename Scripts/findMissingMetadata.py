@@ -13,7 +13,7 @@ from unidecode import unidecode
 
 
 def get_from_already_extract(formated_name, already_extracted_files):
-    metadata = metadata_base.copy()
+    metadata = None
     for k in special_char_conversion.keys():
         formated_name = formated_name.replace(k, "%" + special_char_conversion[k])
     print("formated_name", formated_name)
@@ -116,7 +116,7 @@ def extract_without_link(row, already_extracted_files, web_scraper):
         print("author", authors)
         print("year", year)
         if web_scraper:
-            metadata = web_scraper.get_metadata_from_title(row['title'], authors, ScopusSignedIn)
+            metadata = web_scraper.get_metadata_from_title(row['title'], authors, SpringerLink)
         print("extracted without link")
 
     print(metadata)
@@ -133,7 +133,7 @@ def extract_with_link(row, already_extracted_files, web_scraper):
     print(formated_url)
     source = htmlParser.get_source(formated_url)
 
-    formated_name = str(row['title'])
+    formated_name = format_link(str(row['title']))
     metadata = get_from_already_extract(formated_name, already_extracted_files)
     if metadata:
         metadata['Link'] = url
@@ -142,7 +142,7 @@ def extract_with_link(row, already_extracted_files, web_scraper):
     # if not already extracted
     elif not metadata:
         if web_scraper:
-            metadata = web_scraper.get_metadata_from_link(url, source)
+            metadata = web_scraper.get_metadata_from_link(row['title'], url, source)
             metadata['Link'] = url
         print("extracted from link")
         time.sleep(random.randint(1, 5))
@@ -208,6 +208,7 @@ def main(sr_df, do_web_scraping=False, run=999):
     already_extracted_files.extend(already_extracted_html)
     already_extracted_files.extend(already_extracted_bibtex)
     for idx, row in sr_df.iterrows():
+        if idx == completed_sr_project.shape[0]:break
         try:
             i += 1
             print(i)
@@ -220,6 +221,7 @@ def main(sr_df, do_web_scraping=False, run=999):
 
             # check if it is missing at least one metadata
             url = row['doi']
+            if url[:4] != 'http':continue
             need_web_scraping = False
             for col in metadata_cols:
                 if pd.isna(row[col]):
