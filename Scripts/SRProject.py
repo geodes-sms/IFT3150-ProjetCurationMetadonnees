@@ -58,13 +58,13 @@ metadata_base = {"Title": "",
 
 # TODO: list de noms pour chaque venue
 IEEE = "IEEE"
-ScienceDirect = "Elsevier BV"
+ScienceDirect = "Science Direct"
 ACM = "ACM"
-SpringerLink = "Springer Science and Business Media LLC"
+SpringerLink = "Springer Link"
 Scopus = "scopus"
-ScopusSignedIn = "ScopusSignedIn"
+ScopusSignedIn = "Scopus Signed In"
 WoS = "Web of Science"
-PubMedCentral = "PubMedCentral"
+PubMedCentral = "Pub Med Central"
 arXiv = "arXiv"
 
 sources_name = ['acm', 'ieee', 'wos', 'scopus', 'springer', 'sciencedirect']
