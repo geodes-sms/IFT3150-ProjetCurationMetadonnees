@@ -543,6 +543,8 @@ def get_metadata_from_html_scopus(html):
     publisher = publisher_section_text[publisher_section_text.find('Publisher:')+10:] if publisher_section_text and 'Publisher' in publisher_section_text else None
     if not publisher and abstract and '(c)' in abstract:
         publisher = abstract[abstract.find('(c)')+3:]
+    if not publisher and abstract and 'Copyright' in abstract:
+        publisher = abstract[abstract.find('Copyright')+len('Copyright'):]
         # publisher = publisher_candidate if any(src in publisher_candidate.lower() for src in all_sources_name) else None
 
     # Return the metadata
@@ -555,12 +557,16 @@ def get_metadata_from_html_scopus_signed_in(html):
     soup = BeautifulSoup(html, 'lxml')
 
     # Extract the title
-    title_tag = soup.find('title')
+    title_section = soup.find('div', {'data-testid': 'document-title'})
+    title_tag = title_section.find('h2') if title_section else None
     title = title_tag.get_text(strip=True) if title_tag else None
-    if title and (' | Signed in' in title or 'Document details - ' in title or 'Scopus - ' in title):
-        title = re.sub('Scopus - ', '', title)
-        title = re.sub('Document details - ', '', title)
-        title = re.sub(' | Signed in', '', title)
+    if not title:
+        title_tag = soup.find('title')
+        title = title_tag.get_text(strip=True) if title_tag else None
+        if title and (' | Signed in' in title or 'Document details - ' in title or 'Scopus - ' in title):
+            title = re.sub('Scopus - ', '', title)
+            title = re.sub('Document details - ', '', title)
+            title = re.sub(' | Signed in', '', title)
 
     # Extract the venue
     venue_tag = soup.find('a', {'class': 'source-preview-flyout'})
@@ -672,7 +678,9 @@ def get_metadata_from_html_wos(html):
 
     # Extract the publisher
     publisher_div = soup.find('div', {'class': 'journal-content'})
-    publisher_section = publisher_div.find(lambda tag: tag.name=='div' and 'Publisher' in tag.text) if publisher_div else None
+    if not publisher_div:
+        publisher_div = soup.find('div', {'id': 'snJournalData'})
+    publisher_section = publisher_div.find(lambda tag: tag.name=='div' and 'Publisher' in tag.text and 'journal-content-row' in tag.attrs['class']) if publisher_div else None
     publisher_tag = publisher_section.find('span', {'class': 'value'}) if publisher_section else None
     if not publisher_tag:
         publisher_tag = publisher_section.find('span', {'class': 'cdx-grid-data'}) if publisher_section else None
