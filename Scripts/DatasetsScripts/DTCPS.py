@@ -80,6 +80,8 @@ class DTCPS(SRProject):
         # self.df["references"]
         # self.df["bibtex"]
         # self.df['mode'] = ['snowballing' if s != 'None' else 'new_screen' for s in sheet_without_duplicates['Snowballing']]
+        self.df["doi"].astype(str)
+        self.df['doi'].loc[self.df['doi'] != ''] = 'https://doi.org/' + self.df['doi'].loc[self.df['doi'] != '']
 
         # Find all screened decisions
         # self.find_decision_on_articles(sheet_screen_title_and_abstract, sheet_screen_title_and_abstract, 'Title + Abstract')
@@ -89,12 +91,12 @@ class DTCPS(SRProject):
 
         self.df["reviewer_count"] = 2  # TODO: not indicated in Excel which are conflicted
 
-        self.df["doi"].astype(str)
         self.df["link"].astype(str)
 
         self.df['project'] = "DTCPS"
         self.export_path = f"{MAIN_PATH}/Datasets/DTCPS/DTCPS.tsv"
         print(self.df)
+        print(self.df['doi'])
 
     def find_decision_on_articles(self, sheet_included, sheet_criteria, criteria_column, is_final=False):
         decision = 'screened_decision' if not is_final else 'final_decision'
