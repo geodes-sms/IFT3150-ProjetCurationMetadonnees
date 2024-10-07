@@ -392,17 +392,17 @@ class SearcherInSource:
     def extract_bibtex_in_scopus_signed_in(self, title, link=None):
         if link:
             self.driver.get(link)
-            self.wait_to_load(30, "/html/body/div/div/div[1]/div[2]/div/div[3]/div[3]/div/div[1]/div[2]/micro-ui/scopus-document-details-page/div/article/div[2]/div[3]/div/div[2]/section/div/div/div/div/span/button")
+            self.wait_to_load(30, "/html/body/div[1]/div/div[1]/div[2]/div/div[3]/div[3]/div/div[1]/div[2]/micro-ui/scopus-document-details-page/div/article/div[2]/div[3]/div/div[2]/section/div/div/div/div/span/button")
         web_element = self.driver.find_element(By.XPATH,
-                                               "/html/body/div/div/div[1]/div[2]/div/div[3]/div[3]/div/div[1]/div[2]/micro-ui/scopus-document-details-page/div/article/div[2]/div[3]/div/div[2]/section/div/div/div/div/span/button")
+                                               "/html/body/div[1]/div/div[1]/div[2]/div/div[3]/div[3]/div/div[1]/div[2]/micro-ui/scopus-document-details-page/div/article/div[2]/div[3]/div/div[2]/section/div/div/div/div/span/button")
         web_element.click()
 
         web_element = self.driver.find_element(By.XPATH,
-                                               "/html/body/div/div/div[1]/div[2]/div/div[3]/div[3]/div/div[1]/div[2]/micro-ui/scopus-document-details-page/div/article/div[2]/div[3]/div/div[2]/section/div/div/div/div/span/div/div[1]/button")
+                                               "/html/body/div[1]/div/div[1]/div[2]/div/div[3]/div[3]/div/div[1]/div[2]/micro-ui/scopus-document-details-page/div/article/div[2]/div[3]/div/div[2]/section/div/div/div/div/span/div/div[1]/button")
         web_element.click()
 
         web_element = self.driver.find_element(By.XPATH,
-                                               "/html/body/div/div/div[1]/div[2]/div/div[3]/div[3]/div/div[1]/div[2]/micro-ui/scopus-document-details-page/div/article/div[2]/div[3]/div/div[2]/section/div/div/div/div[2]/div/div/section/div[2]/div/div/span[2]/div/div/button")
+                                               "/html/body/div[1]/div/div[1]/div[2]/div/div[3]/div[3]/div/div[1]/div[2]/micro-ui/scopus-document-details-page/div/article/div[2]/div[3]/div/div[2]/section/div/div/div/div[2]/div/div/section/div[2]/div/div/span[2]/div/div/button")
         web_element.click()
         time.sleep(2)
         
@@ -410,30 +410,31 @@ class SearcherInSource:
 
     def search_in_Scopus_signed_in(self, title):
         tries = 0
-        while tries < 5:
+        while tries < 2:
             try:
                 # aller sur basic search
                 self.driver.get("https://www.scopus.com/home.uri?zone=header&origin=searchbasic")
-                self.wait_to_load(30, '/html/body/div/div/div[1]/div[2]/div/div[3]/div/div[2]/div[2]/micro-ui/scopus-homepage/div/div[2]/div/div/div[1]/div[3]/div/div/form/div/div[1]/div/div/div[2]/div/div[1]/div/label/input')
-                self.driver.implicitly_wait(random.randint(2, 5))
+                self.wait_to_load(30, '/html/body/div[1]/div/div[1]/div[2]/div/div[3]/div/div[2]/div[2]/micro-ui/scopus-homepage/div/div[2]/div/h1')
 
-                # appuie sur le x pour effacer la recherche précédente
+                # appuie sur le reset pour effacer la recherche précédente
                 try:
-                    web_element = self.driver.find_element(By.XPATH, '/html/body/div/div/div[1]/div[2]/div/div[3]/div/div[2]/div[2]/micro-ui/scopus-homepage/div/div[2]/div/div/div[1]/div[3]/div/div/form/div/div[2]/div[2]/button[1]')
+                    web_element = self.driver.find_element(By.XPATH,
+                                                           '/html/body/div[1]/div/div[1]/div[2]/div/div[3]/div/div[2]/div[2]/micro-ui/scopus-homepage/div/div[2]/div/div/div[1]/div[3]/div/div/form/div/div[2]/div[2]/button[1]')
                     web_element.click()
                     print("reset")
                     time.sleep(2)
                 except:
                     pass
-                
+
                 # Sélectionne la recherche seulement pour le titre de l'article
-                web_element = self.driver.find_element(By.XPATH, '/html/body/div/div/div[1]/div[2]/div/div[3]/div/div[2]/div[2]/micro-ui/scopus-homepage/div/div[2]/div/div/div[1]/div[3]/div/div/form/div/div[1]/div/div/div[1]/label/select')
+                web_element = self.driver.find_element(By.XPATH,
+                                                       '/html/body/div[1]/div/div[1]/div[2]/div/div[3]/div/div[2]/div[2]/micro-ui/scopus-homepage/div/div[2]/div/div/div[1]/div[3]/div/div/form/div/div[1]/div/div/div[1]/label/select')
                 select_element = Select(web_element)
                 select_element.select_by_value('TITLE')
-
+                
                 # Insère dans la boîte de texte appropriée le titre de l'article
-                web_element = self.driver.find_element(By.XPATH, '/html/body/div/div/div[1]/div[2]/div/div[3]/div/div[2]/div[2]/micro-ui/scopus-homepage/div/div[2]/div/div/div[1]/div[3]/div/div/form/div/div[1]/div/div/div[2]/div/div/label/input')
-                self.driver.implicitly_wait(random.randint(2, 5))
+                web_element = self.driver.find_element(By.XPATH, '/html/body/div[1]/div/div[1]/div[2]/div/div[3]/div/div[2]/div[2]/micro-ui/scopus-homepage/div/div[2]/div/div/div[1]/div[3]/div/div/form/div/div[1]/div/div/div[2]/div/div/label/input')
+                # web_element = self.driver.find_element(By.XPATH, '/html/body/div/div/div[1]/div[2]/div/div[3]/div/div[2]/div[2]/micro-ui/scopus-homepage/div/div[2]/div/div/div[1]/div[3]/div/div/form/div/div[1]/div/div/div[2]/div/div/label/input')
                 web_element.send_keys(clean_title(title))
                 print("title")
                 time.sleep(random.randint(2, 5))
@@ -447,19 +448,33 @@ class SearcherInSource:
                 # except:
                 #     pass
 
+                # web_element = self.driver.find_element(By.XPATH,
+                #                                        '/html/body/div[1]/div/div[1]/div[2]/div/div[3]/div/div[2]/div[2]/micro-ui/scopus-homepage/div/div[2]/div/div/div[1]/div[3]/div/div/form/div/div[2]/div[2]/button[2]')
+                # web_element.click()
+                # print("click")
                 # Clique pour lancer la recherche
                 for i in range(3).__reversed__():
                     try:
                         web_element = self.driver.find_element(By.XPATH,
-                                                           '/html/body/div/div/div[1]/div[2]/div/div[3]/div/div[2]/div[2]/micro-ui/scopus-homepage/div/div[2]/div/div/div[1]/div[3]/div/div/form/div/div[2]/div[2]/button[' + str(i) + ']')
-                        self.driver.implicitly_wait(random.randint(2, 5))
+                                                           '/html/body/div[1]/div/div[1]/div[2]/div/div[3]/div/div[2]/div[2]/micro-ui/scopus-homepage/div/div[2]/div/div/div[1]/div[3]/div/div/form/div/div[2]/div[2]/button[' + str(i) + ']')
                         web_element.click()
                         print("click")
                         break
                     except:
                         pass
 
-                self.wait_to_load(30, "/html/body/div/div/div[1]/div/div/div[3]/micro-ui/document-search-results-page/div[1]/section[2]/div/div[2]/div/div[2]/div/div[2]/div[1]/table/tbody/tr[2]/td[2]/div/div/h3/a")
+                self.wait_to_load(30, '/html/body/div[1]/div/div[1]/div/div/div[3]/micro-ui/document-search-results-page/div[1]/section[2]/div/div[2]/div/div[2]/div/div[1]/table/tbody/tr/td[3]/div/div/div[1]/label/select')
+                # sort par relevance
+                try:
+                    web_element = self.driver.find_element(By.XPATH,
+                                                           '/html/body/div[1]/div/div[1]/div/div/div[3]/micro-ui/document-search-results-page/div[1]/section[2]/div/div[2]/div/div[2]/div/div[1]/table/tbody/tr/td[3]/div/div/div[1]/label/select')
+                    select_element = Select(web_element)
+                    select_element.select_by_value('r-f')
+                except:
+                    pass
+                time.sleep(1)
+
+                self.wait_to_load(30, "/html/body/div[1]/div/div[1]/div/div/div[3]/micro-ui/document-search-results-page/div[1]/section[2]/div/div[2]/div/div[2]/div/div[2]/div[1]/table/tbody/tr[2]/td[2]/div/div/h3/a")
                 # Clique pour ouvrir le premier document
                 # web_element = self.driver.find_element(By.XPATH,
                 #                                        "/html/body/div/div/div[1]/div/div/div[3]/micro-ui/document-search-results-page/div[1]/section[2]/div/div[2]/div/div[2]/div/div[2]/div[1]/table/tbody/tr[5]/td[2]/div/div/h3/a")
@@ -467,13 +482,11 @@ class SearcherInSource:
                 # web_element = self.driver.find_element(By.XPATH,
                 #                                        "/html/body/div[4]/div/div[2]/div/div[2]/div[2]/ol/li[" + str(
                 #                                            tries + 1) + "]/div[1]/div/h3/a")
-                web_element = self.driver.find_element(By.XPATH, "/html/body/div/div/div[1]/div/div/div[3]/micro-ui/document-search-results-page/div[1]/section[2]/div/div[2]/div/div[2]/div/div[2]/div[1]/table/tbody/tr[2]/td[2]/div/div/h3/a")
-                self.driver.implicitly_wait(random.randint(2, 5))
+                web_element = self.driver.find_element(By.XPATH, "/html/body/div[1]/div/div[1]/div/div/div[3]/micro-ui/document-search-results-page/div[1]/section[2]/div/div[2]/div/div[2]/div/div[2]/div[1]/table/tbody/tr[2]/td[2]/div/div/h3/a")
                 web_element.click()
 
                 # Attend que le document ouvre
-                self.wait_to_load(30, '/html/body/div/div/div[1]/div[2]/div/div[3]/div[3]/div/div[1]/div[2]/micro-ui/scopus-document-details-page/div/article/div[2]/div[2]/section/div[1]/div[1]/div/h2/span')
-                self.driver.implicitly_wait(random.randint(2, 5))
+                self.wait_to_load(30, '/html/body/div[1]/div/div[1]/div[2]/div/div[3]/div[3]/div/div[1]/div[2]/micro-ui/scopus-document-details-page/div/article/div[2]/div[2]/section/div[1]/div[1]/div/h2/span')
                 break
             except TimeoutException:
                 try:
