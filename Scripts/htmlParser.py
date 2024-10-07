@@ -38,7 +38,8 @@ def clean_publisher(publisher: str):
     if not publisher:
         return publisher
     publisher = publisher.replace('All rights reserved.', '')
-    # publisher = ''.join(x for x in publisher if not x.isdigit())
+    publisher = re.sub('^\d+[-\d\s]*?(?=[A-Za-z])', '', publisher)
+    if publisher[-1] == '.': publisher = publisher[:-1]
     return publisher
 
 
