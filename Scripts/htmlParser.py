@@ -680,7 +680,8 @@ def get_metadata_from_html_wos(html):
     publisher_div = soup.find('div', {'class': 'journal-content'})
     if not publisher_div:
         publisher_div = soup.find('div', {'id': 'snJournalData'})
-    publisher_section = publisher_div.find(lambda tag: tag.name=='div' and 'Publisher' in tag.text and 'journal-content-row' in tag.attrs['class']) if publisher_div else None
+    publisher_section = publisher_div.find(lambda tag: tag.name=='div' and 'Publisher' in tag.text and 'class' in tag.attrs.keys()
+                                                       and 'journal-content-row' in tag.attrs['class']) if publisher_div else None
     publisher_tag = publisher_section.find('span', {'class': 'value'}) if publisher_section else None
     if not publisher_tag:
         publisher_tag = publisher_section.find('span', {'class': 'cdx-grid-data'}) if publisher_section else None
