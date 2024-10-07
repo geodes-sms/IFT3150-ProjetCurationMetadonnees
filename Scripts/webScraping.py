@@ -3,6 +3,7 @@ import time
 
 import pandas as pd
 # from fake_useragent import UserAgent
+# import selenium_stealth
 from selenium import webdriver
 from pybtex.database.input import bibtex as bibtex_parser
 
@@ -11,11 +12,11 @@ import searchInSource
 from SRProject import *
 from os_path import MAIN_PATH, FIREFOX_PROFILE_PATH
 
-
-# TODO: ajouter filtre article title seulement sur scopus
+ALREADY_CONNECTED = False
 
 class WebScraper:
     def __init__(self):
+        global ALREADY_CONNECTED
         install_dir = "/snap/firefox/current/usr/lib/firefox"
         driver_loc = os.path.join(install_dir, "geckodriver")
         binary_loc = os.path.join(install_dir, "firefox")
@@ -28,6 +29,7 @@ class WebScraper:
         options.profile = profile
         options.binary_location = binary_loc
         options.set_preference('network.proxy.type', 0)
+        options.set_preference("general.useragent.override", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0)1 Firefox/130.0")
         # options.set_preference("general.useragent.override", ua.random)
         # options.add_argument("-headless")
         # self.driver = webdriver.Firefox(options=options)
@@ -35,8 +37,13 @@ class WebScraper:
         self.driver.get("https://www.webofscience.com/wos/woscc/basic-search")  # WoS
         self.driver.get("https://ieeexplore.ieee.org/Xplore/home.jsp")  # IEEE
         self.driver.get("https://dl.acm.org/")  # ACM
+        # self.driver.get("https://www.scopus.com/search/form.uri?display=basic#basic")  # ScopusSignedIn
+        # time.sleep(2)
 
         self.driver.get("https://www.sciencedirect.com/")  # ScienceDirect + auth
+        if not ALREADY_CONNECTED:
+            input("Continue?")
+            ALREADY_CONNECTED = True
         # web_element = self.driver.find_element(By.XPATH, '//*[@id="qs"]')
         # web_element.send_keys("systematic review")
         # web_element = self.driver.find_element(By.XPATH,
@@ -60,8 +67,9 @@ class WebScraper:
 
     def get_html_from_link(self, link):
         print(link)
-        driver.get(link)
-        html = driver.page_source
+        self.driver.get(link)
+        time.sleep(2)
+        html = self.driver.page_source
         return html
 
     def get_metadata_from_link(self, title, link, source=None):
@@ -223,6 +231,8 @@ class ManualWebScraper:
         options.binary_location = binary_loc
         options.set_preference('network.proxy.type', 0)
         # options.set_preference("general.useragent.override", ua.random)
+        options.set_preference("general.useragent.override", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0)1 Firefox/130.0")
+        # options.set_preference("general.useragent.override", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0")
         # options.add_argument("-headless")
         self.driver = webdriver.Firefox(options=options, service=service)
         self.searcher = searchInSource.SearcherInSource(self.driver)
@@ -534,5 +544,6 @@ if __name__ == '__main__':
     # print(web_scraper.get_metadata_from_title(title, PubMedCentral, link))
     # web_scraper.get_bibtex_from_already_extracted()
     # web_scraper.get_bibtex_from_source_link()
-    web_scraper.search_missing_links_for_articles()
+    # web_scraper.search_missing_links_for_articles()
+    web_scraper.add_articles_manually()
     web_scraper.close()

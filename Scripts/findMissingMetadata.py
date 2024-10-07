@@ -114,7 +114,7 @@ def extract_without_link(row, already_extracted_files, web_scraper):
         print("author", authors)
         print("year", year)
         if web_scraper:
-            metadata = web_scraper.get_metadata_from_title(row['title'], authors, ScopusSignedIn)
+            metadata = web_scraper.get_metadata_from_title(row['title'], authors, source)
         print("extracted without link")
 
     print(metadata)
@@ -127,11 +127,11 @@ def extract_with_link(row, already_extracted_files, web_scraper):
     url = row['doi']
     formated_url = format_link(str(url))
     source = htmlParser.get_source(formated_url)
-    metadata = get_from_already_extract(formated_url, already_extracted_files, source)
-
-    formated_name = format_link(str(row['title']))
-    if not metadata:
-        metadata = get_from_already_extract(formated_name, already_extracted_files)
+    # metadata = get_from_already_extract(formated_url, already_extracted_files, source)
+    #
+    # formated_name = format_link(str(row['title']))
+    # if not metadata:
+    #     metadata = get_from_already_extract(formated_name, already_extracted_files)
 
     if metadata:
         metadata['Link'] = url
@@ -212,7 +212,7 @@ def main(sr_df, do_web_scraping=False, run=999):
             print(i)
             if run < parts and not (n * run <= i <= n * (run+1)):
                 continue  # seulement partition
-            if run == 111 and not (i in [1922]):
+            if run == 111 and not (i > 2400):
                 continue  # on veut extraire sans link
             # if row['source'] in ["IEEE", "ACM", "Web of Science", "Scopus"]:
             #     continue
