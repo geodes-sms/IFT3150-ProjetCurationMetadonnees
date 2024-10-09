@@ -12,6 +12,18 @@ from os_path import *
 from unidecode import unidecode
 
 
+def get_link_from_articles_source_links(title):
+    # check if title is in articles_source_links.tsv
+    links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t',
+                                         encoding='windows-1252', encoding_errors='ignore')
+    links_already_searched['Title'] = links_already_searched['Title'].astype(str)
+    # links_already_searched['Title'] = links_already_searched['Title'].apply(unidecode)
+    # links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t')
+    if title in links_already_searched['Title'].values:
+        print("link already searched, adding it instead of DOI")
+        return links_already_searched.loc[links_already_searched['Title'] == title]['Link'].values[0]
+
+
 def get_from_already_extract(formated_name, already_extracted_files, source=None):
     metadata = None
     print("formated_name", formated_name)
@@ -93,17 +105,10 @@ def extract_without_link(row, already_extracted_files, web_scraper):
         source = metadata['Source']
         authors = metadata['Authors']
 
-        # check if title is in articles_source_links.tsv
-        links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t', encoding='windows-1252', encoding_errors='ignore')
-        links_already_searched['Title'] = links_already_searched['Title'].astype(str)
-        # links_already_searched['Title'] = links_already_searched['Title'].apply(unidecode)
-        # links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t')
-        if row['title'] in links_already_searched['Title'].values:
-            print("link already searched, adding it instead of DOI")
-            metadata['Link'] = links_already_searched.loc[links_already_searched['Title'] == row['title']]['Link'].values[0]
-            if metadata['DOI'] is None or metadata['DOI'] == "":
-                print("missing DOI")
-                metadata['DOI'] = metadata['Link']
+        metadata['Link'] = get_link_from_articles_source_links(row['title'])
+        if metadata['DOI'] is None or metadata['DOI'] == "":
+            print("missing DOI")
+            metadata['DOI'] = metadata['Link']
 
     # need to extract without link
     if not metadata or metadata['DOI'] is None or metadata['DOI'] == "":
@@ -127,14 +132,16 @@ def extract_with_link(row, already_extracted_files, web_scraper):
     url = row['doi']
     formated_url = format_link(str(url))
     source = htmlParser.get_source(formated_url)
-    # metadata = get_from_already_extract(formated_url, already_extracted_files, source)
-    #
-    # formated_name = format_link(str(row['title']))
-    # if not metadata:
-    #     metadata = get_from_already_extract(formated_name, already_extracted_files)
+    metadata = get_from_already_extract(formated_url, already_extracted_files, source)
 
+    formated_name = format_link(str(row['title']))
+    if not metadata:
+        metadata = get_from_already_extract(formated_name, already_extracted_files)
+
+    # check if different link saved than the one given
     if metadata:
-        metadata['Link'] = url
+        source_link = get_link_from_articles_source_links(row['title'])
+        metadata['Link'] = source_link if source_link else url
         print("already extracted from link")
 
     # if not already extracted
