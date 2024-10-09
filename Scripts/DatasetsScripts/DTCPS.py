@@ -7,21 +7,36 @@ import pandas as pd
 
 
 excl_crit_desc = {
-    "Duplicated": "Studies that were duplicates of other studies.",
-    "Written in other languages": "Studies that were not written in English.",
-    "Before 2009": "Studies that were not published online between 2009 to 2021.",
-    "Non-peer reviewed": "Studies presenting non-peer-reviewed material.",
-    "Proceedings": "Studies presenting peer-reviewed but not published in journals, conferences, or workshops.",
-    "Proceedings and posters": "Studies presenting peer-reviewed but not published in journals, conferences, or workshops.",
-    "Summaries of conferences/editorials": "Studies that were summaries of conferences/editorials.",
-    "Not primary study": "Non-primary studies.",
-    "Serious games or gamification": "Studies that were focused on the social and educational impact of video games, such as serious games.",
-    "AI": "Studies that were focused on Artificial Intelligence (AI).",
-    "Content Creation": "Studies that were focused on Content Creation.",
-    "Not related to Software Engineering": "Studies that were not in the field of Software Engineering.",
-    "Not related to Video Games": "Studies that were not focused on software engineering applied to industry-scale computer games development.",
-    "Not sure": ""
+    'IC1': "A least one testing technique is described",
+    'IC2': "The system under test must be a cyber–physical system",
+    'IC3': "Testing is performed using a digital twin",
+    'EC1': "The digital twin described does not use a live data coupling",
+    'EC2': "The study describes future use of a digital twin",
+    'EC3': "Non-english study",
+    'EC4': "Not published in a journal or conference proceedings",
+    'QC1': "Are the research questions of the examined study answered?",
+    'QC2': "Is the study reproducible?",
 }
+
+find_criteria_id = {
+    'Testing context but no explained method': 'IC1',
+    'Non testing context': 'IC1',
+    'Model based verification': 'IC1', #?
+    'DT not used for testing CPS': 'IC2',
+    'No Physical Element': 'IC2',
+    'Non Cyber-Physical System': 'IC2',
+    'No Digital Twin': 'IC3',
+    'Not focused on Digital Twin': 'IC3',
+    # '': 'EC1',
+    'Future Works': 'EC2',
+    'Non English Study': 'EC3',
+    'Non paper': 'EC4',
+    'Non Paper': 'EC4',
+    'Does not fulfill RQs': 'QC1',
+    # '': 'QC2',
+    '': None
+}
+
 # TODO: in methodology, articles excluded if not meeting inclusion criterias
 # TODO: verify meaning of proceedings and not sure
 
@@ -60,8 +75,11 @@ class DTCPS(SRProject):
             sheet_all = pd.read_excel(f, sheet_name="export")  # 458 rows
             print(sheet_all)
         sheet_without_duplicates = sheet_all.loc[sheet_all['Duplicate'] == 'Accepted']  # 454
-        sheet_screen_title_and_abstract = sheet_without_duplicates.loc[sheet_without_duplicates['Title + Abstract'] == 'Accepted']  # 147
+        print(sheet_without_duplicates)
+        sheet_screen_title_and_abstract = sheet_without_duplicates.loc[(sheet_without_duplicates['Title + Abstract'] == 'Accepted') | (sheet_without_duplicates['Title + Abstract'] == 'Accepted - Dream Paper')]  # 147
+        print(sheet_screen_title_and_abstract)
         sheet_screen_full_text = sheet_screen_title_and_abstract.loc[sheet_screen_title_and_abstract['Full Text'] == 'Accepted']  # 26
+        print(sheet_screen_full_text)
 
         # Add columns
         # self.df["key"]
@@ -79,15 +97,15 @@ class DTCPS(SRProject):
         # self.df["year"].astype(int)
         # self.df["references"]
         # self.df["bibtex"]
-        # self.df['mode'] = ['snowballing' if s != 'None' else 'new_screen' for s in sheet_without_duplicates['Snowballing']]
+        self.df['mode'] = 'new_screen'
         self.df["doi"].astype(str)
-        self.df['doi'].loc[self.df['doi'] != ''] = 'https://doi.org/' + self.df['doi'].loc[self.df['doi'] != '']
+        self.df.loc[self.df['doi'] != '', 'doi'] = 'https://doi.org/' + self.df['doi'].loc[self.df['doi'] != '']
 
         # Find all screened decisions
-        # self.find_decision_on_articles(sheet_screen_title_and_abstract, sheet_screen_title_and_abstract, 'Title + Abstract')
+        self.find_decision_on_articles(sheet_screen_title_and_abstract, sheet_without_duplicates, 'Title + Abstract')
 
         # Find all final decisions based on which articles are included in different sheets
-        # self.find_decision_on_articles(sheet_screen_full_text, sheet_screen_full_text, 'Full Text', True)
+        self.find_decision_on_articles(sheet_screen_full_text, sheet_screen_title_and_abstract, 'Full Text', True)
 
         self.df["reviewer_count"] = 2  # TODO: not indicated in Excel which are conflicted
 
@@ -110,9 +128,14 @@ class DTCPS(SRProject):
                 if article_title in sheet_criteria["Title"].values:
                     exclusion_criteria = sheet_criteria.loc[sheet_criteria["Title"] == article_title, [criteria_column]].values[0][0]
                     if not pd.isna(exclusion_criteria):
-                        exclusion_criteria = exclusion_criteria[11:]
-                        self.df.loc[self.df['title'] == article_title, criteria] = exclusion_criteria  # + ": " + excl_crit_desc[exclusion_criteria]
-
+                        if 'Rejected' in exclusion_criteria:
+                            exclusion_criteria = exclusion_criteria[len('Rejected - '):]
+                            exclusion_criteria = find_criteria_id[exclusion_criteria]
+                            if exclusion_criteria:
+                                criteria = 'inclusion_criteria' if exclusion_criteria[:2] == 'IC' else 'exclusion_criteria'
+                                self.df.loc[self.df['title'] == article_title, criteria] = exclusion_criteria + ": " + excl_crit_desc[exclusion_criteria]
+                        else:
+                            pass
 
     def find_source(self, publishers):
         results = []
@@ -130,3 +153,7 @@ class DTCPS(SRProject):
             else:
                 results.append(pub)
         return results
+
+if __name__ == '__main__':
+    dtcps = DTCPS()
+    dtcps.df.to_csv(dtcps.export_path, sep='\t')
