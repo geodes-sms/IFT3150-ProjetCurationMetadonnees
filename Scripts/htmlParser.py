@@ -23,14 +23,16 @@ def update_metadata(old, new):
         if v is not None:
             tmp[k] = v
     old.update(tmp)
-    
+
+def clean_abstract(abstract):
+    return abstract
     
 def clean_authors(authors):
     results = []
     for author in authors:
         author = re.sub(',;', ';', author)
         author = re.sub(r'[0-9]+', '', author)
-        author = " ".join([x for x in author.split() if x != "and" or ""])
+        author = " ".join([x for x in author.split() if x != "and" and x != ""])
         results.append(author)
     return results
 
@@ -38,7 +40,8 @@ def clean_publisher(publisher: str):
     if not publisher:
         return publisher
     publisher = publisher.replace('All rights reserved.', '')
-    publisher = re.sub('^\d+[-\d\s]*?(?=[A-Za-z])', '', publisher)
+    publisher = re.sub('^\d+[-,\d\s]*?(?=[A-Za-z])', '', publisher.strip())  # chiffre avant texte
+    publisher = re.sub('\d+\s*.*$', '', publisher.strip())  # chiffre apres texte
     if publisher[-1] == '.': publisher = publisher[:-1]
     return publisher
 
