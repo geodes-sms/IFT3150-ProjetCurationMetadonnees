@@ -25,6 +25,7 @@ def update_metadata(old, new):
     old.update(tmp)
 
 def clean_abstract(abstract):
+    abstract = re.sub('(?:\(c\)|Copyright)\s*(.*)', '', abstract)
     return abstract
     
 def clean_authors(authors):
@@ -54,7 +55,7 @@ def assign_metadata(title, venue, authors, pages, abstract, keywords, references
     metadata['Venue'] = venue
     metadata['Pages'] = pages
     metadata['Authors'] = "; ".join(clean_authors(authors)) if authors is not None else None
-    metadata['Abstract'] = abstract
+    metadata['Abstract'] = clean_abstract(abstract)
     metadata['Keywords'] = "; ".join(keywords) if keywords is not None else None
     metadata['References'] = "; ".join(references) if references is not None else None
     metadata['DOI'] = doi
