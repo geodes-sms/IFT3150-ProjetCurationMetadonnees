@@ -75,7 +75,7 @@ class DTCPS(SRProject):
         self.df["link"] = sheet_without_duplicates["url"]
         self.df["pages"] = sheet_without_duplicates["pages"]
         self.df["publisher"] = sheet_without_duplicates["publisher"]
-        # self.df["source"] = self.find_source(sheet_without_duplicates["publisher"])
+        self.df["source"] = self.df['publisher']
         # self.df["year"].astype(int)
         # self.df["references"]
         # self.df["bibtex"]
