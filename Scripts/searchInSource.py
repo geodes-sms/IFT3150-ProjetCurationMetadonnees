@@ -163,7 +163,6 @@ class SearcherInSource:
         if not check_if_right_link(new_metadata, title):
             return
         save_extracted_html(title + "/keywords#keywords_00", html)
-        new_metadata['Link'] = link
 
         self.driver.get(link + "/references#references")
         html = self.driver.page_source
@@ -173,6 +172,7 @@ class SearcherInSource:
         #     return  # TODO: ajouter plutôt avant le break et changer d'article
         save_extracted_html(title + "/references#references_00", html)
         self.extract_bibtex_in_IEEE(title)
+        new_metadata['Link'] = link
         return new_metadata
     
     def extract_bibtex_in_ACM(self, title, link=None):
@@ -280,8 +280,8 @@ class SearcherInSource:
             return  # TODO: ajouter plutôt avant le break et changer d'article
         save_link(title, link)
         save_extracted_html(title + '_01', html)
-        new_metadata['Link'] = link
         self.extract_bibtex_in_ACM(title)
+        new_metadata['Link'] = link
         return new_metadata
     
     def extract_bibtex_in_WoS(self, title, link=None):
@@ -382,8 +382,8 @@ class SearcherInSource:
                 return  # TODO: ajouter plutôt avant le break et changer d'article
             save_extracted_html(title + '_05', html)
             save_link(title, self.driver.current_url)
-            new_metadata['Link'] = self.driver.current_url
             self.extract_bibtex_in_WoS(title)
+            new_metadata['Link'] = self.driver.current_url
             return new_metadata
 
     def search_in_Scopus(self, title):
@@ -578,8 +578,8 @@ class SearcherInSource:
             return  # TODO: ajouter plutôt avant le break et changer d'article
         save_extracted_html(title + '_03', html)
         save_link(title, self.driver.current_url)
-        new_metadata['Link'] = self.driver.current_url
         self.extract_bibtex_in_SpringerLink(title)
+        new_metadata['Link'] = self.driver.current_url
         return new_metadata
     
     def extract_bibtex_in_ScienceDirect(self, title, link=None):
@@ -655,8 +655,8 @@ class SearcherInSource:
             return  # TODO: ajouter plutôt avant le break et changer d'article
         save_extracted_html(title + '_02', html)
         save_link(title, self.driver.current_url)
-        new_metadata['Link'] = self.driver.current_url
         self.extract_bibtex_in_ScienceDirect(title)
+        new_metadata['Link'] = self.driver.current_url
         return new_metadata
     
     
