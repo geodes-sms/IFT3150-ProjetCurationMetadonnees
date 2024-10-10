@@ -207,17 +207,17 @@ class SearcherInSource:
             # ouvrir la page principale avec la barre de recherche
             self.driver.get("https://dl.acm.org/")
             self.wait_to_load(30,
-                              "/html/body/div[3]/div/div[1]/main/section[1]/div/div[1]/div/div[1]/div/form/div/div/div/input")
+                              "/html/body/div[2]/div/div[1]/main/section[1]/div/div[1]/div/div[1]/div/form/div/div/div/input")
 
             # écrire le titre de l'article
             web_element = self.driver.find_element(By.XPATH,
-                                                   "/html/body/div[3]/div/div[1]/main/section[1]/div/div[1]/div/div[1]/div/form/div/div/div/input")
+                                                   "/html/body/div[2]/div/div[1]/main/section[1]/div/div[1]/div/div[1]/div/form/div/div/div/input")
             # web_element.clear()
             web_element.send_keys(clean_title(title))
 
             # lancer la recherche
             web_element = self.driver.find_element(By.XPATH,
-                                                   "/html/body/div[3]/div/div[1]/main/section[1]/div/div[1]/div/div[1]/div/form/div/div/button")
+                                                   "/html/body/div[2]/div/div[1]/main/section[1]/div/div[1]/div/div[1]/div/form/div/div/button")
             web_element.click()
             # self.wait_to_load(30,
             #              "/html/body/div[2]/div/div[1]/main/div[1]/div/div[1]/div/div[1]/div/form/div/div/div/input")
@@ -240,14 +240,14 @@ class SearcherInSource:
 
             while tries < 5:
                 self.wait_to_load(30,
-                                  "/html/body/div[3]/div/div[1]/main/div[1]/div/div[2]/div/ul/li[1]/div[2]/div[2]/div/h5/span/a")
+                                  "/html/body/div[2]/div/div[1]/main/div[1]/div/div[2]/div/ul/li[1]/div[2]/div[2]/div/h5/span/a")
 
                 # Clique pour ouvrir le premier document
                 web_element = self.driver.find_element(By.XPATH,
-                                                       "/html/body/div[3]/div/div[1]/main/div[1]/div/div[2]/div/ul/li[" + str(
+                                                       "/html/body/div[2]/div/div[1]/main/div[1]/div/div[2]/div/ul/li[" + str(
                                                            tries + 1) + "]/div[2]/div[2]/div/h5/span/a")
                 web_element.click()
-                self.wait_to_load(30, "/html/body/div[2]/div/div[1]/main/article/header/div/h1")
+                self.wait_to_load(30, "/html/body/div[1]/div/div[1]/main/article/header/div/h1")
 
                 # Parse la page web pour extraire le metadata
                 html = self.driver.page_source
