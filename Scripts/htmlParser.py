@@ -95,8 +95,8 @@ def get_metadata_from_bibtex(bib_data):
     bib_dict = bib_data.entries[bib_key].fields
     metadata['Title'] = bib_dict['title'] if 'title' in bib_dict.keys() else None
     metadata['Venue'] = bib_dict['journal'] if 'journal' in bib_dict.keys() else None
-    metadata['Authors'] = '; '.join([str(x) for x in bib_data.entries[bib_key].persons['author']]) if 'author' in bib_data.entries[bib_key].persons.keys() else None
-    metadata['Abstract'] = bib_dict['abstract'] if 'abstract' in bib_dict.keys() else None
+    metadata['Authors'] = '; '.join(clean_authors([str(x) for x in bib_data.entries[bib_key].persons['author']])) if 'author' in bib_data.entries[bib_key].persons.keys() else None
+    metadata['Abstract'] = clean_abstract(bib_dict['abstract']) if 'abstract' in bib_dict.keys() else None
     metadata['Keywords'] = '; '.join(str(x) for x in bib_dict['keywords'].split(',') if x != "") if 'keywords' in bib_dict.keys() else None
     metadata['References'] = bib_dict['cited-references'] if 'cited-references' in bib_dict.keys() else None
     metadata['Pages'] = bib_dict['pages'] if 'pages' in bib_dict.keys() else None
@@ -105,7 +105,7 @@ def get_metadata_from_bibtex(bib_data):
     metadata['DOI'] = bib_dict['doi'] if 'doi' in bib_dict.keys() else None
     metadata['Source'] = bib_dict['source'] if 'source' in bib_dict.keys() else None
     metadata['Link'] = bib_dict['url'] if 'url' in bib_dict.keys() else None
-    metadata['Publisher'] = bib_dict['publisher'] if 'publisher' in bib_dict.keys() else None
+    metadata['Publisher'] = clean_publisher(bib_dict['publisher']) if 'publisher' in bib_dict.keys() else None
 
     for key in metadata.keys():
         if metadata[key]:
