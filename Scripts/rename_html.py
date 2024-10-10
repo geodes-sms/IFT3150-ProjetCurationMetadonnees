@@ -190,4 +190,14 @@ def clean_and_duplicate_good_scopus_html():
         # if file[-8:-5] == '_04':
         #     os.remove(f"{EXTRACTED_PATH}/HTML extracted/{file}")
         shutil.copy(f"{EXTRACTED_PATH}/HTML extracted/{file}", f"{EXTRACTED_PATH}/HTML extracted/{file[:-5] + '_04' + file[-5:]}")
-clean_and_duplicate_good_scopus_html()
+# clean_and_duplicate_good_scopus_html()
+
+def clean_publisher(publisher: str):
+    if not publisher:
+        return publisher
+    publisher = publisher.replace('All rights reserved.', '')
+    publisher = re.sub('^\d+[-,\d\s]*?(?=[A-Za-z])', '', publisher.strip())  # chiffre avant texte
+    publisher = re.sub('\d+\s*.*$', '', publisher.strip())  # chiffre apres texte
+    if publisher[-1] == '.': publisher = publisher[:-1]
+    return publisher
+print(clean_publisher('ACTA PRESS2509 DIEPPE AVE SW, BLDG B6, STE 101, CALGARY, AB T3E 7J9, CANADA'))
