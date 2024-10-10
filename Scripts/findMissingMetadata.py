@@ -8,6 +8,7 @@ import pandas as pd
 import htmlParser
 import webScraping
 from SRProject import *
+from Scripts.webScraping import WebScraper
 from os_path import *
 from unidecode import unidecode
 
@@ -119,18 +120,18 @@ def extract_without_link(row, already_extracted_files, web_scraper):
         print("author", authors)
         print("year", year)
         if web_scraper:
-            metadata = web_scraper.get_metadata_from_title(row['title'], authors, source)
+            metadata = web_scraper.get_metadata_from_title(row['title'], authors, ScopusSignedIn)
             print("extracted without link")
             # extract doi obtained
             if metadata and metadata['DOI']:
-                metadata = web_scraper.get_metadata_from_link(row['title'], metadata['DOI'], metadata['Publisher'])
+                metadata = web_scraper.get_metadata_from_link(row['title'], "https://doi.org/" + str(metadata['DOI']), metadata['Publisher'])
                 print("extracted from new doi obtained")
 
     print(metadata)
     return metadata
 
 
-def extract_with_link(row, already_extracted_files, web_scraper):
+def extract_with_link(row, already_extracted_files, web_scraper: WebScraper):
     metadata = None
     # check if already extracted
     url = row['doi']
@@ -156,8 +157,8 @@ def extract_with_link(row, already_extracted_files, web_scraper):
             print("extracted from link")
             # time.sleep(random.randint(1, 5))
 
-    # if not metadata or not metadata['Title']:
-    #     metadata = extract_without_link(row, already_extracted_files, web_scraper)
+    if not metadata or not metadata['Title']:
+        metadata = extract_without_link(row, already_extracted_files, web_scraper)
 
     return metadata
 
@@ -244,13 +245,12 @@ def main(sr_df, do_web_scraping=False, run=999):
                 # link exists in source data
                 if not metadata and not pd.isna(url) and url[:4] == 'http':
                     metadata = extract_with_link(row, already_extracted_files, web_scraper)
-                    time.sleep(2)
 
                 # no link
-                # if not metadata:
-                #     print(row[['title', 'source']])
-                #     metadata = extract_without_link(row, already_extracted_files, web_scraper)
-                # print(metadata)
+                if not metadata:
+                    print(row[['title', 'source']])
+                    metadata = extract_without_link(row, already_extracted_files, web_scraper)
+                print(metadata)
                 
                 # found metadata
                 if metadata:
