@@ -191,7 +191,7 @@ def clean_bad_html():
                         print('deplace...')
                         n += 1
     print('nb deplace:', n)
-clean_bad_html()
+# clean_bad_html()
 
 def clean_and_duplicate_good_scopus_html():
     n = 0
@@ -211,4 +211,12 @@ def clean_publisher(publisher: str):
     publisher = re.sub('\d+\s*.*$', '', publisher.strip())  # chiffre apres texte
     if publisher[-1] == '.': publisher = publisher[:-1]
     return publisher
-print(clean_publisher('ACTA PRESS2509 DIEPPE AVE SW, BLDG B6, STE 101, CALGARY, AB T3E 7J9, CANADA'))
+# print(clean_publisher('ACTA PRESS2509 DIEPPE AVE SW, BLDG B6, STE 101, CALGARY, AB T3E 7J9, CANADA'))
+
+def clean_abstract(abstract):
+    if not abstract:
+        return abstract
+    abstract = re.sub('(?:\(c\)|Copyright)\s*(.*)', '', abstract)
+    return abstract
+print(clean_abstract("""There is untapped potential in having a computer work as a colleague with the video game level designer as a source of creative stimuli, instead of simply working as his slave. This paper presents 3Buddy, a co-creative level design tool exploring this digital peer paradigm, aimed at fostering creativity by allowing human and computer to work together in the context of level design, and describes a case study of the approach to produce content using the Legend of Grimrock 2 level editor. Suggestions are generated and iteratively evolved by multiple inter-communicating genetic algorithms guiding three different domains: innovation (exploring new directions), guidelines (respecting specific design goals) and convergence (focusing on current co-proposal). The interface allows the designer to orient the tool behaviour in the space defined by these dimensions. This paper details the inner workings of the system and presents an exploratory study showing, on the one hand, how the tool was used differently by professional and amateur level designers, and on the other hand, how the nuances of the co-creative interaction through an intention-oriented interface may be a source of positive influence for the creative level design process. (c) ICCC 2017.
+"""))
