@@ -463,6 +463,7 @@ class SearcherInSource:
                     except:
                         pass
 
+                time.sleep(random.randint(2, 5))
                 self.wait_to_load(30, '/html/body/div[1]/div/div[1]/div/div/div[3]/micro-ui/document-search-results-page/div[1]/section[2]/div/div[2]/div/div[2]/div/div[1]/table/tbody/tr/td[3]/div/div/div[1]/label/select')
                 # sort par relevance
                 try:
@@ -472,7 +473,7 @@ class SearcherInSource:
                     select_element.select_by_value('r-f')
                 except:
                     pass
-                time.sleep(1)
+                time.sleep(random.randint(2, 5))
 
                 self.wait_to_load(30, "/html/body/div[1]/div/div[1]/div/div/div[3]/micro-ui/document-search-results-page/div[1]/section[2]/div/div[2]/div/div[2]/div/div[2]/div[1]/table/tbody/tr[2]/td[2]/div/div/h3/a")
                 # Clique pour ouvrir le premier document
@@ -508,6 +509,7 @@ class SearcherInSource:
         save_link(title, self.driver.current_url)
         new_metadata['Link'] = self.driver.current_url
 
+        time.sleep(random.randint(2, 5))
         self.extract_bibtex_in_scopus_signed_in(title)
 
         parser = bibtex_parser.Parser()
@@ -585,14 +587,14 @@ class SearcherInSource:
     def extract_bibtex_in_ScienceDirect(self, title, link=None):
         if link:
             self.driver.get(link)
-            self.wait_to_load(30, '//*[@id="popover-trigger-export-citation-popover"]/button')
+            self.wait_to_load(30, '/html/body/div[2]/div/div/div/div/div/div[2]/article/div[2]/div[2]/div[3]/div/div/button')
         web_element = self.driver.find_element(By.XPATH,
-                                               '//*[@id="popover-trigger-export-citation-popover"]/button')
-        self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
+                                               '/html/body/div[2]/div/div/div/div/div/div[2]/article/div[2]/div[2]/div[3]/div/div/button')
+        # self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
         time.sleep(1)
         web_element.click()
         web_element = self.driver.find_element(By.XPATH,
-                                               '//*[@id="popover-content-export-citation-popover"]/div/div/ul/li[3]/form/button')
+                                               '/html/body/div[2]/div/div/div/div/div/div[2]/article/div[2]/div[2]/div[3]/div/div[2]/div/div/ul/li[3]/form/button')
         web_element.click()
 
         time.sleep(2)
