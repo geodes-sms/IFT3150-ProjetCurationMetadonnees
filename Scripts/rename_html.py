@@ -164,7 +164,7 @@ def clean_bad_html():
                 if not metadata or not metadata['Title']:
                     print(file)
                     print(metadata)
-                    if "Getting results..." in doc:
+                    if "IEEE Xplore is temporarily unavailable" in doc:
                         os.rename(f"{EXTRACTED_PATH}/HTML extracted/{file}",f"{EXTRACTED_PATH}/Error/{file}")
                         print('deplace...')
                         n += 1
@@ -175,12 +175,23 @@ def clean_bad_html():
                 if not metadata or not metadata['Title']:
                     print(file)
                     print(metadata)
-                    if "Search Results" in doc:
+                    if "DOI Not Found" in doc:
+                        os.rename(f"{EXTRACTED_PATH}/HTML extracted/{file}",f"{EXTRACTED_PATH}/Error/{file}")
+                        print('deplace...')
+                        n += 1
+        if file[-7:-5] == '02':
+            with open(f"{EXTRACTED_PATH}/HTML extracted/{file}", 'rb') as f:
+                doc = f.read().decode('utf-8')
+                metadata = htmlParser.get_metadata_from_html_sciencedirect(doc)
+                if not metadata or not metadata['Title']:
+                    print(file)
+                    print(metadata)
+                    if "There was a problem providing the content you requested" in doc:
                         os.rename(f"{EXTRACTED_PATH}/HTML extracted/{file}",f"{EXTRACTED_PATH}/Error/{file}")
                         print('deplace...')
                         n += 1
     print('nb deplace:', n)
-# clean_bad_html()
+clean_bad_html()
 
 def clean_and_duplicate_good_scopus_html():
     n = 0
