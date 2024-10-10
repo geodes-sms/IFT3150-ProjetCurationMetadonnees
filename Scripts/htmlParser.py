@@ -25,6 +25,8 @@ def update_metadata(old, new):
     old.update(tmp)
 
 def clean_abstract(abstract):
+    if not abstract:
+        return abstract
     abstract = re.sub('(?:\(c\)|Copyright)\s*(.*)', '', abstract)
     return abstract
     
@@ -32,6 +34,8 @@ def clean_authors(authors):
     results = []
     for author in authors:
         author = re.sub(',;', ';', author)
+        if author[-1] in [',', '&']:
+            author = author[:-1]
         author = re.sub(r'[0-9]+', '', author)
         author = " ".join([x for x in author.split() if x != "and" and x != ""])
         results.append(author)
@@ -588,7 +592,7 @@ def get_metadata_from_html_scopus_signed_in(html):
 
     # Extract the abstract
     abstract_tag = soup.find('div', {'class': 'Abstract-module__pTWiT'})
-    abstract = abstract_tag if abstract_tag else None
+    abstract = abstract_tag.get_text() if abstract_tag else None
 
 
     # Extract the authors
@@ -633,11 +637,6 @@ def get_metadata_from_html_wos(html):
     # Parse the HTML content
     soup = BeautifulSoup(html, 'html.parser')
 
-    # Function to extract text by class name
-    def extract_text_by_class(soup, class_name):
-        element = soup.find(class_=class_name)
-        return element.get_text(strip=True) if element else None
-
     # Extract the title
     title_tag = soup.find('title')
     title = title_tag.get_text(strip=True) if title_tag else None
@@ -647,6 +646,10 @@ def get_metadata_from_html_wos(html):
     authors_tag = soup.find_all('span', {'id': re.compile(r"SumAuthTa-FrAuthStandard-author-en-.*")})
     if not authors_tag:
         authors_tag = soup.find_all('span', {'id': re.compile(r"SumAuthTa-DisplayName-author-en-.*")})
+    if not authors_tag:
+        authors_tag = soup.find_all('a', {'id': re.compile(r"SumAuthTa-DisplayName-author-en-.*")})
+    if not authors_tag:
+        authors_tag = soup.find_all('a', {'id': re.compile(r"SumAuthTa-FrAuthStandard-author-en-.*")})
     authors = [author.get_text(strip=True)[1:-1] for author in authors_tag] if authors_tag else None
 
     # Extract the venue
