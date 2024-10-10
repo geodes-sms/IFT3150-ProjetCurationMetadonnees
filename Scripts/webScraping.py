@@ -73,12 +73,17 @@ class WebScraper:
         return html
 
     def get_metadata_from_link(self, title, link, source=None):
+        # TODO: ajouter verfication titre avant d'enregistrer
         if source is None:  # is DOI
             source = htmlParser.get_venue_from_doi(self.get_html_from_link("http://api.crossref.org/works/" + link[16:]))
         metadata = metadata_base.copy()
         metadata['Link'] = link
 
-        if source == IEEE or source == 'ieee':
+        if source == IEEE or source == 'ieee' or 'Institute of Electrical and Electronics Engineers' in source:
+            if 'doi' in link:
+                self.driver.get(link)
+                link = self.driver.current_url
+
             html = self.get_html_from_link(link + "/keywords#keywords")
             save_extracted_html(title + "/keywords#keywords" + "_00", html)
             new_metadata = htmlParser.get_metadata_from_html_ieee(html)
@@ -90,7 +95,7 @@ class WebScraper:
             update_metadata(metadata, new_metadata)
             self.searcher.extract_bibtex_in_IEEE(title, link)
 
-        elif source == ScienceDirect or source == 'sciencedirect':
+        elif source == ScienceDirect or source == 'sciencedirect' or 'Elsevier' in source:
             html = self.get_html_from_link(link)
             save_extracted_html(title + "_02", html)
             new_metadata = htmlParser.get_metadata_from_html_sciencedirect(html)
@@ -105,7 +110,7 @@ class WebScraper:
             metadata.update(new_metadata)
             self.searcher.extract_bibtex_in_ACM(title, link)
 
-        elif source == SpringerLink or source == 'springer':
+        elif source == SpringerLink or 'Springer' in source:
             html = self.get_html_from_link(link)
             save_extracted_html(title + "_03", html)
             new_metadata = htmlParser.get_metadata_from_html_springerlink(html)
