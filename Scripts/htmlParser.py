@@ -27,12 +27,15 @@ def update_metadata(old, new):
 def clean_abstract(abstract):
     if not abstract:
         return abstract
-    abstract = re.sub('(?:\(c\)|Copyright)\s*(.*)', '', abstract)
+    abstract = unidecode(abstract)
+    abstract = re.sub('(?:\(c\)|\(C\)|Copyright)\s*(.*)', '', abstract)
+    # TODO: attention a ne pas supprimer une partie de l'abstract
     return abstract
     
 def clean_authors(authors):
     results = []
     for author in authors:
+        author = unidecode(author)
         author = re.sub(',;', ';', author)
         if author[-1] in [',', '&']:
             author = author[:-1]
@@ -44,6 +47,7 @@ def clean_authors(authors):
 def clean_publisher(publisher: str):
     if not publisher:
         return publisher
+    publisher = unidecode(publisher)
     publisher = publisher.replace('All rights reserved.', '')
     publisher = re.sub('^\d+[-,\d\s]*?(?=[A-Za-z])', '', publisher.strip())  # chiffre avant texte
     publisher = re.sub('\d+\s*.*$', '', publisher.strip())  # chiffre apres texte
@@ -408,7 +412,7 @@ def get_metadata_from_html_sciencedirect(html):
 
     # Return the metadata
     return assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher,
-                           "ScienceDirect")
+                           "Science Direct")
 
 
 def get_metadata_from_html_springerlink(html):
@@ -470,7 +474,7 @@ def get_metadata_from_html_springerlink(html):
     publisher = publisher_tag.get_text(strip=True) if publisher_tag else 'Springer Link'
 
     # Return the metadata
-    return assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher, "SpringerLink")
+    return assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher, "Springer Link")
 
 
 def get_metadata_from_html_scopus(html):
