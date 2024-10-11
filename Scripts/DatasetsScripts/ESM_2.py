@@ -1,5 +1,7 @@
-from SRProject import SRProject
+from Scripts.SRProject import SRProject
 import pandas as pd
+
+from Scripts.os_path import MAIN_PATH
 
 # Author : Guillaume Genois, 20248507
 # This script is for the CodeClone SR project
@@ -30,7 +32,7 @@ class ESM_2(SRProject):
 
     def __init__(self):
         super().__init__()
-        self.path = "../../Datasets/ESM_2/ESM_2-source.xlsx"
+        self.path = f"{MAIN_PATH}/Datasets/ESM_2/ESM_2-source.xlsx"
         sheet_abstract = pd.read_excel(self.path, sheet_name="Abstract")  # 114
         sheet_final = pd.read_excel(self.path, sheet_name="Intro+method+conclusion")  # 61
 
@@ -70,7 +72,7 @@ class ESM_2(SRProject):
         self.df['title'] = self.df['title'].str[:-1]
 
         self.df['project'] = "ESM_2"
-        self.export_path = "../../Datasets/ESM_2/ESM_2.tsv"
+        self.export_path = f"{MAIN_PATH}/Datasets/ESM_2/ESM_2.tsv"
         print(self.df[['screened_decision', 'final_decision', 'exclusion_criteria']])
 
     def find_decision_on_articles(self, sheet_included, sheet_criteria, is_final=False):
