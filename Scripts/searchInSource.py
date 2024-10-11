@@ -287,28 +287,32 @@ class SearcherInSource:
     def extract_bibtex_in_WoS(self, title, link=None):
         if link:
             self.driver.get(link)
-            self.wait_to_load(30, '//*[@id="FullRecSnRecListtop"]/app-export-menu/div/button')
+            self.wait_to_load(30, '/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-full-record-home/div[1]/app-page-controls/div/div[1]/div[2]/app-full-record-export-option/div/app-export-menu/div/button')
         # Export
         web_element = self.driver.find_element(By.XPATH,
-                                               '//*[@id="FullRecSnRecListtop"]/app-export-menu/div/button')
+                                               '/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-full-record-home/div[1]/app-page-controls/div/div[1]/div[2]/app-full-record-export-option/div/app-export-menu/div/button')
         web_element.click()
 
         # to bibtex
+        time.sleep(2)
         web_element = self.driver.find_element(By.XPATH,
                                                '//*[@id="exportToBibtexButton"]')
         web_element.click()
 
         # open dropdown menu
+        time.sleep(2)
         web_element = self.driver.find_element(By.XPATH,
-                                               '//*[@id="FullRecordExportToEnwOptionContentover"]/button')
+                                               '/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route[1]/app-export-overlay/div/div[3]/div[2]/app-full-record-export-out-details/div/form/div[1]/wos-select/button')
         web_element.click()
         
         # choose "Full Record and Cited References"
+        time.sleep(2)
         web_element = self.driver.find_element(By.XPATH,
-                                               '//*[@id="global-select"]/div/div/div[4]')
+                                               '/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route[1]/app-export-overlay/div/div[3]/div[2]/app-full-record-export-out-details/div/form/div[1]/wos-select/div/div/div/div[3]')
         web_element.click()
         
         # Export
+        time.sleep(2)
         web_element = self.driver.find_element(By.XPATH,
                                                '//*[@id="FullRecordExportToEnwBtnover"]')
         web_element.click()
@@ -319,72 +323,77 @@ class SearcherInSource:
 
     def search_in_WoS(self, title):
         tries = 0
-        while tries < 5:
+        # while tries < 5:
+        try:
+            # aller sur basic search
+            self.driver.get("https://www.webofscience.com/wos/woscc/basic-search")
+            self.wait_to_load(30, '//*[@id="search-option"]')
+            time.sleep(random.randint(2, 5))
+
+            # print(self.driver.page_source)
+
+            # appuie sur le x pour effacer la recherche précédente
             try:
-                # aller sur basic search
-                self.driver.get("https://www.webofscience.com/wos/woscc/basic-search")
-                self.wait_to_load(30, '//*[@id="search-option"]')
-                self.driver.implicitly_wait(random.randint(2, 5))
-
-                # print(self.driver.page_source)
-
-                # appuie sur le x pour effacer la recherche précédente
-                try:
-                    # self.wait_to_load(30, '/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-search-home/div[2]/div/app-input-route/app-search-basic/app-search-form/form/div[1]/app-search-row/div/div[2]/mat-form-field/div/div[1]/div[4]/div/button')
-                    web_element = self.driver.find_element(By.CSS_SELECTOR, '.clear-row-button')
-                    web_element.click()
-                except:
-                    pass
-
-
-                # Sélectionne de rechercher seulement sur les titres d'articles
-                web_element = self.driver.find_element(By.XPATH, '/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-search-home/div[2]/div[2]/app-input-route/app-search-basic/app-search-form/form/div[1]/app-search-row/div/div[1]/app-select-search-field/wos-select/button')
+                # self.wait_to_load(30, '/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-search-home/div[2]/div/app-input-route/app-search-basic/app-search-form/form/div[1]/app-search-row/div/div[2]/mat-form-field/div/div[1]/div[4]/div/button')
+                web_element = self.driver.find_element(By.CSS_SELECTOR, '.cdx-but-link')
                 web_element.click()
-                web_element = self.driver.find_element(By.XPATH, '/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-search-home/div[2]/div[2]/app-input-route/app-search-basic/app-search-form/form/div[1]/app-search-row/div/div[1]/app-select-search-field/wos-select/div/div[1]/div/div[3]')
-                web_element.click()
+            except:
+                pass
 
-                # Insère dans la boîte de texte appropriée le titre de l'article
-                web_element = self.driver.find_element(By.XPATH, '//*[@id="search-option"]')
-                self.driver.implicitly_wait(random.randint(2, 5))
-                time.sleep(random.randint(2, 5))
-                web_element.send_keys(clean_title(title))
 
-                # Clique pour lancer la recherche
-                web_element = self.driver.find_element(By.XPATH, '/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-search-home/div[2]/div/app-input-route/app-search-basic/app-search-form/form/div[3]/button[2]')
-                self.driver.implicitly_wait(random.randint(2, 5))
-                web_element.click()
-                self.wait_to_load(30, "/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-base-summary-component/div/div[2]/app-records-list/app-record/div/div/div[2]/div[1]/app-summary-title/h3/a")
+            time.sleep(random.randint(2, 5))
+            # Sélectionne de rechercher seulement sur les titres d'articles
+            web_element = self.driver.find_element(By.XPATH, '/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-search-home/div[2]/div[2]/app-input-route/app-search-basic/app-search-form/form/div[1]/app-search-row/div/div[1]/app-select-search-field/wos-select/button')
+            web_element.click()
+            web_element = self.driver.find_element(By.XPATH, '/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-search-home/div[2]/div[2]/app-input-route/app-search-basic/app-search-form/form/div[1]/app-search-row/div/div[1]/app-select-search-field/wos-select/div/div[1]/div/div[3]')
+            web_element.click()
 
-                # Clique pour ouvrir le premier document
-                web_element = self.driver.find_element(By.XPATH, "/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-base-summary-component/div/div[2]/app-records-list/app-record/div/div/div[2]/div[1]/app-summary-title/h3/a")
-                self.driver.implicitly_wait(random.randint(2, 5))
-                web_element.click()
+            time.sleep(random.randint(2, 5))
+            # Insère dans la boîte de texte appropriée le titre de l'article
+            web_element = self.driver.find_element(By.XPATH, '//*[@id="search-option"]')
+            self.driver.implicitly_wait(random.randint(2, 5))
+            time.sleep(random.randint(2, 5))
+            web_element.send_keys(clean_title(title))
 
-                # Attend que le document ouvre
-                self.wait_to_load(30, '//*[@id="FullRTa-fullRecordtitle-0"]')
-                self.driver.implicitly_wait(random.randint(2, 5))
-                break
-            except TimeoutException:
-                try:
-                    # didn't find
-                    if self.driver.find_element(By.XPATH,
-                                           "/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-search-home/div[2]/div/app-input-route/app-search-basic/app-search-form/form/div[1]"):
-                        print("no results found")
-                        return  # no results found
-                except:
-                    # self.driver.close()
-                    # self.driver = webself.driver.Firefox(options=options)
-                    return
-            html = self.driver.page_source
-            new_metadata = htmlParser.get_metadata_from_html_wos(html)
-            print("new_metadata", new_metadata)
-            if not check_if_right_link(new_metadata, title):
-                return  # TODO: ajouter plutôt avant le break et changer d'article
-            save_extracted_html(title + '_05', html)
-            save_link(title, self.driver.current_url)
-            self.extract_bibtex_in_WoS(title)
-            new_metadata['Link'] = self.driver.current_url
-            return new_metadata
+            # Clique pour lancer la recherche
+            web_element = self.driver.find_element(By.XPATH, '/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-search-home/div[2]/div[2]/app-input-route/app-search-basic/app-search-form/form/div[3]/button[2]')
+            self.driver.implicitly_wait(random.randint(2, 5))
+            web_element.click()
+            self.wait_to_load(30, "/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-base-summary-component/div/div[2]/app-records-list/app-record[1]/div/div/div[2]/div[2]/app-summary-title/h3/a")
+
+            time.sleep(random.randint(2, 5))
+            # Clique pour ouvrir le premier document
+            web_element = self.driver.find_element(By.XPATH, "/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-base-summary-component/div/div[2]/app-records-list/app-record[1]/div/div/div[2]/div[2]/app-summary-title/h3/a")
+            self.driver.implicitly_wait(random.randint(2, 5))
+            web_element.click()
+
+            # Attend que le document ouvre
+            time.sleep(random.randint(2, 5))
+            # self.wait_to_load(30, '/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-full-record-home/div[2]/div[1]/div[1]/app-full-record/div/div[1]/div/div/div/h2')
+            # self.driver.implicitly_wait(random.randint(2, 5))
+                # break
+        except TimeoutException:
+            try:
+                # didn't find
+                if self.driver.find_element(By.XPATH,
+                                       "/html/body/app-wos/main/div/div/div[2]/div/div/div[2]/app-input-route/app-search-home/div[2]/div/app-input-route/app-search-basic/app-search-form/form/div[1]"):
+                    print("no results found")
+                    return  # no results found
+            except:
+                # self.driver.close()
+                # self.driver = webself.driver.Firefox(options=options)
+                return
+        html = self.driver.page_source
+        new_metadata = htmlParser.get_metadata_from_html_wos(html)
+        print("new_metadata", new_metadata)
+        if not check_if_right_link(new_metadata, title):
+            return  # TODO: ajouter plutôt avant le break et changer d'article
+        save_extracted_html(title + '_05', html)
+        save_link(title, self.driver.current_url)
+        time.sleep(2)
+        self.extract_bibtex_in_WoS(title)
+        new_metadata['Link'] = self.driver.current_url
+        return new_metadata
 
     def search_in_Scopus(self, title):
         return
