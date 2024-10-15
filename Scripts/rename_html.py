@@ -224,4 +224,6 @@ def clean_abstract(abstract):
 def test_opening_dataset(tsv):
     df = pandas.read_csv(tsv, sep='\t')
     return df
-print(test_opening_dataset(f'{MAIN_PATH}/Datasets/_Datasets Sent/GameSE.tsv'))
+test_df = test_opening_dataset(f'{MAIN_PATH}/Datasets/_Datasets Sent/GameSE.tsv')
+print(test_df)
+print(test_df.columns)
