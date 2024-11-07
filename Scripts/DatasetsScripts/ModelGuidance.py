@@ -60,6 +60,9 @@ class ModelGuidance(SRProject):
             sheet_final = pd.read_excel(f, sheet_name="step4analysis")  # 22 rows
             print(sheet_final)
 
+        # TODO: to be changed to normal
+        sheet_all = sheet_abstract
+
         # Add columns
         # self.df["key"]
         self.df['title'] = sheet_all["Title"]
