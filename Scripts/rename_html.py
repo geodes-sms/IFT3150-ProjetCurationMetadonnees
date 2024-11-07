@@ -120,7 +120,7 @@ def extract_from_manual():
 
 def compare_titles_and_metatitles():
     errors = []
-    df = pd.read_csv(f"{MAIN_PATH}/Datasets/GameSE/GameSE.tsv", sep='\t')
+    df = pd.read_csv(f"{MAIN_PATH}/Datasets/DTCPS/DTCPS.tsv", sep='\t')
     for idx, row in df.iterrows():
         title = clean_title(str(row['title']))
         meta_title = clean_title(str(row['meta_title']))
@@ -221,9 +221,50 @@ def clean_abstract(abstract):
 # print(clean_abstract("""There is untapped potential in having a computer work as a colleague with the video game level designer as a source of creative stimuli, instead of simply working as his slave. This paper presents 3Buddy, a co-creative level design tool exploring this digital peer paradigm, aimed at fostering creativity by allowing human and computer to work together in the context of level design, and describes a case study of the approach to produce content using the Legend of Grimrock 2 level editor. Suggestions are generated and iteratively evolved by multiple inter-communicating genetic algorithms guiding three different domains: innovation (exploring new directions), guidelines (respecting specific design goals) and convergence (focusing on current co-proposal). The interface allows the designer to orient the tool behaviour in the space defined by these dimensions. This paper details the inner workings of the system and presents an exploratory study showing, on the one hand, how the tool was used differently by professional and amateur level designers, and on the other hand, how the nuances of the co-creative interaction through an intention-oriented interface may be a source of positive influence for the creative level design process. (c) ICCC 2017.
 # """))
 
+def remove_whitespaces_from_bibtex_id(bibtex_string):
+    match = re.search(r"(?<=\{)(.*?)(?=\,)", bibtex_string)
+
+    if match:
+        cleaned_id = match.group().replace(' ', '')
+        bibtex_string = bibtex_string.replace(match.group(), cleaned_id)
+    return bibtex_string
+
+# Example usage
+bibtex_string = """
+@INPROCEEDINGS{5693185,
+  author={Liu, Yi and Ma, Zhiyi and Shao, Weizhong},
+  booktitle={2010 Asia Pacific Software Engineering Conference}, 
+  title={Integrating Non-functional Requirement Modeling into Model Driven Development Method}, 
+  year={2010},
+  volume={},
+  number={},
+  pages={98-107},
+  abstract={...},
+  keywords={...},
+  doi={10.1109/APSEC.2010.21},
+  ISSN={1530-1362},
+  month={Nov},}
+"""
+
+# cleaned_bibtex = remove_whitespaces_from_bibtex_id(bibtex_string)
+# print(cleaned_bibtex)
+
+
 def test_opening_dataset(tsv):
     df = pandas.read_csv(tsv, sep='\t')
     return df
-test_df = test_opening_dataset(f'{MAIN_PATH}/Datasets/_Datasets Sent/GameSE.tsv')
-print(test_df)
-print(test_df.columns)
+# test_df = test_opening_dataset(f'{MAIN_PATH}/Datasets/_Datasets Sent/GameSE.tsv')
+# print(test_df.shape)
+# print(test_df.columns)
+# test_df = test_opening_dataset(f'{MAIN_PATH}/Datasets/_Datasets Sent/ESM_2.tsv')
+# print(test_df.shape)
+# print(test_df.columns)
+
+def clean_all_bibtex():
+    for file in os.listdir(f"{EXTRACTED_PATH}/Bibtex"):
+        with open(f"{EXTRACTED_PATH}/Bibtex/{file}", 'rb') as f:
+            bib = f.read().decode('utf-8')
+        cleaned_bib = remove_whitespaces_from_bibtex_id(bib)
+        with open(f"{EXTRACTED_PATH}/Bibtex/{file}", 'wb') as f:
+            f.write(cleaned_bib.encode('utf-8'))
+# clean_all_bibtex()
