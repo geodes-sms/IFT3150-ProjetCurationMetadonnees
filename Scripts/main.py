@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+
+# import cudf.pandas
+# cudf.pandas.install()
+
 import sys
-
-
 import chardet
-
 import findMissingMetadata
 from Scripts.DatasetsScripts.Behave import Behave
 from Scripts.DatasetsScripts.CodeClone import CodeClone
@@ -12,6 +13,8 @@ from Scripts.DatasetsScripts.ESM_2 import ESM_2
 from Scripts.DatasetsScripts.GameSE import GameSE
 from Scripts.DatasetsScripts.GameSE_abstract import GameSE_abstract
 from Scripts.DatasetsScripts.GameSE_title import GameSE_title
+from Scripts.DatasetsScripts.ModelGuidance import ModelGuidance
+from Scripts.DatasetsScripts.ModelingAssist import ModelingAssist
 from Scripts.DatasetsScripts.TestNN import TestNN
 from Scripts.DatasetsScripts.TrustSE import TrustSE
 from SRProject import *
@@ -66,6 +69,7 @@ def postProcessing(sr_project):
                 print("Error:", line[0], row[key])
     print("Number of blanks/NaN:", empty_counts)
     print("Number of articles:", len(file))
+    print("Number of missing articles:", file['meta_title'].isna().sum())
 
     # TODO: check good number of lines exported
     # TODO: check for any unknown characters
@@ -76,9 +80,11 @@ def postProcessing(sr_project):
 def cleanDataFrame(df: pd.DataFrame) -> pd.DataFrame:
     new_df = df.replace("–", "-")
     new_df = new_df.replace("©", '')
+    new_df = new_df.replace("©", '')
     # new_df = new_df['keywords'].replace(",", ';')
-    df_obj = new_df.select_dtypes('object')
-    new_df[df_obj.columns] = df_obj.apply(lambda x: x.str.strip())
+    new_df = new_df.map(lambda x: x.strip() if isinstance(x, str) else x)
+    new_df = new_df.replace("nan", '')
+    new_df = new_df.fillna('')
     return new_df
 
 
@@ -129,8 +135,8 @@ def ExportToCSV(sr_project):
 
 def main(args=None):
     if args is None or not len(args) > 0:
-        # args = ["GameSE", "GameSE_abstract", "GameSE_title"]
-        args = ["Behave"]
+        args = ["TrustSE"]
+        # args = ['TrustSE', "Behave", "DTCPS", "ModelGuidance", "ModelingAssist", "TrustSE", "CodeClone"]
     sr_project = None
 
     for arg in args:
@@ -138,24 +144,31 @@ def main(args=None):
             sr_project = Behave()
         elif arg == "CodeClone":
             sr_project = CodeClone()
-        elif arg == "DTCPS":
+        elif arg == "DTCPS":  # complete
             sr_project = DTCPS()
-        elif arg == "ESM_2":
+        elif arg == "ESM_2":  # complete
             sr_project = ESM_2()
-        elif arg == "GameSE":
+        elif arg == "GameSE":  # complete
             sr_project = GameSE()
-        elif arg == "GameSE_title":
+        elif arg == "GameSE_title":  # complete
             sr_project = GameSE_title()
-        elif arg == "GameSE_abstract":
+        elif arg == "GameSE_abstract":  # complete
             sr_project = GameSE_abstract()
-        elif arg == "TestNN":
+        elif arg == "ModelGuidance":
+            sr_project = ModelGuidance()
+        elif arg == "ModelingAssist":
+            sr_project = ModelingAssist()
+        elif arg == "TestNN":  # complete
             sr_project = TestNN()
         elif arg == "TrustSE":
             sr_project = TrustSE()
+        else:
+            print("Not a valid argument")
+            continue
 
         sr_project.df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}_pre-extract.xlsx")
         # printEncoding(sr_project.path)  # to make sure we use the right encoding if necessary
-        completed_df = findMissingMetadata.main(sr_project.df, False, 999)
+        completed_df = findMissingMetadata.main(sr_project.df, True, 999)
         # df = pd.read_csv("C:/Users/guill/OneDrive - Universite de Montreal/Projet Curation des métadonnées/Datasets/{arg}/{arg}.tsv", delimiter="\t")
         # print(df)
         # completed_df = find_missing_metadata(df)
