@@ -28,6 +28,8 @@ def clean_abstract(abstract):
     if not abstract:
         return abstract
     abstract = unidecode(abstract)
+    abstract = abstract[len('Abstract:'):] if abstract.startswith('Abstract:') else abstract
+    abstract = abstract[len('Abstract'):] if abstract.startswith('Abstract') else abstract
     abstract = re.sub('(?:\(c\)|\(C\)|Copyright)\s*(.*)', '', abstract)
     # TODO: attention a ne pas supprimer une partie de l'abstract
     return abstract
@@ -36,11 +38,13 @@ def clean_authors(authors):
     results = []
     for author in authors:
         author = unidecode(author)
-        author = re.sub(',;', ';', author)
+        if len(author) == 0: continue
+        author = re.sub(',;', '', author)
+        author = re.sub(r'[0-9]+', '', author)
+        author = re.sub("ORCID:orcid\.org/---", '', author)
+        author = " ".join([x for x in author.split() if x != "and" and x != ""])
         if author[-1] in [',', '&']:
             author = author[:-1]
-        author = re.sub(r'[0-9]+', '', author)
-        author = " ".join([x for x in author.split() if x != "and" and x != ""])
         results.append(author)
     return results
 
@@ -55,7 +59,6 @@ def clean_publisher(publisher: str):
     return publisher
 
 
-# TODO: strip les keywords individuellement (dans postprocessing remplacer r'space*;space*' par '')
 def assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher, source):
     # Return the metadata
     metadata = metadata_base.copy()
@@ -64,7 +67,7 @@ def assign_metadata(title, venue, authors, pages, abstract, keywords, references
     metadata['Pages'] = pages
     metadata['Authors'] = "; ".join(clean_authors(authors)) if authors is not None else None
     metadata['Abstract'] = clean_abstract(abstract)
-    metadata['Keywords'] = "; ".join(keywords) if keywords is not None else None
+    metadata['Keywords'] = "; ".join(str(x).strip() for x in keywords) if keywords is not None else None
     metadata['References'] = "; ".join(references) if references is not None else None
     metadata['DOI'] = doi
     metadata['Publisher'] = clean_publisher(publisher)
@@ -105,7 +108,7 @@ def get_metadata_from_bibtex(bib_data):
     metadata['Venue'] = bib_dict['journal'] if 'journal' in bib_dict.keys() else None
     metadata['Authors'] = '; '.join(clean_authors([str(x) for x in bib_data.entries[bib_key].persons['author']])) if 'author' in bib_data.entries[bib_key].persons.keys() else None
     metadata['Abstract'] = clean_abstract(bib_dict['abstract']) if 'abstract' in bib_dict.keys() else None
-    metadata['Keywords'] = '; '.join(str(x) for x in bib_dict['keywords'].split(',') if x != "") if 'keywords' in bib_dict.keys() else None
+    metadata['Keywords'] = '; '.join(str(x) for x in bib_dict['keywords'].split(',') + bib_dict['keywords'].split(';') if x != "") if 'keywords' in bib_dict.keys() else None
     metadata['References'] = bib_dict['cited-references'] if 'cited-references' in bib_dict.keys() else None
     metadata['Pages'] = bib_dict['pages'] if 'pages' in bib_dict.keys() else None
     metadata['Year'] = bib_dict['year'] if 'year' in bib_dict.keys() else None
@@ -354,8 +357,11 @@ def get_metadata_from_html_sciencedirect(html):
     soup = BeautifulSoup(html, 'lxml')
 
     # Extract the title
-    title_tag = soup.find('meta', {'name': 'citation_title'})
-    title = title_tag['content'].strip() if title_tag else None
+    title_tag = soup.find('h1', {'id': 'screen-reader-main-title'})
+    title = title_tag.get_text(strip=True) if title_tag else None
+    if not title:
+        title_tag = soup.find('meta', {'name': 'citation_title'})
+        title = title_tag['content'].strip() if title_tag else None
 
     # Extract the venue
     venue_tag = soup.find('a', {'class': 'publication-title-link'})
@@ -366,7 +372,10 @@ def get_metadata_from_html_sciencedirect(html):
     if pages_section:
         pages_tag = pages_section.find('div', {'class': 'text-xs'})
         pages_text = pages_tag.get_text(strip=True) if pages_tag else None
-        pages = pages_text[pages_text.find("Pages")+5:] if pages_text else None
+        pages = pages_text[pages_text.find("Pages")+5:] if pages_text and 'Pages' in pages_text else None
+        if not pages:
+            pages = pages_text[pages_text.rfind(',')+1:].strip() if pages_text else None
+            if not all(x.isdigit() for x in pages): pages = None
     else:
         pages = None
 
@@ -381,7 +390,11 @@ def get_metadata_from_html_sciencedirect(html):
         for tag in author_tags:
             authors.append(tag['title'].strip())
     else:
-        authors = None
+        author_tags = soup.find_all('button', {'data-xocs-content-type': 'author'})
+        if author_tags:
+            for tag in author_tags:
+                authors.append(tag.get_text(strip=True))
+    if len(authors) == 0: authors = None
 
     # Extract the keywords
     keywords_section = soup.find('div', {'class': 'keyword'})
@@ -426,17 +439,17 @@ def get_metadata_from_html_springerlink(html):
     # title = title_tag['content'].strip() if title_tag else None
     title = title_tag.get_text(strip=True) if title_tag else None
 
-    # TODO: enlever les chiffres des auteurs
     # Extract the authors
     authors = []
     author_tags = soup.find_all('li', {'class': 'c-article-author-list__item'})
     for tag in author_tags:
         authors.append(tag.get_text(strip=True))
+    if len(authors) == 0: authors = None
 
     # Extract the pages
     pages_tag = soup.find('span', {'class': 'c-chapter-book-details__meta'})
     pages = pages_tag.get_text(strip=True) if pages_tag else None
-    # TODO: enlever le pp
+    pages = pages[pages.find('pp') + 2:].strip() if pages and 'pp' in pages else pages
 
     # Extract the venue
     venue_tag = soup.find('li', {'class': 'app-book-series-listing__item'})
@@ -452,12 +465,14 @@ def get_metadata_from_html_springerlink(html):
     keyword_tags = soup.find_all('li', {'class': 'c-article-subject-list__subject'})
     for tag in keyword_tags:
         keywords.append(tag.get_text(strip=True))
+    if len(keywords) == 0: keywords = None
 
     # Extract the references
     references = []
     reference_tags = soup.find_all('meta', {'name': 'citation_reference'})
     for tag in reference_tags:
         references.append(tag['content'].strip())
+    if len(references) == 0: references = None
 
     # Extract the DOI
     doi_tag = soup.find('meta', {'name': 'dc.identifier', 'content': lambda x: x and x.startswith('doi:')})
@@ -809,7 +824,7 @@ def get_metadata_from_html_arxiv(html):
     doi = doi_text[doi_text.find("doi.org/")+8:] if doi_text else None
 
     # Extract the publisher
-    publisher = None
+    publisher = 'arXiv'
 
     # Return the metadata
     return assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher,
