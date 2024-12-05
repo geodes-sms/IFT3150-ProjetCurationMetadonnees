@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 import pandas as pd
 from unidecode import unidecode
-
+from nltk import edit_distance
 from Scripts.os_path import EXTRACTED_PATH, MAIN_PATH
 
 """
@@ -135,7 +135,29 @@ class SRProject:
     export_path = None
 
     def __init__(self):
-        pass
+        # Blank dataframe
+        self.df = empty_df.copy()
+        # All columns
+        self.project = None
+        self.key = None
+        self.title = None
+        self.abstract = None
+        self.keywords = None
+        self.authors = None
+        self.venue = None
+        self.doi = None
+        self.references = None
+        self.bibtex = None
+        self.screened_decision = None
+        self.final_decision = None
+        self.mode = None
+        self.inclusion_criteria = None
+        self.exclusion_criteria = None
+        self.reviewer_count = None
+
+        # Paths
+        self.path = None
+        self.export_path = None
 
 
 def update_metadata(old, new):
@@ -150,13 +172,12 @@ def format_link(link):
     formated_link = link
     for k in special_char_conversion.keys():
         formated_link = formated_link.replace(k, "%" + special_char_conversion[k])
+    formated_link = formated_link[:200]
     return formated_link
 
 
 def save_extracted_html(link, html):
-    formated_link = link
-    for k in special_char_conversion.keys():
-        formated_link = formated_link.replace(k, "%" + special_char_conversion[k])
+    formated_link = format_link(link)
     with open(f"{EXTRACTED_PATH}/HTML extracted/{datetime.today().strftime('%Y-%m-%d')}_{formated_link}.html", 'wb') as f:
         f.write(html.encode("utf-8"))
     print(f"{datetime.today().strftime('%Y-%m-%d')}_{formated_link}.html")
@@ -168,11 +189,13 @@ def clean_title(title):
     # tmp_title = title[title.index(":"):] if ":" in title else title
     # print(title)
     # tmp_title = title[title.index("-"):] if "-" in title else title
-    tmp_title = unidecode(title)
+    tmp_title = title
     print(tmp_title)
     # tmp_title = str.lower(tmp_title)
-    tmp_title = re.sub(r":|/|-|—|,|\.|<.*>|³N|\?|\*|&|;|â€“|‘|'|\"|’|–|”|“|±|\+", " ", str.lower(tmp_title))
+    tmp_title = re.sub(r"\\'", '', str.lower(tmp_title))
+    tmp_title = re.sub(r"\\emdash|\\endash|&amp;|:|/|-|—|,|\.|<.*>|³N|\?|\*|&|;|â€“|‘|'|\"|’|–|”|“|±|\+|\\|\(|\)", " ", tmp_title)
     print(tmp_title)
+    tmp_title = unidecode(tmp_title)
     print([e for e in tmp_title.split(" ") if e != ""])
     return " ".join([e for e in tmp_title.split(" ") if e != ""])
 
@@ -185,8 +208,9 @@ def check_if_right_link(new_metadata, title, author=None, venue=None, year=None)
     tmp_meta_title = clean_title(new_metadata['Title'])
     print(tmp_title)
     print(tmp_meta_title)
-    if tmp_title in tmp_meta_title or tmp_meta_title in tmp_title:
-        return True
+    if tmp_title in tmp_meta_title or tmp_meta_title in tmp_title or edit_distance(tmp_title, tmp_meta_title) < 3:
+        if abs(len(tmp_title.split()) - len(tmp_meta_title.split())) < 4 or abs(len(tmp_title) - len(tmp_meta_title)) < 10:
+            return True
     return False
 
 
