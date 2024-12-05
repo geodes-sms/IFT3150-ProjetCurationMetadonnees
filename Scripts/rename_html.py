@@ -3,6 +3,7 @@ import shutil
 import time
 
 import pandas as pd
+from pybtex.database import parse_file
 
 from SRProject import *
 from os_path import EXTRACTED_PATH
@@ -268,3 +269,41 @@ def clean_all_bibtex():
         with open(f"{EXTRACTED_PATH}/Bibtex/{file}", 'wb') as f:
             f.write(cleaned_bib.encode('utf-8'))
 # clean_all_bibtex()
+
+def convert_bib_to_tsv():
+    # Path to your .bib file
+    input_bib_file = "C:/Users/guill/OneDrive - Universite de Montreal/Projet Curation des métadonnées/Datasets/ESPLE/ESPLE-screened.bib"
+    # Path to save the output .tsv file
+    output_tsv_file = "C:/Users/guill/OneDrive - Universite de Montreal/Projet Curation des métadonnées/Datasets/ESPLE/ESPLE-screened.tsv"
+
+    # List of desired columns in the output TSV
+    columns = [
+        "entrytype", "abstract", "address", "annote", "author", "booktitle",
+        "chapter", "crossref", "edition", "editor", "howpublished",
+        "institution", "journal", "key", "month", "note", "number",
+        "organization", "pages", "paper", "publisher", "school", "series",
+        "title", "type", "volume", "year"
+    ]
+
+    # Parse the .bib file
+    bib_data = parse_file(input_bib_file)
+
+    # Extract records into a list of dictionaries
+    records = []
+
+    for entry_key, entry in bib_data.entries.items():
+        record = {field: entry.fields.get(field, "") for field in columns}
+        record["entrytype"] = entry.type
+        # Handle authors and editors as comma-separated strings
+        if "author" in entry.persons:
+            record["author"] = ", ".join(str(person) for person in entry.persons["author"])
+        if "editor" in entry.persons:
+            record["editor"] = ", ".join(str(person) for person in entry.persons["editor"])
+        records.append(record)
+
+    # Create a DataFrame and save it as TSV
+    df = pd.DataFrame(records, columns=columns)
+    df.to_csv(output_tsv_file, sep='\t', index=False)
+
+    print(f"Conversion complete! TSV file saved as: {output_tsv_file}")
+# convert_bib_to_tsv()
