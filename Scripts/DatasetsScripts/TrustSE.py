@@ -7,23 +7,19 @@ import pandas as pd
 
 
 excl_crit_desc = {
-    "Duplicated": "Studies that were duplicates of other studies.",
-    "Written in other languages": "Studies that were not written in English.",
-    "Before 2009": "Studies that were not published online between 2009 to 2021.",
-    "Non-peer reviewed": "Studies presenting non-peer-reviewed material.",
-    "Proceedings": "Studies presenting peer-reviewed but not published in journals, conferences, or workshops.",
-    "Proceedings and posters": "Studies presenting peer-reviewed but not published in journals, conferences, or workshops.",
-    "Summaries of conferences/editorials": "Studies that were summaries of conferences/editorials.",
-    "Not primary study": "Non-primary studies.",
-    "Serious games or gamification": "Studies that were focused on the social and educational impact of video games, such as serious games.",
-    "AI": "Studies that were focused on Artificial Intelligence (AI).",
-    "Content Creation": "Studies that were focused on Content Creation.",
-    "Not related to Software Engineering": "Studies that were not in the field of Software Engineering.",
-    "Not related to Video Games": "Studies that were not focused on software engineering applied to industry-scale computer games development.",
-    "Not sure": ""
+'book': 'Studies that were books or gray literature',
+'Book': 'Studies that were books or gray literature',
+'Book cannot access': 'Studies that were books or gray literature',
+'Cannot access': 'Studies that were not accessible in full-text',
+'cannot access': 'Studies that were not accessible in full-text',
+'incomplete paper': 'Studies that were incomplete, short papers, or only provided literature in the form of abstracts, prefaces, or presentation slides',
+'Not a paper': 'Studies that were incomplete, short papers, or only provided literature in the form of abstracts, prefaces, or presentation slides',
+'Not peer-reviewed': 'Studies that were not peer-reviewed',
+'Short paper': 'Studies that were incomplete, short papers, or only provided literature in the form of abstracts, prefaces, or presentation slides',
+'Tech Report': 'Studies that were incomplete, short papers, or only provided literature in the form of abstracts, prefaces, or presentation slides',
+'thesis': 'Studies that were incomplete, short papers, or only provided literature in the form of abstracts, prefaces, or presentation slides',
+'Working paper': 'Studies that were incomplete, short papers, or only provided literature in the form of abstracts, prefaces, or presentation slides',
 }
-# TODO: in methodology, articles excluded if not meeting inclusion criterias
-# TODO: verify meaning of proceedings and not sure
 
 
 def convert(x):
@@ -56,8 +52,10 @@ class TrustSE(SRProject):
         # converters = {"Title": lambda x: x.encode('utf-8')}
         # All sheets
         with open(self.path, 'rb') as f:
-            sheet_all = pd.read_excel(f, sheet_name="Selected manuscripts", header=1)  # 3491 rows
+            sheet_all = pd.read_excel(f, sheet_name="Selected manuscripts", header=1)  # 556 rows
             print(sheet_all)
+            sheet_final = sheet_all.loc[sheet_all['SLR paper?'] == 'Yes']  # 112 rows
+            print(sheet_final)
 
 
         # Add columns
@@ -75,7 +73,7 @@ class TrustSE(SRProject):
         # self.df['mode'] = "new_screen"
 
         # Find all screened decisions
-        # self.find_decision_on_articles(sheet_title_keywords_included, sheet_without_duplicates)
+        self.find_decision_on_articles(sheet_final, sheet_all)
         # self.find_decision_on_articles(sheet_abstract_included, sheet_title_keywords_included)
         #
         # # Add snowballing articles
@@ -93,23 +91,6 @@ class TrustSE(SRProject):
         self.export_path = f"{MAIN_PATH}/Datasets/TrustSE/TrustSE.tsv"
         print(self.df)
 
-    def add_snowballing_articles(self, sheet_snowballing):
-        snowball_df = empty_df.copy()
-        snowball_df[['title', 'abstract', 'authors', 'venue', 'year']] = sheet_snowballing[["Title", "Abstract", "Author", "Journal", "Year"]]
-        snowball_df['mode'] = "snowballing"
-        decision = 'screened_decision'
-        criteria = 'exclusion_criteria'
-        for article_title in snowball_df['title'].values:
-            if article_title in sheet_snowballing["Title"].values:
-                exclusion_criteria = sheet_snowballing.loc[
-                    sheet_snowballing["Title"] == article_title, ["Exclusion Criteria by Title"]].values[0][0]
-                if not pd.isna(exclusion_criteria):
-                    self.df.loc[self.df['title'] == article_title, criteria] = exclusion_criteria + ": " + \
-                                                                                   excl_crit_desc[exclusion_criteria]
-        self.df = pd.concat([self.df, snowball_df], ignore_index=True)
-        # TODO: missing keywords, url for these articles
-        # TODO: missing exclusion criteria on different page than other articles
-
     def find_decision_on_articles(self, sheet_included, sheet_criteria, is_final=False):
         decision = 'screened_decision' if not is_final else 'final_decision'
         # criteria = 'exclusion_criteria' if not is_final else 'inclusion_criteria'
@@ -120,7 +101,10 @@ class TrustSE(SRProject):
             else:
                 self.df.loc[self.df['title'] == article_title, decision] = "Excluded"
                 if article_title in sheet_criteria["Title"].values:
-                    exclusion_criteria = sheet_criteria.loc[sheet_criteria["Title"] == article_title, ["Exclusion Criteria by Title"]].values[0][0]
+                    exclusion_criteria = sheet_criteria.loc[sheet_criteria["Title"] == article_title, ["SLR paper?"]].values[0][0]
                     if not pd.isna(exclusion_criteria):
-                        self.df.loc[self.df['title'] == article_title, criteria] = exclusion_criteria + ": " + excl_crit_desc[exclusion_criteria]
+                        self.df.loc[self.df['title'] == article_title, criteria] = excl_crit_desc[exclusion_criteria]
 
+
+if __name__ == '__main__':
+    sr_project = TrustSE()
