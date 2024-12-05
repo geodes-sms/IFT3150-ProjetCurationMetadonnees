@@ -18,6 +18,16 @@ excl_crit_desc = {
 }
 
 
+def clean_title_for_search(title):
+    if not title or len(title) == 0:
+        return title
+    if title[-1] == '}':
+        title = title[:-1]
+    if title[0] == '{':
+        title = title[1:]
+    return title
+
+
 class ESPLE(SRProject):
     """
     Empirical software product line engineering: A systematic literature review
@@ -34,18 +44,23 @@ class ESPLE(SRProject):
 
     def __init__(self):
         super().__init__()
-        self.path = f"{MAIN_PATH}/Datasets/ESPLE/ESPLE-filtered.tsv"
+        self.path = f"{MAIN_PATH}/Datasets/ESPLE"
 
         # converters = {"Title": lambda x: x.encode('utf-8')}
         # All sheets
-        with open(self.path, 'rb') as f:
-            sheet_all = pd.read_csv(f, sep='\t')  # 2613 rows
-            print(sheet_all)
-            print(sheet_all.columns)
+        with open(self.path + "/ESPLE-filtered.tsv", 'rb') as f:
+            sheet_all = pd.read_csv(f, sep='\t')  # 963 rows
+            sheet_all['title'] = sheet_all['title'].apply(lambda x: x.replace("{", "").replace("}", ""))
+            print(sheet_all['title'])
+
+        with open(self.path + "/ESPLE-screened.tsv", 'rb') as f:
+            sheet_final = pd.read_csv(f, sep='\t')  # 60 rows
+            sheet_final['title'] = sheet_final['title'].apply(lambda x: x.replace("{", "").replace("}", ""))
+            print(sheet_final['title'])
 
         # Add columns
         # self.df["key"]
-        self.df['title'] = sheet_all["title"].apply(lambda x: x.replace("{", "").replace("}", ""))
+        self.df['title'] = sheet_all["title"]
         self.df['abstract'] = sheet_all["abstract"]
         # self.df["keywords"] = sheet_all["Keywords"]
         self.df["authors"] = sheet_all["author"]
@@ -61,7 +76,8 @@ class ESPLE(SRProject):
         # self.df['mode'] = ['snowballing' if not pd.isna(s) else 'new_screen' for s in sheet_without_duplicates['Strategy']]
 
         # Find all screened decisions
-        # self.find_decision_on_articles(sheet_screen_title, sheet_without_duplicates, 'Not fulfilled inclusion/exclusion criteria')
+        self.find_decision_on_articles(sheet_final)
+        self.df['final_decision'] = self.df['screened_decision']
         # self.find_decision_on_articles(sheet_screen_title_and_abstract, sheet_without_duplicates, 'Not fulfilled inclusion/exclusion criteria')
 
         # Find all final decisions based on which articles are included in different sheets
@@ -77,50 +93,22 @@ class ESPLE(SRProject):
         self.export_path = f"{MAIN_PATH}/Datasets/ESPLE/ESPLE.tsv"
         print(self.df)
 
-    def find_decision_on_articles(self, sheet_included, sheet_criteria, criteria_column, is_final=False):
-        decision = 'screened_decision' if not is_final else 'final_decision'
-        # criteria = 'exclusion_criteria' if not is_final else 'inclusion_criteria'
+    def find_decision_on_articles(self, sheet_included):
+        decision = 'screened_decision'
+        print(self.df["title"].values)
+        print(sheet_included['title'].values)
         for article_title in self.df['title'].values:
-            if article_title in sheet_included["Title"].values:
-                conflicted_decision = "Included"
-                if is_final:
-                    row = sheet_criteria.loc[sheet_criteria['Title'] == article_title]
-                    if row['Include after second reviewer opinion? '].values[0] != row['Include after full-text review?'].values[0]:
-                        conflicted_decision = "ConflictIncluded"
-                self.df.loc[self.df['title'] == article_title, decision] = conflicted_decision
+            if clean_title(article_title) in sheet_included["title"].apply(clean_title).values:
+                self.df.loc[self.df['title'] == article_title, decision] = "Included"
             else:
-                conflicted_decision = "Excluded"
-                if is_final and article_title in sheet_criteria['Title'].values:
-                    row = sheet_criteria.loc[sheet_criteria['Title'] == article_title]
-                    if row['Include after second reviewer opinion? '].values[0] != row['Include after full-text review?'].values[0]:
-                        conflicted_decision = "ConflictExcluded"
-                self.df.loc[self.df['title'] == article_title, decision] = conflicted_decision
-                if article_title in sheet_criteria["Title"].values:
-                    exclusion_criteria = sheet_criteria.loc[sheet_criteria["Title"] == article_title, [criteria_column]].values[0][0]
-                    if not pd.isna(exclusion_criteria):
-                        criteria = 'exclusion_criteria' if exclusion_criteria[0] == 'E' else 'inclusion_criteria'
-                        self.df.loc[self.df['title'] == article_title, criteria] = exclusion_criteria + ": " + excl_crit_desc[exclusion_criteria]
-
-
-    def find_source(self, publishers):
-        results = []
-        for pub in publishers:
-            if pd.isna(pub):
-                results.append(pub)
-            elif 'ACM' in pub or 'Association for Computing Machinery' in pub or 'ICST' in pub:
-                results.append('ACM')
-            elif 'Elsevier' in pub or 'Academic Press' in pub:
-                results.append('ScienceDirect')
-            elif 'IEEE' in pub or 'Institute of Electrical and Electronics Engineers' in pub:
-                results.append('IEEE')
-            elif 'Springer' in pub:
-                results.append('Springer')
-            else:
-                results.append(pub)
-        return results
+                self.df.loc[self.df['title'] == article_title, decision] = "Excluded"
 
 
 if __name__ == '__main__':
     sr_project = ESPLE()
-    print(sr_project.df['title'])
-    sr_project.df.to_csv(sr_project.export_path, sep='\t')
+    print('screened_decision:', sum(sr_project.df['screened_decision'] == 'Excluded'), 'Excluded,',
+          sum(sr_project.df['screened_decision'] == 'Included'), 'Included')
+    print('final_decision:', sum(sr_project.df['final_decision'] == 'Excluded'), 'Excluded,',
+          sum(sr_project.df['final_decision'] == 'Included'), 'Included')
+    sr_project.df.to_excel('esple.xlsx')
+
