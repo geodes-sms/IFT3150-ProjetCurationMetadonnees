@@ -82,7 +82,7 @@ def assign_metadata(title, venue, authors, pages, abstract, keywords, references
     return metadata
 
 
-def get_venue_from_doi(html):
+def get_source_from_doi_with_crossref(html):
     # Parse the HTML content
     soup = BeautifulSoup(html, 'lxml')
     # Extract the venue
@@ -141,7 +141,7 @@ def get_metadata_from_already_extract(file, source=None):
                 with open(f"{EXTRACTED_PATH}/HTML extracted/"
                           + file[:11] + "http%3A%2F%2Fapi.crossref.org%2Fworks%2F" + file[file.find("doi.org%2F")+10:-5] + ".html", 'rb') as g:
                     crossref_html = g.read()
-                source = get_venue_from_doi(crossref_html)
+                source = get_source_from_doi_with_crossref(crossref_html)
             if source == IEEE or source == 'ieee':
                 new_metadata = get_metadata_from_html_ieee(html)
                 update_metadata(metadata, new_metadata)
@@ -835,7 +835,7 @@ if __name__ == '__main__':
     print("CrossRef")
     with open(f"{EXTRACTED_PATH}/HTML extracted/2024-06-09_http%3a%2f%2fapi.crossref.org%2fworks%2f10.1145%2f1486508.1486516.html", 'rb') as f:
         html = f.read()
-    results = get_venue_from_doi(html)
+    results = get_source_from_doi_with_crossref(html)
     print(results)
 
     print("IEEE")
