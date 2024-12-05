@@ -6,15 +6,21 @@
 import sys
 import chardet
 import findMissingMetadata
+from Scripts.DatasetsScripts.ArchiML import ArchiML
 from Scripts.DatasetsScripts.Behave import Behave
 from Scripts.DatasetsScripts.CodeClone import CodeClone
+from Scripts.DatasetsScripts.CodeCompr import CodeCompr
 from Scripts.DatasetsScripts.DTCPS import DTCPS
 from Scripts.DatasetsScripts.ESM_2 import ESM_2
+from Scripts.DatasetsScripts.ESPLE import ESPLE
 from Scripts.DatasetsScripts.GameSE import GameSE
 from Scripts.DatasetsScripts.GameSE_abstract import GameSE_abstract
 from Scripts.DatasetsScripts.GameSE_title import GameSE_title
 from Scripts.DatasetsScripts.ModelGuidance import ModelGuidance
 from Scripts.DatasetsScripts.ModelingAssist import ModelingAssist
+from Scripts.DatasetsScripts.OODP import OODP
+from Scripts.DatasetsScripts.SecSelfAdapt import SecSelfAdapt
+from Scripts.DatasetsScripts.SmellReprod import SmellReprod
 from Scripts.DatasetsScripts.TestNN import TestNN
 from Scripts.DatasetsScripts.TrustSE import TrustSE
 from SRProject import *
@@ -67,6 +73,7 @@ def postProcessing(sr_project):
             elif re.search(undesirable_pattern, str(row[key])):
                 continue
                 print("Error:", line[0], row[key])
+    print(sr_project.df['project'].values[0])
     print("Number of blanks/NaN:", empty_counts)
     print("Number of articles:", len(file))
     print("Number of missing articles:", file['meta_title'].isna().sum())
@@ -91,76 +98,52 @@ def cleanDataFrame(df: pd.DataFrame) -> pd.DataFrame:
 # Function to export to CSV the SRProject object
 def ExportToCSV(sr_project):
 
-    # final_data_frame = pd.DataFrame(columns=["key", "project", "title", "abstract", "keywords", "authors", "venue",
-    #                                          "doi", "references", "bibtex", "screened_decision", "final_decision",
-    #                                          "mode", "inclusion_criteria", "exclusion_criteria", "reviewer_count"],
-    #                                 dtype=str)
-    #
-    # final_data_frame["project"] = sr_project.project
-    # final_data_frame["title"] = sr_project.title
-    # final_data_frame["abstract"] = sr_project.abstract
-    # final_data_frame["keywords"] = sr_project.keywords
-    # final_data_frame["authors"] = sr_project.authors
-    # final_data_frame["venue"] = sr_project.venue
-    # final_data_frame["doi"] = sr_project.doi
-    # final_data_frame["references"] = sr_project.references
-    # final_data_frame["bibtex"] = sr_project.bibtex
-    # final_data_frame["screened_decision"] = sr_project.screened_decision
-    # final_data_frame["final_decision"] = sr_project.final_decision
-    # final_data_frame["mode"] = sr_project.mode
-    # final_data_frame["inclusion_criteria"] = sr_project.inclusion_criteria
-    # final_data_frame["exclusion_criteria"] = sr_project.exclusion_criteria
-
-    # final_data_frame = sr_project.df.drop(columns="year")
     final_data_frame = sr_project.df
 
-    # otherwise error when trying to change None to int
-    if sr_project.reviewer_count is not None:
-        final_data_frame["reviewer_count"] = sr_project.reviewer_count
-        final_data_frame["reviewer_count"].astype(int)
+    final_data_frame = final_data_frame.drop(columns=["index",'key'])
+    final_data_frame.to_csv(sr_project.export_path, sep="\t", index_label="key", encoding='utf-8')
 
-    # if there are no keys, assign index as key
-    if sr_project.key is None:
-        final_data_frame = final_data_frame.drop(columns="key")
-        final_data_frame.to_csv(sr_project.export_path, sep="\t", index_label="key", encoding='utf-8')
-    else:
-        final_data_frame["key"] = sr_project.key
-        final_data_frame.to_csv(sr_project.export_path, sep="\t", index=False, encoding='utf-8')
-    # TODO: why not just assign key as range directly in SRProject class?
-
-
-# def add_missing_links(df):
-#     for idx, row in df.iterrows():
-#         if row[]
 
 def main(args=None):
     if args is None or not len(args) > 0:
-        args = ["TrustSE"]
-        # args = ['TrustSE', "Behave", "DTCPS", "ModelGuidance", "ModelingAssist", "TrustSE", "CodeClone"]
+        args = ["OODP"]
+        # args = ["ESPLE", "OODP", 'Behave', 'ModelingAssist', 'ModelGuidance']
     sr_project = None
 
     for arg in args:
-        if arg == "Behave":
+        if arg == "ArchiML":
+            sr_project = ArchiML()
+        elif arg == "Behave":  # final cleaning needed
             sr_project = Behave()
         elif arg == "CodeClone":
             sr_project = CodeClone()
+        elif arg == "CodeCompr":
+            sr_project = CodeCompr()
         elif arg == "DTCPS":  # complete
             sr_project = DTCPS()
         elif arg == "ESM_2":  # complete
             sr_project = ESM_2()
+        elif arg == "ESPLE":  # 62 (77 science direct)
+            sr_project = ESPLE()
         elif arg == "GameSE":  # complete
             sr_project = GameSE()
         elif arg == "GameSE_title":  # complete
             sr_project = GameSE_title()
         elif arg == "GameSE_abstract":  # complete
             sr_project = GameSE_abstract()
-        elif arg == "ModelGuidance":
+        elif arg == "ModelGuidance":  # 914 missing
             sr_project = ModelGuidance()
-        elif arg == "ModelingAssist":
+        elif arg == "ModelingAssist":  # 749
             sr_project = ModelingAssist()
+        elif arg == "OODP":  # 183 missing
+            sr_project = OODP()
+        elif arg == "SecSelfAdapt":  # started
+            sr_project = SecSelfAdapt()
+        elif arg == "SmellReprod":
+            sr_project = SmellReprod()
         elif arg == "TestNN":  # complete
             sr_project = TestNN()
-        elif arg == "TrustSE":
+        elif arg == "TrustSE":  # 97 missing
             sr_project = TrustSE()
         else:
             print("Not a valid argument")
