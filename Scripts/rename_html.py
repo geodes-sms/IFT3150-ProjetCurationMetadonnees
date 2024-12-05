@@ -121,16 +121,18 @@ def extract_from_manual():
 
 def compare_titles_and_metatitles():
     errors = []
-    df = pd.read_csv(f"{MAIN_PATH}/Datasets/DTCPS/DTCPS.tsv", sep='\t')
+    df = pd.read_csv(f"{MAIN_PATH}/Datasets/Behave/Behave.tsv", sep='\t')
+    links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t',
+                                         encoding='windows-1252', encoding_errors='ignore')
     for idx, row in df.iterrows():
         title = clean_title(str(row['title']))
         meta_title = clean_title(str(row['meta_title']))
-        if title not in meta_title and meta_title not in title:
+        if abs(len(title.split()) - len(meta_title.split())) > 4 or abs(len(title) - len(meta_title)) > 10 or edit_distance(title, meta_title) > 3:
             print("erreur")
             errors.append((idx, title, meta_title))
             print((idx, title, meta_title))
             # errors.append((idx, row['title'], row['meta_title']))
-            if abs(len(title.split()) - len(meta_title.split())) > 4 or abs(len(title) - len(meta_title)) > 10: decision = 'y'
+            if title not in meta_title and meta_title not in title: decision = 'y'
             else: decision = input("delete?")
             if decision == "y":
                 n = 0
@@ -145,13 +147,16 @@ def compare_titles_and_metatitles():
                         print(file)
                         n += 1
                 print('nb deplace:', n)
+                links_already_searched = links_already_searched.loc[links_already_searched['Title'] != meta_title] # TODO: enlever le lien de l'article
+                links_already_searched.to_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t')
+                print("liens supprimés")
                 time.sleep(1)
         else:
             print("correct")
     print("====================================")
     for er in errors: print(er)
     print(len(errors))
-# compare_titles_and_metatitles()
+compare_titles_and_metatitles()
 
 def clean_bad_html():
     n = 0
