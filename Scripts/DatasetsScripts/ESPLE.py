@@ -48,12 +48,12 @@ class ESPLE(SRProject):
 
         # converters = {"Title": lambda x: x.encode('utf-8')}
         # All sheets
-        with open(self.path + "/ESPLE-filtered.tsv", 'rb') as f:
+        with open(self.path + "/ESPLE-filtered-source.tsv", 'rb') as f:
             sheet_all = pd.read_csv(f, sep='\t')  # 963 rows
             sheet_all['title'] = sheet_all['title'].apply(lambda x: x.replace("{", "").replace("}", ""))
             print(sheet_all['title'])
 
-        with open(self.path + "/ESPLE-screened.tsv", 'rb') as f:
+        with open(self.path + "/ESPLE-screened-source.tsv", 'rb') as f:
             sheet_final = pd.read_csv(f, sep='\t')  # 60 rows
             sheet_final['title'] = sheet_final['title'].apply(lambda x: x.replace("{", "").replace("}", ""))
             print(sheet_final['title'])
