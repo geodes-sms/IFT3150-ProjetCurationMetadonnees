@@ -4,6 +4,7 @@ import time
 import traceback
 
 import pandas as pd
+from selenium.common import NoSuchElementException
 
 import htmlParser
 import webScraping
@@ -22,7 +23,7 @@ def get_link_from_articles_source_links(title):
     # links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t')
     if title in links_already_searched['Title'].values:
         print("link already searched, adding it instead of DOI")
-        return links_already_searched.loc[links_already_searched['Title'] == title]['Link'].values[0]
+        return links_already_searched.loc[links_already_searched['Title'] == title]['Link'].values[-1]
 
 
 def get_from_already_extract(formated_name, already_extracted_files, source=None):
@@ -120,9 +121,10 @@ def extract_without_link(row, already_extracted_files, web_scraper):
         print("author", authors)
         print("year", year)
         if web_scraper:
-            metadata = web_scraper.get_metadata_from_title(row['title'], authors, SpringerLink)  # source here if want to specify
-            print("extracted without link")
-            time.sleep(60)
+            metadata = web_scraper.get_metadata_from_title(row['title'], authors, WoS)  #### source here if want to specify
+            if metadata: print("extracted without link")
+            else: print("no article found without link")
+            # time.sleep(60)
             # extract doi obtained
             if metadata and metadata['DOI']:
                 metadata = web_scraper.get_metadata_from_link(row['title'], "https://doi.org/" + str(metadata['DOI']), metadata['Publisher'])
@@ -137,10 +139,11 @@ def extract_with_link(row, already_extracted_files, web_scraper: WebScraper):
     # check if already extracted
     url = row['doi']
     formated_url = format_link(str(url))
-    source = htmlParser.get_source(formated_url) if not row['source'] else str(row['source'])
+    source = htmlParser.get_source(formated_url) if not row['source'] or pd.isna(row['source']) else str(row['source'])
     metadata = get_from_already_extract(formated_url, already_extracted_files, source)
 
     formated_name = format_link(str(row['title']))
+
     if not metadata:
         metadata = get_from_already_extract(formated_name, already_extracted_files)
 
@@ -151,12 +154,22 @@ def extract_with_link(row, already_extracted_files, web_scraper: WebScraper):
         print("already extracted from link")
 
     # if not already extracted
-    elif not metadata:
+    if not metadata:
         if web_scraper:
-            metadata = web_scraper.get_metadata_from_link(row['title'], url, source)
+            for i in range(5):
+                try:
+                    metadata = web_scraper.get_metadata_from_link(row['title'], url, source)
+                    break
+                except NoSuchElementException as e:
+                    break
+                    metadata = None
+                    web_scraper.close()
+                    web_scraper = webScraping.WebScraper()
+                    continue
             metadata['Link'] = url
-            print("extracted from link")
-            # time.sleep(random.randint(1, 5))
+            if metadata: print("extracted from link")
+            else: print("no article found from link")
+            # time.sleep(60*5)
 
     if not metadata or not metadata['Title']:
         metadata = extract_without_link(row, already_extracted_files, web_scraper)
@@ -204,7 +217,7 @@ def update_dataset(row, metadata):
     
 
 def main(sr_df, do_web_scraping=False, run=999):
-    completed_sr_project = sr_df.copy()
+    completed_sr_project = sr_df.copy().reset_index()
     web_scraper = webScraping.WebScraper() if do_web_scraping else None
     metadata_cols = ['title', 'venue', 'authors', 'abstract', 'keywords', 'references', 'doi', 'meta_title']
 
@@ -217,12 +230,12 @@ def main(sr_df, do_web_scraping=False, run=999):
     already_extracted_bibtex = os.listdir(f"{EXTRACTED_PATH}/Bibtex")
     already_extracted_files.extend(already_extracted_html)
     already_extracted_files.extend(already_extracted_bibtex)
-    for idx, row in sr_df.iterrows():
+    for idx, row in completed_sr_project.iterrows():
         try:
             print(idx)
             if run < parts and not (n * run <= idx <= n * (run+1)):
                 continue  # seulement partition
-            if run == 111 and not (idx > 240):
+            if run == 111 and not (idx == 66):
                 continue  # on veut extraire sans link
             # if row['source'] in ["IEEE", "ACM", "Web of Science", "Scopus"]:
             #     continue
