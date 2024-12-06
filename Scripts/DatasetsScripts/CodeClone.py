@@ -1,4 +1,4 @@
-from SRProject import SRProject
+from Scripts.SRProject import *
 import pandas as pd
 
 # Author : Guillaume Genois, 20248507
@@ -92,3 +92,11 @@ class CodeClone(SRProject):
                     exclusion_criteria = str.upper(sheet_criteria.loc[sheet_criteria["Article title"] == article_title, [header_criteria]].values[0][0])
                     if not pd.isna(exclusion_criteria) and exclusion_criteria not in ['SELECTED', 'NO']:
                         self.df.loc[self.df['title'] == article_title, criteria] = exclusion_criteria + ": " + excl_crit_desc[exclusion_criteria]
+
+
+if __name__ == '__main__':
+    sr_project = CodeClone()
+    print('screened_decision:', sum(sr_project.df['screened_decision'] == 'Excluded'), 'Excluded,',
+          sum(sr_project.df['screened_decision'] == 'Included'), 'Included')
+    print('final_decision:', sum(sr_project.df['final_decision'] == 'Excluded'), 'Excluded,',
+          sum(sr_project.df['final_decision'] == 'Included'), 'Included')

@@ -37,17 +37,16 @@ convert_dict = {"Title": convert}  # TODO: add other columns
 
 class SmellReprod(SRProject):
     """
-    Behaviour driven development: A systematic mapping study
-    https://doi.org/10.1016/j.jss.2023.111749
-    Size: 601
-    Included: 148
-    Excluded: 453
-    Inclusion rate: 25%%
+    How far are we from reproducible research on code smell detection? A systematic literature review
+    https://www.sciencedirect.com/science/article/pii/S095058492100224X
+    Size: 1736
+    Included: 169
+    Excluded: 1567
+    Inclusion rate: 10%
     Has Conflict data: No
-    Criteria labeled: No
-    Has abstract text: Some
-    Comment: For some articles, full-text needed
-    Need to subtract the two lists to get excluded articles
+    Criteria labeled: Yes
+    Has abstract text: No
+    Comment: Full-text decision available
     """
 
     def __init__(self):
@@ -58,10 +57,12 @@ class SmellReprod(SRProject):
         # converters = {"Title": lambda x: x.encode('utf-8')}
         # All sheets
         with open(self.path, 'rb') as f:
-            sheet_all = pd.read_excel(f, sheet_name="SmellReprod")  # 601 rows
+            sheet_all = pd.read_excel(f, sheet_name="SmellReprod")  # 1733 rows
             print(sheet_all)
-            # sheet_final = pd.read_excel(f, sheet_name="final_data_from_database_search")  # 148 rows
-            # print(sheet_final)
+            sheet_screened = sheet_all.loc[sheet_all['include decision'] == 'Y']  # 169 rows
+            print(sheet_screened)
+            sheet_final = sheet_screened.loc[sheet_screened['Final result'] == 'Accepted']  # 46 rows
+            print(sheet_final)
 
         # Add columns
         # self.df["key"]
@@ -78,7 +79,30 @@ class SmellReprod(SRProject):
         self.df['mode'] = "new_screen"
 
         # Find all screened and final decisions
-        # self.find_decision_on_articles(sheet_final, sheet_all)
+        self.df['screened_decision'] = sheet_all['include decision'].apply(lambda x: 'Included' if x == 'Y' else 'Excluded')
+        self.df['final_decision'] = sheet_all['Final result'].apply(lambda x: 'Included' if x == 'Accepted' else 'Excluded')
+
+        criteria_columns = {
+            "The entry is a single journal paper, chapter of a book or conference proceedings publication which requires peer review (i.e., it is not an editorial, abstract, technical report etc).": "The entry is not a single journal paper, chapter of a book or conference proceedings publication which requires peer review (i.e., it is not an editorial, abstract, technical report etc).",
+            "The paper is written in English": "The paper is not written in English",
+            "The paper was published in 1999 or later": "The paper was not published in 1999 or later",
+            "Title or abstract of the paper indicates that it is related to software engineering": "Title or abstract of the paper does not indicate that it is related to software engineering",
+            "Title or abstract of the paper indicates that at least one code smell/anti-pattern plays an important part of the study": "Title or abstract of the paper does not indicate that at least one code smell/anti-pattern plays an important part of the study",
+            "Title or abstract of the paper indicates that it might use machine learning techniques.": "Title or abstract of the paper does not indicate that it might use machine learning techniques.",
+            "Abstract of the paper indicates that it focuses on code smells/anti-patterns in programming languages": "Abstract of the paper does not indicate that it focuses on code smells/anti-patterns in programming languages",
+            "Abstract of the paper indicates that it focuses on code smells/anti-patterns detection using source code": "Abstract of the paper does not indicate that it focuses on code smells/anti-patterns detection using source code",
+            "The paper does not focus on techniques for resolving code smells/anti-patterns": "The paper focuses on techniques for resolving code smells/anti-patterns",
+            "The paper does not focus on using code smells/anti-patterns as predictors of other code or project traits.": "The paper focuses on using code smells/anti-patterns as predictors of other code or project traits.",
+            "The paper focuses on detection of code smells/anti-patterns": "The paper does not focus on detection of code smells/anti-patterns",
+            "If the paper is a chapter of a book or conference proceedings publication, its authors have not published a study under same title in a journal (we want to include the paper once and it may be expected that the journal version includes more details)": "If the paper is a chapter of a book or conference proceedings publication, its authors have published a study under same title in a journal (we want to include the paper once and it may be expected that the journal version includes more details)",
+            "Full text of the paper is available": "Full text of the paper is not available"
+        }
+
+        self.df['exclusion_criteria'] = sheet_all.apply(
+                                            lambda row: ', '.join([criteria_columns[col] for col in criteria_columns.keys() if row[col] == 'N']),
+                                            axis=1
+                                            )
+        # self.df['inclusion_criteria'] = self.df['']
 
         self.df["reviewer_count"] = 2  # TODO: verify
 
@@ -86,16 +110,10 @@ class SmellReprod(SRProject):
         self.export_path = f"{MAIN_PATH}/Datasets/SmellReprod/SmellReprod.tsv"
         print(self.df)
 
-    def find_decision_on_articles(self, sheet_included, sheet_criteria):
-        for article_title in self.df['title'].values:
-            if article_title in sheet_included["Title"].values:
-                self.df.loc[self.df['title'] == article_title, 'screened_decision'] = "Included"
-                self.df.loc[self.df['title'] == article_title, 'final_decision'] = "Included"
-            else:
-                self.df.loc[self.df['title'] == article_title, 'screened_decision'] = "Excluded"
-                self.df.loc[self.df['title'] == article_title, 'final_decision'] = "Excluded"
-
 
 if __name__ == '__main__':
     sr_project = SmellReprod()
-    print(sr_project.df['doi'])
+    print('screened_decision:', sum(sr_project.df['screened_decision'] == 'Excluded'), 'Excluded,',
+          sum(sr_project.df['screened_decision'] == 'Included'), 'Included')
+    print('final_decision:', sum(sr_project.df['final_decision'] == 'Excluded'), 'Excluded,',
+          sum(sr_project.df['final_decision'] == 'Included'), 'Included')

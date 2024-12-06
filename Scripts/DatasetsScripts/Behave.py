@@ -42,7 +42,7 @@ class Behave(SRProject):
     Size: 601
     Included: 148
     Excluded: 453
-    Inclusion rate: 25%%
+    Inclusion rate: 25%
     Has Conflict data: No
     Criteria labeled: No
     Has abstract text: Some
@@ -95,3 +95,11 @@ class Behave(SRProject):
                 self.df.loc[self.df['title'] == article_title, 'screened_decision'] = "Excluded"
                 self.df.loc[self.df['title'] == article_title, 'final_decision'] = "Excluded"
 
+
+if __name__ == '__main__':
+    sr_project = Behave()
+    print('screened_decision:', sum(sr_project.df['screened_decision'] == 'Excluded'), 'Excluded,',
+          sum(sr_project.df['screened_decision'] == 'Included'), 'Included')
+    print('final_decision:', sum(sr_project.df['final_decision'] == 'Excluded'), 'Excluded,',
+          sum(sr_project.df['final_decision'] == 'Included'), 'Included')
+    sr_project.df.to_excel('esple.xlsx')

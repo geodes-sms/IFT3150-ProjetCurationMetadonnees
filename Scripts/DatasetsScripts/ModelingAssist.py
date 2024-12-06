@@ -129,5 +129,8 @@ class ModelingAssist(SRProject):
 
 if __name__ == '__main__':
     sr_project = ModelingAssist()
-    print(sr_project.df)
-    sr_project.df.to_csv(sr_project.export_path, sep='\t')
+    print('screened_decision:', sum(sr_project.df['screened_decision'] == 'Excluded'), 'Excluded,',
+          sum(sr_project.df['screened_decision'] == 'Included'), 'Included')
+    print('final_decision:', sum(sr_project.df['final_decision'] == 'Excluded'), 'Excluded,',
+          sum(sr_project.df['final_decision'] == 'Included'), 'Included')
+    sr_project.df.to_excel('esple.xlsx')
