@@ -74,6 +74,7 @@ class TrustSE(SRProject):
 
         # Find all screened decisions
         self.find_decision_on_articles(sheet_final, sheet_all)
+        self.df['final_decision'] = self.df['screened_decision']
         # self.find_decision_on_articles(sheet_abstract_included, sheet_title_keywords_included)
         #
         # # Add snowballing articles
@@ -83,7 +84,7 @@ class TrustSE(SRProject):
         # self.find_decision_on_articles(sheet_final_selection, sheet_abstract_included, True)
         # self.find_decision_on_articles(sheet_final_selection, sheet_text_included, True)
 
-        self.df["reviewer_count"] = 2  # TODO: not indicated in Excel which are conflicted
+        self.df["reviewer_count"] = 2
 
         self.df["doi"].astype(str)
 
