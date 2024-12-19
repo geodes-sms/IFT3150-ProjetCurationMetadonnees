@@ -72,6 +72,8 @@ class SecSelfAdapt(SRProject):
 
         self.df["reviewer_count"] = 2
 
+        self.df = self.df.loc[~pd.isna(self.df['title'])]  # enleve les titres vides
+
         self.df["doi"].astype(str)
         # self.df.loc[~self.df['doi'].isna(), 'doi'] = "https://doi.org/" + self.df.loc[~self.df['doi'].isna(), 'doi']
         self.df["link"].astype(str)
