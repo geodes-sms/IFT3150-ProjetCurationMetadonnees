@@ -76,7 +76,6 @@ class ModelGuidance(SRProject):
         # self.df["pages"] = sheet_abstract["pages"]
         # self.df["publisher"] = sheet_abstract["publisher"]
         # self.df["source"] = self.find_source(sheet_abstract["publisher"])
-        # self.df["year"].astype(int)
         # self.df["references"]
         # self.df["bibtex"]
         # self.df['mode'] = ['snowballing' if s != 'None' else 'new_screen' for s in sheet_abstract['Snowballing']]
@@ -93,7 +92,7 @@ class ModelGuidance(SRProject):
 
         self.df["doi"].astype(str)
         self.df["link"].astype(str)
-        # self.df['year'] = self.df['year'].astype("Int64")
+        self.df['year'] = self.df['year'].astype("Int64")
 
         self.df['project'] = "ModelGuidance"
         self.export_path = f"{MAIN_PATH}/Datasets/ModelGuidance/ModelGuidance.tsv"
