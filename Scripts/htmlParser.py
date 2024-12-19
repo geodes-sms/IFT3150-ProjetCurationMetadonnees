@@ -219,12 +219,16 @@ def get_metadata_from_html_ieee(html):
     # Extract the authors
     # author_tag = soup.find('meta', {'name': 'parsely-author'})
     # authors = author_tag['content'] if author_tag else None
+    authors = []
     authors_section = soup.find('div', {'class': 'authors-info-container'})
     if authors_section:
         authors_tag = authors_section.find_all('span', {'class': 'blue-tooltip'})
         authors = [author.get_text(strip=True) for author in authors_tag]
-    else:
-        authors = None
+        if len(authors) == 0:
+            authors_section = soup.find('div', {'class': 'authors-container'})
+            authors_tag = authors_section.find_all('span', {'class': 'authors-info'}) if authors_section else []
+            authors = [author.get_text(strip=True) for author in authors_tag]
+    authors = None if len(authors) == 0 else authors
 
     # Extract the keywords
     keywords_section = soup.find('ul', {'class': 'doc-keywords-list stats-keywords-list'})
@@ -280,7 +284,11 @@ def get_metadata_from_html_ACM(html):
                 else:
                     authors.append(tag.get_text(strip=True))
         else:
-            authors = None
+            authors_section = soup.find('ul', {'id':'authorsListId-mfxh'})
+            if authors_section:
+                author_tags = authors_section.find_all('li')
+                authors = [x.get_text(strip=True) for x in author_tags if not ('class' in x.attrs.keys() and x.attrs['class'] in ['label', 'count-list'])]
+            authors = None if len(authors) == 0 else authors
 
     # Extract the venue
     venue_tag = soup.find('span', {'class': 'epub-section__title'})
