@@ -95,13 +95,32 @@ class SmellReprod(SRProject):
             "The paper does not focus on using code smells/anti-patterns as predictors of other code or project traits.": "The paper focuses on using code smells/anti-patterns as predictors of other code or project traits.",
             "The paper focuses on detection of code smells/anti-patterns": "The paper does not focus on detection of code smells/anti-patterns",
             "If the paper is a chapter of a book or conference proceedings publication, its authors have not published a study under same title in a journal (we want to include the paper once and it may be expected that the journal version includes more details)": "If the paper is a chapter of a book or conference proceedings publication, its authors have published a study under same title in a journal (we want to include the paper once and it may be expected that the journal version includes more details)",
-            "Full text of the paper is available": "Full text of the paper is not available"
+            "Full text of the paper is available": "Full text of the paper is not available",
+            # "Not accessible": None,
+            # "Out of scope": None,
+            # "Out of scope - antipattern library, not detection": None,
+            # "Out of scope - clones only": None,
+            # "Out of scope - code smell correction, not detection": None,
+            # "Out of scope - detection not from source code": None,
+            # "Out of scope - literature review": None,
+            # "Out of scope - no data": None,
+            # "Out of scope - no ML": None,
+            # "Out of scope - no smells analyzed": None,
+            # "Out of scope - not in English": None,
+            # "Out of scope - only a brief": None,
+            # "Out of scope - refactoring rather than detection": None,
+            # "Out of scope - results already reported in 10.1109/WCRE.2012.56": None,
+            # "Out of scope - uses diagrams instead of source code": None,
+            # "Out of scope - uses dynamic instrumentation not source code": None,
+            # "Out of scope - WSDL modelling, not programming": None,
+            # "Out of scope: no data": None
         }
 
         self.df['exclusion_criteria'] = sheet_all.apply(
                                             lambda row: ', '.join([criteria_columns[col] for col in criteria_columns.keys() if row[col] == 'N']),
                                             axis=1
                                             )
+        # self.df['exclusion_criteria'] = sheet_all.apply()
         # self.df['inclusion_criteria'] = self.df['']
 
         self.df["reviewer_count"] = 2  # TODO: verify
