@@ -35,7 +35,7 @@ class CodeClone(SRProject):
 
     def __init__(self):
         super().__init__()
-        self.path = "../Datasets/CodeClone/CodeClone-source.xlsx"
+        self.path = f"{MAIN_PATH}/Datasets/CodeClone/CodeClone-source.xlsx"
         sheet_initial_articles = pd.read_excel(self.path, sheet_name="initial-articles")  # 10454 rows
         sheet_initial_selection = pd.read_excel(self.path, sheet_name="initial-selection")  # 573 rows
         sheet_final_selected = pd.read_excel(self.path, sheet_name="final-selected")  # 301 rows
@@ -58,7 +58,7 @@ class CodeClone(SRProject):
         self.df["reviewer_count"].astype(int)
 
         self.df['project'] = "CodeClone"
-        self.export_path = "../Datasets/CodeClone/CodeClone.tsv"
+        self.export_path = f"{MAIN_PATH}/Datasets/CodeClone/CodeClone.tsv"
         self.find_decision_on_articles(sheet_initial_selection, sheet_initial_articles)
         self.find_decision_on_articles(sheet_final_selected, sheet_initial_selection, True)
 
