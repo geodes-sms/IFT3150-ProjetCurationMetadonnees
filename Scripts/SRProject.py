@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 import pandas as pd
+from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from unidecode import unidecode
 from nltk import edit_distance
 from Scripts.os_path import EXTRACTED_PATH, MAIN_PATH
@@ -189,19 +190,19 @@ def clean_title(title):
     # tmp_title = title[title.index(":"):] if ":" in title else title
     # print(title)
     # tmp_title = title[title.index("-"):] if "-" in title else title
-    tmp_title = title
+    tmp_title = ILLEGAL_CHARACTERS_RE.sub(r'', title)
     print(tmp_title)
     # tmp_title = str.lower(tmp_title)
-    tmp_title = re.sub(r"\\'", '', str.lower(tmp_title))
+    tmp_title = re.sub(r"\\'|#x0027|#x201c|#x201d", '', str.lower(tmp_title))
     tmp_title = re.sub(r"\\emdash|\\endash|&amp;|:|/|-|—|,|\.|<.*>|³N|\?|\*|&|;|â€“|‘|'|\"|’|–|”|“|±|\+|\\|\(|\)", " ", tmp_title)
     print(tmp_title)
     tmp_title = unidecode(tmp_title)
     print([e for e in tmp_title.split(" ") if e != ""])
-    return " ".join([e for e in tmp_title.split(" ") if e != ""])
+    return " ".join([e for e in tmp_title.split(" ") if len(e) > 1])
 
 
 def check_if_right_link(new_metadata, title, author=None, venue=None, year=None):
-    if new_metadata is None or new_metadata['Title'] == "" or title == "":
+    if new_metadata is None or new_metadata['Title'] == "" or title == "" or new_metadata['Title'] is None:
         return False
     # TODO: enlever les deux points, les virgules, les tirets, / ou prendre distance? ou auteurs et année?
     tmp_title = clean_title(title)
