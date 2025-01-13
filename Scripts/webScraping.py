@@ -142,6 +142,10 @@ class WebScraper:
             new_metadata = htmlParser.get_metadata_from_html_ieee(html)
             update_metadata(metadata, new_metadata)
             self.searcher.extract_bibtex_in_IEEE(title, link)
+            parser = bibtex_parser.Parser()
+            bib_data = parser.parse_file(
+                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_00.bib')
+            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == ScienceDirect or source == 'sciencedirect' or 'Elsevier' in source:
             html = self.get_html_from_link(link)
@@ -151,6 +155,10 @@ class WebScraper:
             save_extracted_html(title + "_02", html)
             update_metadata(metadata, new_metadata)
             self.searcher.extract_bibtex_in_ScienceDirect(title)
+            parser = bibtex_parser.Parser()
+            bib_data = parser.parse_file(
+                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_02.bib')
+            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == ACM or source in ['acm', "Association for Computing Machinery (ACM)", "ACM Press",
                                        "Society for Computer Simulation International"] or "ACM" in source:
@@ -161,6 +169,10 @@ class WebScraper:
             save_extracted_html(title + "_01", html)
             metadata.update(new_metadata)
             self.searcher.extract_bibtex_in_ACM(title, link)
+            parser = bibtex_parser.Parser()
+            bib_data = parser.parse_file(
+                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_01.bib')
+            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == SpringerLink or 'Springer' in source or source == 'springer':
             html = self.get_html_from_link(link)
@@ -170,6 +182,10 @@ class WebScraper:
             save_extracted_html(title + "_03", html)
             metadata.update(new_metadata)
             self.searcher.extract_bibtex_in_SpringerLink(title, link)
+            parser = bibtex_parser.Parser()
+            bib_data = parser.parse_file(
+                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_03.bib')
+            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == Scopus or source == 'scopus':
             # i.e.: "https://www.scopus.com/record/display.uri?eid=2-s2.0-85083744459&doi=10.1089%2fg4h.2019.0067&origin=inward&txGid=0d477ca65acc675d5e5d53dc3edac470"
@@ -180,6 +196,10 @@ class WebScraper:
             save_extracted_html(title + "_04", html)
             metadata.update(new_metadata)
             self.searcher.extract_bibtex_in_scopus_signed_in(title, link)
+            parser = bibtex_parser.Parser()
+            bib_data = parser.parse_file(
+                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_04.bib')
+            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
             if all(new_metadata[k] is None for k in new_metadata.keys()):
                 last_half = link[link.find("doi"):]
@@ -199,6 +219,10 @@ class WebScraper:
                 return
             metadata.update(new_metadata)
             self.searcher.extract_bibtex_in_WoS(title, link)
+            parser = bibtex_parser.Parser()
+            bib_data = parser.parse_file(
+                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_05.bib')
+            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == PubMedCentral:
             html = self.get_html_from_link(link)
@@ -208,6 +232,10 @@ class WebScraper:
             save_extracted_html(title + "_08", html)
             metadata.update(new_metadata)
             self.searcher.extract_bibtex_in_PubMedCentral(title, link)
+            parser = bibtex_parser.Parser()
+            bib_data = parser.parse_file(
+                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_08.bib')
+            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         else:
             print(f'source "{source}" not valid')
