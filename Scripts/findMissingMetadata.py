@@ -121,14 +121,17 @@ def extract_without_link(row, already_extracted_files, web_scraper):
         print("author", authors)
         print("year", year)
         if web_scraper:
-            metadata = web_scraper.get_metadata_from_title(row['title'], authors, WoS)  #### source here if want to specify
+            metadata = web_scraper.get_metadata_from_title(row['title'], authors, source)  #### source here if want to specify
             if metadata: print("extracted without link")
             else: print("no article found without link")
             # time.sleep(60)
             # extract doi obtained
             if metadata and metadata['DOI']:
-                metadata = web_scraper.get_metadata_from_link(row['title'], "https://doi.org/" + str(metadata['DOI']), metadata['Publisher'])
-                print("extracted from new doi obtained")
+                print("trying to extract from new DOI")
+                new_metadata = web_scraper.get_metadata_from_link(row['title'], "https://doi.org/" + str(metadata['DOI']), metadata['Publisher'])
+                if new_metadata and new_metadata['Title']:
+                    update_metadata(metadata, new_metadata)
+                    print("extracted from new doi obtained")
 
     print(metadata)
     return metadata
@@ -166,8 +169,9 @@ def extract_with_link(row, already_extracted_files, web_scraper: WebScraper):
                     web_scraper.close()
                     web_scraper = webScraping.WebScraper()
                     continue
-            metadata['Link'] = url
-            if metadata: print("extracted from link")
+            if metadata:
+                print("extracted from link")
+                metadata['Link'] = url
             else: print("no article found from link")
             # time.sleep(60*5)
 
@@ -235,7 +239,7 @@ def main(sr_df, do_web_scraping=False, run=999):
             print(idx)
             if run < parts and not (n * run <= idx <= n * (run+1)):
                 continue  # seulement partition
-            if run == 111 and not (idx == 66):
+            if run == 111 and not (idx == 407):
                 continue  # on veut extraire sans link
             # if row['source'] in ["IEEE", "ACM", "Web of Science", "Scopus"]:
             #     continue
@@ -273,7 +277,9 @@ def main(sr_df, do_web_scraping=False, run=999):
                     erreurs.append((idx, "all", 'passed'))
         except Exception as e:
             print(e)
+            print(traceback.format_exc())
             erreurs.append((idx, e, traceback.format_exc()))
+            # breakpoint()
         print(completed_sr_project.loc[idx])
         completed_sr_project.loc[idx] = row
         print(row)

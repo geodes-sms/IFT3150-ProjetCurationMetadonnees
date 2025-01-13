@@ -2,9 +2,14 @@
 
 # import cudf.pandas
 # cudf.pandas.install()
-
 import sys
+
+from Scripts.DatasetsScripts.Demo import Demo
+
+sys.path.extend(['/home/ggenois/PycharmProjects/IFT3150-ProjetCurationMetadonnees'])
+
 import chardet
+from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 import findMissingMetadata
 from Scripts.DatasetsScripts.ArchiML import ArchiML
 from Scripts.DatasetsScripts.Behave import Behave
@@ -28,6 +33,7 @@ from os_path import MAIN_PATH
 
 # Author : Guillaume Genois, 20248507
 # This script is for importing and uniformising data from multiple datasets of SR.
+
 
 """
   Key               String
@@ -87,11 +93,12 @@ def postProcessing(sr_project):
 def cleanDataFrame(df: pd.DataFrame) -> pd.DataFrame:
     new_df = df.replace("–", "-")
     new_df = new_df.replace("©", '')
-    new_df = new_df.replace("©", '')
+    new_df = new_df.replace(";;", ';')
     # new_df = new_df['keywords'].replace(",", ';')
     new_df = new_df.map(lambda x: x.strip() if isinstance(x, str) else x)
     new_df = new_df.replace("nan", '')
     new_df = new_df.fillna('')
+    new_df = new_df.map(lambda x: ILLEGAL_CHARACTERS_RE.sub(r'',x) if isinstance(x, str) else x)
     return new_df
 
 
@@ -106,18 +113,18 @@ def ExportToCSV(sr_project):
 
 def main(args=None):
     if args is None or not len(args) > 0:
-        args = ["OODP"]
-        # args = ["ESPLE", "OODP", 'Behave', 'ModelingAssist', 'ModelGuidance']
+        # args = ["ArchiML", 'CodeCompr', 'ModelingAssist', 'CodeClone']
+        args = ['Demo']
     sr_project = None
 
     for arg in args:
-        if arg == "ArchiML":
+        if arg == "ArchiML":  #
             sr_project = ArchiML()
         elif arg == "Behave":  # final cleaning needed
             sr_project = Behave()
-        elif arg == "CodeClone":
+        elif arg == "CodeClone":  #
             sr_project = CodeClone()
-        elif arg == "CodeCompr":
+        elif arg == "CodeCompr":  #
             sr_project = CodeCompr()
         elif arg == "DTCPS":  # complete
             sr_project = DTCPS()
@@ -139,12 +146,14 @@ def main(args=None):
             sr_project = OODP()
         elif arg == "SecSelfAdapt":  # started
             sr_project = SecSelfAdapt()
-        elif arg == "SmellReprod":
+        elif arg == "SmellReprod":  #
             sr_project = SmellReprod()
         elif arg == "TestNN":  # complete
             sr_project = TestNN()
         elif arg == "TrustSE":  # 97 missing
             sr_project = TrustSE()
+        elif arg == "Demo":
+            sr_project = Demo()
         else:
             print("Not a valid argument")
             continue
@@ -152,17 +161,14 @@ def main(args=None):
         sr_project.df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}_pre-extract.xlsx")
         # printEncoding(sr_project.path)  # to make sure we use the right encoding if necessary
         completed_df = findMissingMetadata.main(sr_project.df, True, 999)
-        # df = pd.read_csv("C:/Users/guill/OneDrive - Universite de Montreal/Projet Curation des métadonnées/Datasets/{arg}/{arg}.tsv", delimiter="\t")
-        # print(df)
-        # completed_df = find_missing_metadata(df)
         cleaned_df = cleanDataFrame(completed_df)
-        cleaned_df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}.xlsx")
-        # return
-        # postProcessing(sr_project)
         sr_project.df = cleaned_df
 
         ExportToCSV(sr_project)
         postProcessing(sr_project)
+
+        # cleaned_df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}.xlsx")
+        # sr_project.df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}_tmp.xlsx")
 
 
 if __name__ == "__main__":

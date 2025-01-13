@@ -156,7 +156,7 @@ def compare_titles_and_metatitles():
     print("====================================")
     for er in errors: print(er)
     print(len(errors))
-compare_titles_and_metatitles()
+# compare_titles_and_metatitles()
 
 def clean_bad_html():
     n = 0
@@ -235,25 +235,59 @@ def remove_whitespaces_from_bibtex_id(bibtex_string):
         bibtex_string = bibtex_string.replace(match.group(), cleaned_id)
     return bibtex_string
 
+def wrap_entry_in_bibtex(bibtex_string):
+    def clean_field(field_content):
+        # Split by "and" to process each editor/institution separately
+        entries = field_content.split(" and ")
+        cleaned_entries = []
+        for entry in entries:
+            # Escape commas in each entry that are not already wrapped in {}
+            if ',' in entry and not entry.startswith("{") and not entry.endswith("}"):
+                cleaned_entries.append(f"{{{entry.strip()}}}")
+            else:
+                cleaned_entries.append(entry.strip())
+        return " and ".join(cleaned_entries)
+
+    # Search for the editor field and apply cleaning
+    bibtex_string = re.sub(
+        r'editor\s*=\s*{([^{}]*)}',
+        lambda match: 'editor = {' + clean_field(match.group(1)) + '}',
+        bibtex_string
+    )
+    return bibtex_string
+
 # Example usage
 bibtex_string = """
-@INPROCEEDINGS{5693185,
-  author={Liu, Yi and Ma, Zhiyi and Shao, Weizhong},
-  booktitle={2010 Asia Pacific Software Engineering Conference}, 
-  title={Integrating Non-functional Requirement Modeling into Model Driven Development Method}, 
-  year={2010},
-  volume={},
-  number={},
-  pages={98-107},
-  abstract={...},
-  keywords={...},
-  doi={10.1109/APSEC.2010.21},
-  ISSN={1530-1362},
-  month={Nov},}
+@ARTICLE{Caron2003164,
+	author = {Caron, O. and Carré, B. and Muller, A. and Vanwormhoudt, G.},
+	title = {A framework for supporting views in component oriented information systems},
+	year = {2003},
+	journal = {Lecture Notes in Computer Science (including subseries Lecture Notes in Artificial Intelligence and Lecture Notes in Bioinformatics)},
+	volume = {2817},
+	pages = {164 – 178},
+	doi = {10.1007/978-3-540-45242-3_16},
+	url = {https://www.scopus.com/inward/record.uri?eid=2-s2.0-35248841430&doi=10.1007%2f978-3-540-45242-3_16&partnerID=40&md5=4b710662ae6114ad707ca98c732cf67f},
+	affiliations = {Laboratoire d'Informatique Fondamentale de Lille, UPRESA CNRS 8022, Université des Sciences et Technologies de Lille, 59655 Villeneuve d'Ascq Cedex, France},
+	abstract = {The Component Oriented Design of Information Systems is spreading. After being used for gaining in reusability at the architectural level, components are nowadays applied at the business logic level. We focus here on the design of multiple functional views in such information systems, specially within the EJB framework. Traditionally, in the database context, this problem is solved by the notion of "view-schemas" applied to a database schema. We present a composition-oriented approach grounded on the splitting of entities according to views requirements. Two original design patterns are formulated and capture the main issues of the approach. The first one is concerned with the management of the split component and its conceptual identity. The second offers a solution for relationships among such components. Finally, we apply these patterns to the EJB framework. This framework improves evolution and traceability of views. © Springer-Verlag Berlin Heidelberg 2003.},
+	keywords = {Reusability; Architectural levels; Business logic; Component-oriented; Component-oriented designs; Database schemas; Original design; Information systems},
+	correspondence_address = {O. Caron; Laboratoire d'Informatique Fondamentale de Lille, UPRESA CNRS 8022, Université des Sciences et Technologies de Lille, 59655 Villeneuve d'Ascq Cedex, France; email: carono@lifl.fr},
+	editor = {Konstantas D. and Leonard M. and Konstantas D. and University of Twente, Department of Computer Science, P.O.Box 217, Enschede, 7500 and Pigneur Y. and Patel S. and South Bank University, School of Computing, Information Systems and Mathematics, 103 Borough Road, London, SE1 0AA},
+	publisher = {Springer Verlag},
+	issn = {03029743},
+	isbn = {3540408606},
+	language = {English},
+	abbrev_source_title = {Lect. Notes Comput. Sci.},
+	type = {Article},
+	publication_stage = {Final},
+	source = {Scopus},
+	note = {Cited by: 8}
+}
 """
 
 # cleaned_bibtex = remove_whitespaces_from_bibtex_id(bibtex_string)
 # print(cleaned_bibtex)
+# clean_bibtex = wrap_entry_in_bibtex(bibtex_string)
+# print(clean_bibtex)
 
 
 def test_opening_dataset(tsv):
@@ -262,9 +296,9 @@ def test_opening_dataset(tsv):
 # test_df = test_opening_dataset(f'{MAIN_PATH}/Datasets/_Datasets Sent/GameSE.tsv')
 # print(test_df.shape)
 # print(test_df.columns)
-# test_df = test_opening_dataset(f'{MAIN_PATH}/Datasets/_Datasets Sent/ESM_2.tsv')
-# print(test_df.shape)
-# print(test_df.columns)
+test_df = test_opening_dataset(f'{MAIN_PATH}/Datasets/_Datasets Sent/Behave.tsv')
+print(test_df.shape)
+print(test_df.columns)
 
 def clean_all_bibtex():
     for file in os.listdir(f"{EXTRACTED_PATH}/Bibtex"):
@@ -273,6 +307,7 @@ def clean_all_bibtex():
         cleaned_bib = remove_whitespaces_from_bibtex_id(bib)
         with open(f"{EXTRACTED_PATH}/Bibtex/{file}", 'wb') as f:
             f.write(cleaned_bib.encode('utf-8'))
+        print(file)
 # clean_all_bibtex()
 
 def convert_bib_to_tsv():

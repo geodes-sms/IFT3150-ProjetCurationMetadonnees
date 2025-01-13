@@ -62,13 +62,13 @@ IEEE = "IEEE"
 ScienceDirect = "Science Direct"
 ACM = "ACM"
 SpringerLink = "Springer Link"
-Scopus = "scopus"
+Scopus = "Scopus"
 ScopusSignedIn = "Scopus Signed In"
 WoS = "Web of Science"
 PubMedCentral = "Pub Med Central"
 arXiv = "arXiv"
 
-sources_name = ['acm', 'ieee', 'wos', 'scopus', 'springer', 'sciencedirect']
+sources_name = ['scopus', 'acm', 'ieee', 'wos', 'springer', 'sciencedirect']
 all_sources_name = ['ieee', 'springer', 'acm', 'sciencedirect', 'scopus', 'wos',
                     IEEE, SpringerLink, ACM, ScienceDirect, Scopus, WoS,
                    "Association for Computing Machinery (ACM)", "ACM Press"]
@@ -111,35 +111,14 @@ def save_link(title, link):
 
 # Abstract class for all systematic reviews datasets
 class SRProject:
-    # Blank dataframe
-    df = empty_df.copy()
-    # All columns
-    project = None
-    key = None
-    title = None
-    abstract = None
-    keywords = None
-    authors = None
-    venue = None
-    doi = None
-    references = None
-    bibtex = None
-    screened_decision = None
-    final_decision = None
-    mode = None
-    inclusion_criteria = None
-    exclusion_criteria = None
-    reviewer_count = None
 
-    # Paths
-    path = None
-    export_path = None
 
     def __init__(self):
         # Blank dataframe
         self.df = empty_df.copy()
         # All columns
         self.project = None
+
         self.key = None
         self.title = None
         self.abstract = None
@@ -194,8 +173,9 @@ def clean_title(title):
     print(tmp_title)
     # tmp_title = str.lower(tmp_title)
     tmp_title = re.sub(r"\\'|#x0027|#x201c|#x201d", '', str.lower(tmp_title))
-    tmp_title = re.sub(r"\\emdash|\\endash|&amp;|:|/|-|—|,|\.|<.*>|³N|\?|\*|&|;|â€“|‘|'|\"|’|–|”|“|±|\+|\\|\(|\)", " ", tmp_title)
+    tmp_title = re.sub(r"\\emdash|\\endash|&amp;|â€”|â€™|:|/|-|—|,|\.|<.*>|³N|\?|\*|&|;|â€“|‘|'|\"|’|–|”|“|±|\+|\\|\(|\)", " ", tmp_title)
     print(tmp_title)
+    tmp_title = ''.join([char for char in tmp_title if char.isalpha() or char.isspace()])
     tmp_title = unidecode(tmp_title)
     print([e for e in tmp_title.split(" ") if e != ""])
     return " ".join([e for e in tmp_title.split(" ") if len(e) > 1])

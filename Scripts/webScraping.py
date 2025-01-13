@@ -156,8 +156,8 @@ class WebScraper:
                                        "Society for Computer Simulation International"] or "ACM" in source:
             html = self.get_html_from_link(link)
             new_metadata = htmlParser.get_metadata_from_html_ACM(html)
-            if not check_if_right_link(new_metadata, title):
-                return
+            # if not check_if_right_link(new_metadata, title):
+            #     return
             save_extracted_html(title + "_01", html)
             metadata.update(new_metadata)
             self.searcher.extract_bibtex_in_ACM(title, link)
@@ -251,12 +251,12 @@ class WebScraper:
             if not new_metadata: new_metadata = metadata_base.copy()
             update_metadata(metadata, new_metadata)
 
-        elif source == Scopus or source == 'scopus':
+        elif source == Scopus:
             new_metadata = self.searcher.search_in_Scopus(title)
             if not new_metadata: new_metadata = metadata_base.copy()
             update_metadata(metadata, new_metadata)
 
-        elif source == ScopusSignedIn:
+        elif source == ScopusSignedIn or source == 'scopus':
             new_metadata = self.searcher.search_in_Scopus_signed_in(title)
             if not new_metadata: new_metadata = metadata_base.copy()
             update_metadata(metadata, new_metadata)
