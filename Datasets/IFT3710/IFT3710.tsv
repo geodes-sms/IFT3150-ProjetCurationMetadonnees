@@ -1,0 +1,48 @@
+	key	project	title	abstract	keywords	authors	venue	doi	references	pages	bibtex	screened_decision	final_decision	mode	inclusion_criteria	exclusion_criteria	reviewer_count	source	year	meta_title	link	publisher	metadata_missing
+0		IFT3710	Physics of Language Models: Part 1, Learning Hierarchical Language Structures																				
+1		IFT3710	Physics of Language Models: Part 2.2, How to Learn From Mistakes on Grade-School Math Problems																				
+2		IFT3710	Physics of Language Models: Part 2.1, Grade-School Math and the Hidden Reasoning Process																				
+3		IFT3710	Physics of Language Models: Part 3.1, Knowledge Storage and Extraction																				
+4		IFT3710	Physics of Language Models: Part 3.2, Knowledge Manipulation																				
+5		IFT3710	Physics of Language Models: Part 3.3, Knowledge Capacity Scaling Laws																				
+6		IFT3710	The First Law of Complexodynamics																				
+7		IFT3710	The Unreasonable Effectiveness of Recurrent Neural Networks																				
+8		IFT3710	Recurrent Neural Network Regularization																				
+9		IFT3710	Keeping Neural Networks Simple by Minimizing the Description Length of the Weights																				
+10		IFT3710	Order Matters: Sequence to Sequence for Sets																				
+11		IFT3710	GPipe: Easy Scaling with Micro-Batch Pipeline Parallelism																				
+12		IFT3710	Multi-Scale Context Aggregation by Dilated Convolutions																				
+13		IFT3710	Identity Mappings in Deep Residual Networks																				
+14		IFT3710	A Simple Neural Network Module for Relational Reasoning																				
+15		IFT3710	Quantifying the Rise and Fall of Complexity in Closed Systems: the Coffee Automaton																				
+16		IFT3710	Neural Turing Machines																				
+17		IFT3710	Deep Speech 2: End-to-End Speech Recognition in English and Mandarin																				
+18		IFT3710	Scaling Laws for Neural Language Models																				
+19		IFT3710	A Tutorial Introduction to the Minimum Description Length Principle																				
+20		IFT3710	Machine Super Intelligence																				
+21		IFT3710	Better & Faster Large Language Models Via Multi-token Prediction																				
+22		IFT3710	Zephyr: Direct Distillation of LM Alignment																				
+23		IFT3710	DeepSeek V3 Technical Report																				
+24		IFT3710	Mixtral of Experts																				
+25		IFT3710	DoRA: Weight-Decomposed Low-Rank Adaptation																				
+26		IFT3710	Simple and Scalable Strategies to Continually Pre-train Large Language Models																				
+27		IFT3710	Is DPO Superior to PPO for LLM Alignment? A Comprehensive Study																				
+28		IFT3710	Visual Autoregressive Modeling: Scalable Image Generation via Next-Scale Prediction																				
+29		IFT3710	Vision Transformers Need Registers																				
+30		IFT3710	Scaling Monosemanticity: Extracting Interpretable Features from Claude 3 Sonnet																				
+31		IFT3710	Segment Anything																				
+32		IFT3710	The Platonic Representation Hypothesis																				
+33		IFT3710	The Llama 3 Herd of Models																				
+34		IFT3710	AFlow: Automating Agentic Workflow Generation																				
+35		IFT3710	The Alberta Plan for AI Research																				
+36		IFT3710	Automating the Search for Artificial Life with Foundation Models																				
+37		IFT3710	Loss of plasticity in deep continual learning																				
+38		IFT3710	Emergence and Causality in Complex Systems: A Survey of Causal Emergence and Related Quantitative Studies																				
+39		IFT3710	A Theory for Emergence of Complex Skills in Language Models																				
+40		IFT3710	Genie: Generative Interactive Environments																				
+41		IFT3710	Understanding World or Predicting Future? A Comprehensive Survey of World Models																				
+42		IFT3710	Locating and Editing Factual Associations in GPT																				
+43		IFT3710	Q*: Improving Multi-step Reasoning for LLMs with Deliberative Planning																				
+44		IFT3710	Scaling of Search and Learning: A Roadmap to Reproduce o1 from Reinforcement Learning Perspective																				
+45		IFT3710	Neuroscience-Inspired Artiﬁcial Intelligence																				
+46		IFT3710	ChainForge: A Visual Toolkit for Prompt Engineering and LLM Hypothesis Testing																				

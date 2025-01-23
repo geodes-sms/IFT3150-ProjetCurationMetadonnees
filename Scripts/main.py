@@ -5,6 +5,7 @@
 import sys
 
 from Scripts.DatasetsScripts.Demo import Demo
+from Scripts.DatasetsScripts.IFT3710 import IFT3710
 
 sys.path.extend(['/home/ggenois/PycharmProjects/IFT3150-ProjetCurationMetadonnees'])
 
@@ -154,6 +155,8 @@ def main(args=None):
             sr_project = TrustSE()
         elif arg == "Demo":
             sr_project = Demo()
+        elif arg == "IFT3710":
+            sr_project = IFT3710()
         else:
             print("Not a valid argument")
             continue
