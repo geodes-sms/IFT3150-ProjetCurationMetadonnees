@@ -745,9 +745,10 @@ class SearcherInSource:
             # self.wait_to_load(30, '/html/body/div[2]/div/div/div/div/div/div[2]/article/div[3]/div[2]/div[2]/div/div/button')
             time.sleep(2)
 
+
         try:
             web_element = self.driver.find_element(By.XPATH,
-                                                   '/html/body/div[3]/div/div/div/div/div/div[2]/article/div[2]/div[2]/div[2]/div/div/button')
+                                                   '/html/body/div[3]/div/div/div/div/div/div[2]/article/div[2]/div[2]/div[3]/div/div/button')
             # self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
             time.sleep(1)
             web_element.click()
@@ -757,42 +758,52 @@ class SearcherInSource:
         except:
             try:
                 web_element = self.driver.find_element(By.XPATH,
-                                                       '/html/body/div[2]/div/div/div/div/div/div[2]/article/div[2]/div[2]/div[3]/div/div/button')
+                                                       '/html/body/div[3]/div/div/div/div/div/div[2]/article/div[2]/div[2]/div[2]/div/div/button')
                 # self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
                 time.sleep(1)
                 web_element.click()
                 web_element = self.driver.find_element(By.XPATH,
-                                                       '/html/body/div[2]/div/div/div/div/div/div[2]/article/div[2]/div[2]/div[3]/div/div[2]/div/div/ul/li[3]/form/button')
+                                                       '/html/body/div[3]/div/div/div/div/div/div[2]/article/div[2]/div[2]/div[3]/div/div[2]/div/div/ul/li[3]/form/button')
                 web_element.click()
             except:
                 try:
                     web_element = self.driver.find_element(By.XPATH,
-                                                       '/html/body/div[3]/div/div/div/div/div/div[2]/article/div[3]/div[2]/div[2]/div/div/button')
+                                                           '/html/body/div[2]/div/div/div/div/div/div[2]/article/div[2]/div[2]/div[3]/div/div/button')
                     # self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
                     time.sleep(1)
                     web_element.click()
                     web_element = self.driver.find_element(By.XPATH,
-                                                           '/html/body/div[3]/div/div/div/div/div/div[2]/article/div[3]/div[2]/div[2]/div/div[2]/div/div/ul/li[3]/form/button')
+                                                           '/html/body/div[2]/div/div/div/div/div/div[2]/article/div[2]/div[2]/div[3]/div/div[2]/div/div/ul/li[3]/form/button')
                     web_element.click()
                 except:
                     try:
                         web_element = self.driver.find_element(By.XPATH,
-                                                           '/html/body/div[4]/div/div/div/div/div/div[2]/article/div[2]/div[2]/div[3]/div/div/button')
+                                                           '/html/body/div[3]/div/div/div/div/div/div[2]/article/div[3]/div[2]/div[2]/div/div/button')
                         # self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
                         time.sleep(1)
                         web_element.click()
                         web_element = self.driver.find_element(By.XPATH,
-                                                               '/html/body/div[4]/div/div/div/div/div/div[2]/article/div[2]/div[2]/div[3]/div/div[2]/div/div/ul/li[3]/form/button')
+                                                               '/html/body/div[3]/div/div/div/div/div/div[2]/article/div[3]/div[2]/div[2]/div/div[2]/div/div/ul/li[3]/form/button')
                         web_element.click()
                     except:
-                        web_element = self.driver.find_element(By.XPATH,
-                                                               '/html/body/div[3]/div/div/div/div/div/div[2]/article/div[3]/div[2]/div[2]/div/div/button')
-                        # self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
-                        time.sleep(1)
-                        web_element.click()
-                        web_element = self.driver.find_element(By.XPATH,
-                                                               '/html/body/div[4]/div/div/div/div/div/div[2]/article/div[2]/div[2]/div[3]/div/div[2]/div/div/ul/li[3]/form/button')
-                        web_element.click()
+                        try:
+                            web_element = self.driver.find_element(By.XPATH,
+                                                               '/html/body/div[4]/div/div/div/div/div/div[2]/article/div[2]/div[2]/div[3]/div/div/button')
+                            # self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
+                            time.sleep(1)
+                            web_element.click()
+                            web_element = self.driver.find_element(By.XPATH,
+                                                                   '/html/body/div[4]/div/div/div/div/div/div[2]/article/div[2]/div[2]/div[3]/div/div[2]/div/div/ul/li[3]/form/button')
+                            web_element.click()
+                        except:
+                            web_element = self.driver.find_element(By.XPATH,
+                                                                   '/html/body/div[3]/div/div/div/div/div/div[2]/article/div[3]/div[2]/div[2]/div/div/button')
+                            # self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
+                            time.sleep(1)
+                            web_element.click()
+                            web_element = self.driver.find_element(By.XPATH,
+                                                                   '/html/body/div[4]/div/div/div/div/div/div[2]/article/div[2]/div[2]/div[3]/div/div[2]/div/div/ul/li[3]/form/button')
+                            web_element.click()
 
         time.sleep(2)
         self.save_bibtex(title, '02')

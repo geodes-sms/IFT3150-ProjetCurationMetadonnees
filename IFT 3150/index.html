@@ -1,5 +1,4 @@
-<html>
-<head>
+<html><head>
 <title>
 IFT 3150 - Guillaume Genois
 </title>
@@ -43,7 +42,7 @@ th, tr, td {
 <br>
 <b>Courriel:</b> guillaume.genois@umontreal.ca
 <br>
-<b>Lien GitHub du projet:</b> https://github.com/Guigui031/IFT3150-ProjetCurationMetadonnees.git
+<b>Lien GitHub du projet:</b> https://github.com/geodes-sms/IFT3150-ProjetCurationMetadonnees
 <br><br>
 <b>Professeur superviseur:</b> Eugene Syriani
 <br>
@@ -71,7 +70,7 @@ résultat. Pour la sélection dans une RLS, le LLM doit décider si un article d
 Ce projet vise à construire des ensembles de données fiables et annotées avec la bonne décision afin d'évaluer
 l'efficacité des LLM dans la sélection d'articles. Les données proviennent de RLS déjà publiées et pour
 lesquelles le processus de sélection d'articles est disponible. Nous avons déjà identifié une 20aine de
-publications (50 000+ articles au total). Les données incluent les métadonnées des articles (ex. titre, résumé,
+publications (30 000+ articles au total). Les données incluent les métadonnées des articles (ex. titre, résumé,
 mots-clés) et l'information sur le processus décisionnel (ex. décision de chaque réviseur, décisions
 conflictuelles, décision finale). Cependant, ces données sont souvent incomplètes et représentées dans des
 formats différents. De plus, les informations décisionnelles doivent souvent être inférées à partir de l'article
@@ -188,29 +187,101 @@ Le travail accompli est en correspondance au plan de développement. Cependant, 
 
 <h3>2 - Semaines du 16 et 23 septembre</h3>
 <ul>
-<li>Complétion des recherches pour les jeux de données Behave et DTCPS;</li>
+<li>Quasi complétion des recherches pour les jeux de données Behave et DTCPS;</li>
 <li>Ajout interopérabilité entre Linux et Windows en regroupant les variables globales des path utilisés;</li>
 <li>Analyse des jeux de données ModelingAssist et ModelGuidance qui sont deux jeux de données avec des décisions comportants des conflits dans le processus de sélection;</li>
-<li>Complétion du jeu de données GameSE qui a nécessité multiples corrections et ajustements au code.</li>
+<li>Quasi complétion complète du jeu de données GameSE qui a nécessité multiples corrections et ajustements au code.</li>
 </ul>
 <p>
 Le travail accompli est en correspondance au plan de développement. GameSE a pris plus de temps que prévu, mais maintenant qu'il est complété, les autres jeux de données seront plus rapides.
 </p>
 
 <h3>3 - Semaines du 30 septembre et 7 octobre</h3>
+<ul>
+<li>Complétion finale du jeu de données GameSE;</li>
+<li>Re-compilation des jeux de données ESM_2 et TestNN, car ils avaient un problème d'encodage. Avec les modifications apportées dans les dernières semaines, le problème s'est réglé en recompilant simplement les jeux de données;</li>
+<li>Nettoyage d'articles incorrectement enregistrés;</li>
+<li>Multiples corrections et ajouts au système d'extraction des métadonnées dans les HTML;</li>
+<li>Mise à jour des balises HTML pour l'extraction automatique des articles pour compléter la recherche des jeux de données Behave et DTCPS.</li>
+</ul>
+<p>
+Le travail accompli est en correspondance au plan de développement. Avec la complétion de GameSE et l'extraction des métadonnées plus efficace, DTCPS et Behave devraient pouvoir être complété pour les semaines prochaines. ModelingAssist et ModelGuidance devraient suivre par après.
+</p>
+
 <h3>4 - Semaines du 14 et 21 octobre</h3>
+<ul>
+<li>Complétion du jeu de données DTCPS;</li>
+<li>Ajout d'un nettoyage automatique lors de l'enregistrement des Bibtex extraits;</li>
+<li>Différents ajouts encore au système d'extraction des métadonnées dans les HTML;</li>
+<li>Correction d'un problème d'encodage sur les fichiers excels pour les articles ajoutés manuellement causé par l'encodage automatique utilisé sur Windows et sur Ubuntu. Une correction manuelle a été faite pour uniformiser en utf-8.</li>
+</ul>
+<p>
+Le travail accompli est un peu en retard au plan de développement. Il faudrait que les prochaines complétions de jeux de données soient plus rapides afin de terminer dans les temps.
+</p>
+
 <h3>5 - Semaines du 28 octobre et 4 novembre</h3>
+<ul>
+<li>Complétion des jeux de données Behave et TrustSE. Leur complétion a demandé un ajout manuel d'environ 120 articles;</li>
+<li>Ajout d'un meilleur nettoyage lors de l'extraction dans les HTML et les Bibtex des abstract, authors et keywords;</li>
+<li>Ajout d'une meilleure flexibilitée en couvrant plus de cas dans les recherches sur le web pour ACM, SpringerLink et ScienceDirect.</li>
+</ul>
+<p>
+Le travail accompli est en correspondance au plan de développement. L'extraction des articles fonctionne bien en général, tout en demandant toujours une mise à jour des balises nécessaires à la recherche en préalable. Le rythme doit être gardé pour les prochaines semaines.
+</p>
+
 <h3>6 - Semaines du 11 et 18 novembre</h3>
+<ul>
+<li>Débuts des recherches automatiques pour ESPLE, SecSelfAdapt, ModelGuidance, ModelingAssist, SmellReprod, CodeCompr et ArchiML;</li>
+<li>Ajout d'un meilleur nettoyage des titres des articles afin de couvrir plus de cas;</li>
+<li>Ajout plus grande flexibilité sur Scopus et Springer Link en récupérant plus d'articles en résultat au moteur de recherche plutôt que juste le premier;</li>
+<li>Mise à jour continue des balises HTML de Scopus, Science Direct et Springer Link pour le fonctionnement de l'application.</li>
+</ul>
+<p>
+Le travail accompli est en retard avec le plan de développement. Afin d'accélérer le processus de complétion des prochaines revues systématiques, les recherches automatiques pour plusieurs ont été tout de suite lancées afin de gagner du temps.
+</p>
+
 <h3>7 - Semaines du 25 novembre et 2 décembre</h3>
+<ul>
+<li>Complétion des jeux de données Behave et TrustSE. Leur complétion a demandé un ajout manuel d'environ 120 articles;</li>
+<li>Complétion du document des métadonnées des projets de revues systématiques (complété pour les 15);</li>
+<li>Amélioration au niveau de la robustesse pour récupérer la source par le lien ouvert par un DOI plutôt que seulement l'API de Crossref;</li>
+<li>Ajout de la logique de la méthodologie pour ESPLE et SecSelfAdapt;</li>
+<li>Ajout d'une dizaine d'articles manuellement pour compléter ModelGuidance.</li>
+</ul>
+<p>
+Le travail accompli est en retard avec le plan de développement. Plusieurs revues systématiques telles que ESPLE, SmellReprod et SecSelfAdapt n'ont preque aucun article à récupérer manuellement. Il faut donc que je prenne le temps de venir les compléter manuellement. Avant l'envoi de n'importe quel jeu de données, je souhaite valider les données recueillies, mais cela retarde le projet aussi un peu.</p>
+
 <h3>8 - Semaines du 9 et 16 décembre</h3>
+<ul>
+<li>Correction à l'aide de ChatGPT d'environ 700 articles dont le nom étaient mal écrits dans le fichier des données sources de ModelingAssist;</li>
+<li>Ajout de la logique de la méthodologie pour CodeClone, ModelGuidance, CodeCompr et SmellReprod;</li>
+<li>Ajout d'une meilleure flexibilitée en couvrant plus de cas dans les recherches sur le web pour ACM, SpringerLink et ScienceDirect;</li>
+<li>Remise du rapport final.</li>
+</ul>
+<p>
+Le travail accompli est en retard avec le plan de développement. Plusieurs revues systématiques sont complétées, 
+mais il manque tout de même une validation finale avant d'être envoyée. Il manque environ 400*4 articles aux 4 derniers jeux de données, 
+soient ModelingAssist, CodeClone, ArchiML et CodeCompr. Le bug se retrouve probablement dans le nettoyage pas assez complet des titres.
+Ces jeux de données seront complétés lors du début de la session d'hiver.
+</p>
 
 <hr size="2">
 
 <h2>Rapport final</h2>
 <h3>Résumé</h3>
-<p>Français</p>
-<p>Anglais</p>
+<p>
+<b>Français</b>
+<br>
+Les revues littéraires systématiques (RLS) constituent une méthodologie clé pour synthétiser les connaissances scientifiques en suivant un processus rigoureux. Ce projet s’inscrit dans une recherche sur l'application des modèles d'apprentissage génératifs (large language models - LLM) pour automatiser des tâches critiques des RLS, notamment la sélection d'articles, souvent laborieuse et source de biais. L'objectif principal est de créer des ensembles de données annotés pour évaluer l'efficacité des LLM dans cette tâche. Les données utilisées proviennent d'une quinzaine de RLS publiées, représentant plus de 30 000 articles. Ces données incluent des métadonnées (titres, résumés, mots-clés) ainsi que des informations décisionnelles (critères d'inclusion/exclusion, décisions des réviseurs). Cependant, ces informations sont souvent incomplètes et nécessitent une normalisation pour garantir leur exploitabilité. Pour cela, plusieurs étapes ont été menées : analyse des méthodologies de RLS, extraction des métadonnées et compilation des données à partir de fichiers HTML et BibTeX issus des principaux moteurs de recherche (IEEE, ACM, Science Direct, etc.). Des algorithmes ont été développés pour automatiser la récupération, le nettoyage et l’alignement des données. Au total, 16 jeux de données standardisés ont été créés, regroupant environ 30 000 articles. Ce projet contribue au développement d’outils permettant d’assister les chercheurs dans la curation de données tout en offrant une opportunité d’apprentissage approfondi de la méthodologie des RLS et de leur application à des cas pratiques.
+</p>
+<p>
+<b>Anglais</b>
+<br>
+Systematic literature reviews (SLRs) are a key methodology for synthesizing scientific knowledge through a rigorous process. This project is part of research on applying generative learning models (large language models - LLMs) to automate critical tasks in SLRs, particularly article selection, which is often laborious and prone to bias. The main objective is to create annotated datasets to evaluate the effectiveness of LLMs in this task. The data used comes from around fifteen published SLRs, representing over 30,000 articles. This data includes metadata (titles, abstracts, keywords) as well as decision-making information (inclusion/exclusion criteria, reviewer decisions). However, this information is often incomplete and requires normalization to ensure its usability. To address this, several steps were taken: analysis of SLR methodologies, extraction of metadata, and data compilation from HTML and BibTeX files obtained from major search engines (IEEE, ACM, Science Direct, etc.). Algorithms were developed to automate the retrieval, cleaning, and alignment of data. A total of 16 standardized datasets were created, encompassing about 30,000 articles. This project contributes to the development of tools to assist researchers in data curation while offering an opportunity for in-depth learning about SLR methodology and its application to practical cases.
+</p>
+
 <h3>Rapport format pdf</h3>
+<p><a href="Rapport_IFT3150_GenoisGuillaume.pdf" target="_blank">Télécharger le PDF</a></p>
 
 <hr size="2">
 <p>Guillaume Genois<br>20248507<br>guillaume.genois@umontreal.ca</p>
