@@ -337,3 +337,99 @@ Open model methodology: a new approach to the development of user interfaces bas
 Modelling the critical success factors of agile software development projects in South Africa	Background: The continued in failure of agile and traditional software development projects have led to the consideration, attention and dispute to critical success factors that are the aspects which are most vital to make a software engineering methodology fruitful. Although there is an increasing variety of critical success factors and methodologies, the conceptual frameworks which have causal relationship are limited. Objective: The objective of this study was to identify and provide insights into the critical success factors that influence the success of software development projects using agile methodologies in South Africa. Method: Quantitative method of collecting data was used. Data were collected in South Africa through a Web-based survey using structured questionnaires. Results: These results show that organisational factors have a great influence on performance expectancy characteristics. Conclusion: The results of this study discovered a comprehensive model that could provide guidelines to the agile community and to the agile professionals. 		Tawanda B. Chiyangwa; Ernest Mnkandla	South African Journal of Information Management	https://hdl.handle.net/10520/EJC-cd6fb1ea0				Google Scholar	2017	Modelling the critical success factors of agile software development projects in South Africa	https://journals.co.za/doi/abs/10.4102/sajim.v19i1.838	Sabinet African Journals
 Modeling Platform Ecosystems	Platforms facilitate the creation of complementary modulesby third parties and act as intermediaries between different groups of ac-tors. Due to the high degree of collaboration between actors, ecosystemsevolve around such platforms. As a result of digitalization, platform busi-ness models are becoming viable in more and more domains. Despite theincreasing variety of different platform ecosystems, means to clearly spec-ify them are scarce. This conceptual ambiguity impedes comparabilityof research and knowledge accumulation. To solve this problem, we pro-pose a domain-specific platform ecosystems modeling language (PEML)which builds on seminal platform ecosystem literature. We demonstratePEML by modeling two real-life platform ecosystems based on onlinecase studies. Our results support researchers and practitioners alike inclearly specifying platform ecosystems.		Pauli, Tobias; Marx, Emanuel; Dunzer, Sebastian; Matzner, Martin	CEUR Workshop Proceedings	https://open.fau.de/handle/openfau/15055		17 - 30		Google Scholar	2020	Modeling platform ecosystems	https://open.fau.de/handle/openfau/15055	Friedrich-Alexander-Universität Erlangen-Nürnberg (FAU)
 Towards automatic graphical concrete syntax generation for domain specific modeling langages	Model Driven Engineering (MDE) is an approach for designing complex systems based on, creating, manipulating and analyzing various models. Multiple Domain Specific Modeling Languages (DSMLs) are used for the creating of these models. It is then necessary to define the graphical representation of these languages. This paper describes concepts and mechanisms allowing to guide and to assist an expert from any engineering domain to define and formalize the concrete syntax of a graphical DSML considered as relevant in this domain. We define multiple classifications of the abstract syntax elements based both on the abstract syntax and on the concrete syntax. Grounded on those classifications, we present how a part of the concrete syntax can be generated automatically from an abstract syntax by a graphical role election.		Nastov, Blazo; Pfister, François	Ingénierie des Systèmes d'Information	https://doi.org/10.3166/ISI.20.2.67-91				Google Scholar	2015	Towards automatic graphical concrete syntax generation for domain specific modeling languages [Vers la génération des syntaxes concrétes graphiques pour les langages de modélisation métier]	https://openurl.ebsco.com/EPDB%3Agcd%3A5%3A8347157/detailv2?sid=ebsco%3Aplink%3Ascholar&id=ebsco%3Agcd%3A103744993&crl=c&link_origin=scholar.google.ca	EBSCO
+											10 ways to undermine an O.O. project		
+											A basic introduction to OO concepts		
+											A common Web information system integrated design based on Struts		
+	This paper presents OpenJava, which is a macro system that we have developed for Java. With traditional macro systems designed for non object-oriented languages, it is difficult to write a number of macros typical in object-oriented programming since they require the ability to access a logical structure of programs. One of the drawbacks of traditional macro systems is that abstract syntax trees are used for rep- resenting source programs. This paper first points out this problem and then shows how OpenJava addresses this problem. A key idea of Open- Java is to use metaobjects, which was originally developed for reflective computing, for representing source programs.				https://www.researchgate.net/publication/242142350_A_Macro_System_with_Class_Objects_for_the_Java_Language						A macro system with class objects for the Java language		
+											Advantages and disadvantages of unique representation patterns		
+											An Intensive MVC Design Pattern Based on ASP.NET		
+An Object-Oriented Analysis and Design of Management Functions for Distributed Access Node Systems	Object-oriented technology promotes a better understanding of requirements and results in more modifiable and maintainable applications providing other benefits such as reusability, extensibility, robustness, reliability and scalability. In this paper, we present the object-oriented application framework for efficient system analysis and design. The software framework we presented comprises the application framework classes and the design pattern as a framework of the software architecture. The application framework classes provide a set of application foundation class that can support easy design and implementation of the application software. The design pattern can be used as the architectural framework by providing unified design concept and principle. In this paper, we present the application framework classes for DANS (Distributed Access Node System) management and describe the system analysis and design based on the framework classes. And we also propose the Actor-Reactor pattern to provide the efficient and reusable software architecture for the distributed and multithreaded environment.		 JinOh Kim; IkKyun Kim; WangHwan Lee; HyupJong Kim	 Korean Institute of Information Scientists and Engineers Journal of KISS(A): Computer Systems and Theory 	https://www.dbpia.co.kr/Journal/articleDetail?nodeId=NODE00600809		10		GoogleScholar	1998	An object-oriented analysis and design of management functions for Distributed Access Node Systems	https://www.dbpia.co.kr/Journal/articleDetail?nodeId=NODE00600809	DBpia
+											Application and research of decorator pattern		
+											Application of design pattern in civil aviation information platform		
+											Application of design patterns in developing industrial configuration software		
+											Aspect oriented programming paradigm		
+											Aspect-oriented Programming to Improve Modularity of Object-oriented Applications		
+											Aspect-oriented requirements engineering for advanced separation of concerns: A review		
+											Astro2020 APC white paper scheduling discovery in the 2020s		
+											Automatic recommendation of design patterns based on patternsb_x0019_ intent		
+											Automatic recommendation of software design patterns: text retrieval approach		
+											Beyond object-oriented software development		
+											Choosing a framework in open source development		
+											Complex Operators: The Correspondence between the Visitor and Builder Design Patterns		
+											Construction of component repository for supporting the CBD process		
+											Controlling the destruction order of singleton objects		
+											CORBA and intelligent networks (IN)		
+											Database pointers in navigational and object-oriented database management systems: a comparison		
+											Describing and composing patterns using role diagrams		
+											Design and implementation of general interface adapter for integrated network management		
+											Design and implementation of IEC60870-5-104 based on FSM		
+											Design and Research of Heterogeneous Environment CSCW System Model and Architecture		
+											Design pattern componentization: the decorator library in C#		
+											Design Pattern Improvement of Chain of Responsibility		
+											Design patterns for real-time distributed system		
+											Design patterns for serious games in tactical problem solving		
+											Documenting a CRC card design		
+											Enabling better research through a new paradigm for access and usability of atmospheric science data		
+											Enhanced MVC pattern based on Petri-Net and its implementation		
+											First UK Colloquium on Object Technology and Systems Re-Engineering (COTSR)		
+											From C to C++: code recycling in practice		
+											Graphs versus objects: practical programming of knowledge-rich applications for Web 2.0 and beyond		
+											Hot spot implementation method of three-layer software framework		
+											Identifying Software Complexity Topics with Latent Dirichlet Allocation on Design Patterns		
+											Immutability and design patterns in Ruby		
+											Improvement of composite pattern based on AOP		
+											Improving the object-oriented software process by means of a quality model		
+											Information science: towards an information paradigm		
+											Integrating information-system development into business process reengineering: An evaluation of software engineering paradigms		
+											Is there a need for new information security models?		
+											Large-scale industrial control software research based on object-oriented design patterns		
+											Manifest3D: a framework to develop 3D graphics applications		
+											Mementos are made of this		
+											Meta data conundrum carries on		
+											Methods to design provided, required and customize interfaces of software components		
+											Modelling transport objects with patterns. The foundation of software systems		
+											Modes for software architectures		
+											Momentum Exchange Between Light and Nanostructured Matter		
+											Multidimensional radar waveforms		
+											Multithreaded programming with the Command pattern		
+											Non-Homogeneous Multi-Unit Collaborative Communications: A Theory and Application for Virtual Real-Time Service		
+											Nucleus C++-an overview		
+											Object methods: what are they and are they important?		
+											Object oriented PDM data organization and framework		
+											Object technology: a general overview		
+											Object-Oriented Description Japanese OODJ and its description environment		
+											Object-oriented technology and computing systems re-engineering		
+											Objects and synchronous programming		
+											On the interaction of object-oriented design patterns and programming languages		
+											OO choices for business		
+											OO migration and software process improvement		
+											Optimal software release problems based on a stochastic differential equation model for distributed development environment		
+											Parametric aspects: a proposal		
+											Pattern writer's workshop		
+											Patterns for mapping OO applications to relational databases		
+											Piccola-a small composition language		
+											Progress on patterns: highlights of PLoP/94		
+											Public transport. Service interface for real-time information relating to public transport operations. Context and framework		
+											Reifying design patterns as metalevel constructs		
+											Research of .NET General Data Access Layer Based on Design Pattern		
+											Research on application of design patterns of ACE in distributed network services		
+											Research Paradigms of Police Intelligence and Their Integration		
+											Reverse engineering to the practical architecture using design decision trees		
+											Safety Analysis of Bridge Pattern Based on SFTA		
+											Semantic refinement of concurrent object systems based on serializability		
+											Semiotics for information systems engineering - re-use of high-level artefacts		
+											Should decorators preserve the component interface?		
+											Smalltalking to a relational database		
+											Smartmodels b_x0013_ A framework for generating on-line sales management systems		
+											SoCoEMo-COTS: a software economic model for commercial off-the-shelf (COTS) based software development		
+											Strategy Pattern as a Variability Enabling Mechanism in Product Line Architecture		
+											Telescope: an object-oriented architecture for visualization systems		
+											The complexity of object-oriented logic programming		
+											The Design and Implementation of Alarm Window of Rail Transit ISCS RT21		
+											The disadvantages of object technology		
+											The end of the age of miracles? [Software development]		
+											Theory versus practice in real-time computing with the JavaTM platform		
+											Towards a Pattern-based Model Transformation Approach for Design Quality Enhancement		
+											Using aspect oriented techniques to build-in software quality		
+											Using patterns in design and documentation of software		
+											Which education requirements for computer science?		
