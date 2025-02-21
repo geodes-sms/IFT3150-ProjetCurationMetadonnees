@@ -98,7 +98,7 @@ class ESPLE(SRProject):
         print(self.df["title"].values)
         print(sheet_included['title'].values)
         for article_title in self.df['title'].values:
-            if clean_title(article_title) in sheet_included["title"].apply(clean_title).values:
+            if standardize_title(article_title) in sheet_included["title"].apply(standardize_title).values:
                 self.df.loc[self.df['title'] == article_title, decision] = "Included"
             else:
                 self.df.loc[self.df['title'] == article_title, decision] = "Excluded"
