@@ -33,6 +33,8 @@ class IFT3710(SRProject):
 
         # Add columns
         self.df['title'] = sheet_all["Title"]
+        self.df['link'] = sheet_all["Link"]
+        self.df['doi'] = self.df['link']
 
         self.df['project'] = "IFT3710"
         self.export_path = f"{MAIN_PATH}/Datasets/IFT3710/IFT3710.tsv"
