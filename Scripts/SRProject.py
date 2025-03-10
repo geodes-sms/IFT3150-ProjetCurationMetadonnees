@@ -68,7 +68,7 @@ WoS = "Web of Science"
 PubMedCentral = "Pub Med Central"
 arXiv = "arXiv"
 
-sources_name = ['scopus', 'acm', 'ieee', 'wos', 'springer', 'sciencedirect']
+sources_name = ['scopus', 'acm', 'ieee', 'wos', 'springer', 'sciencedirect', 'arxiv']
 all_sources_name = ['ieee', 'springer', 'acm', 'sciencedirect', 'scopus', 'wos',
                     IEEE, SpringerLink, ACM, ScienceDirect, Scopus, WoS,
                    "Association for Computing Machinery (ACM)", "ACM Press"]
@@ -164,7 +164,7 @@ def save_extracted_html(link, html):
     print(formated_link)
 
 
-def clean_title(title):
+def standardize_title(title):
     # TODO: for title in title separated by : - —
     # tmp_title = title[title.index(":"):] if ":" in title else title
     # print(title)
@@ -173,7 +173,7 @@ def clean_title(title):
     print(tmp_title)
     # tmp_title = str.lower(tmp_title)
     tmp_title = re.sub(r"\\'|#x0027|#x201c|#x201d", '', str.lower(tmp_title))
-    tmp_title = re.sub(r"\\emdash|\\endash|&amp;|â€”|â€™|:|/|-|—|,|\.|<.*>|³N|\?|\*|&|;|â€“|‘|'|\"|’|–|”|“|±|\+|\\|\(|\)", " ", tmp_title)
+    tmp_title = re.sub(r"\\emdash|\\endash|&amp;|â€”|â€™|:|/|-|—|,|\.|<[^>]+>|³N|\?|\*|&|;|â€“|‘|'|\"|’|–|”|“|±|\+|\\|\(|\)", " ", tmp_title)
     print(tmp_title)
     tmp_title = ''.join([char for char in tmp_title if char.isalpha() or char.isspace()])
     tmp_title = unidecode(tmp_title)
@@ -185,8 +185,8 @@ def check_if_right_link(new_metadata, title, author=None, venue=None, year=None)
     if new_metadata is None or new_metadata['Title'] == "" or title == "" or new_metadata['Title'] is None:
         return False
     # TODO: enlever les deux points, les virgules, les tirets, / ou prendre distance? ou auteurs et année?
-    tmp_title = clean_title(title)
-    tmp_meta_title = clean_title(new_metadata['Title'])
+    tmp_title = standardize_title(title)
+    tmp_meta_title = standardize_title(new_metadata['Title'])
     print(tmp_title)
     print(tmp_meta_title)
     if tmp_title in tmp_meta_title or tmp_meta_title in tmp_title or edit_distance(tmp_title, tmp_meta_title) < 3:
