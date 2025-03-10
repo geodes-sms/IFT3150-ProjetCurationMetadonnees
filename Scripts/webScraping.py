@@ -125,6 +125,13 @@ class WebScraper:
         metadata = metadata_base.copy()
         metadata['Link'] = link
 
+        if not source:
+            print("searching in all options")
+            for name in sources_name:
+                new_metadata = self.get_metadata_from_title(title, None, name, None)
+                if check_if_right_link(new_metadata, title):
+                    update_metadata(metadata, new_metadata)
+                    break
         if source == IEEE or source == 'ieee' or 'Institute of Electrical and Electronics Engineers' in source:
             if 'doi' in link:
                 self.driver.get(link)
@@ -237,8 +244,21 @@ class WebScraper:
                 f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_08.bib')
             update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
+        elif source == arXiv or source == 'arxiv':
+            html = self.get_html_from_link(link)
+            new_metadata = htmlParser.get_metadata_from_html_arxiv(html)
+            if not check_if_right_link(new_metadata, title):
+                return
+            save_extracted_html(title + "_09", html)
+            metadata.update(new_metadata)
         else:
             print(f'source "{source}" not valid')
+            print("searching in all options")
+            for name in sources_name:
+                new_metadata = self.get_metadata_from_title(title, None, name, None)
+                if check_if_right_link(new_metadata, title):
+                    update_metadata(metadata, new_metadata)
+                    break
         if metadata: metadata["Link"] = link
         return metadata
 
@@ -376,31 +396,28 @@ class ManualWebScraper:
                 print(e)
                 pass
 
-    def get_bibtex_from_source_link(self):
-        source_link = pd.read_excel(f"{MAIN_PATH}/Datasets/GameSE/GameSE_pre-extract.xlsx")
-        source_link = source_link.loc[~pd.isna(source_link['doi'])]
+    def get_bibtex_from_source_link(self, sr_project):
+        source_link = pd.read_csv(f"{MAIN_PATH}/Datasets/{sr_project}/{sr_project}.tsv", sep='\t')
+        source_link = source_link.loc[pd.isna(source_link['bibtex'])]
         already_extracted_bibtex = os.listdir(f"{EXTRACTED_PATH}/Bibtex")
-        self.driver.get("https://www.scopus.com/inward/record.uri?eid=2-s2.0-85083744459&doi=10.1089%2fg4h.2019.0067&partnerID=40&md5=eeea66fccb18681e9ca573e20ca78c48")
         input()
         for idx, row in source_link.iterrows():
             print(row[['doi']])
             try:
                 link = row['doi']
                 verification_link = link
-                if 'scopus' in link:
-                    continue
                 if 'doi' in link:
                     self.driver.get(link)
-                    time.sleep(2)
+                    time.sleep(3)
                     verification_link = self.driver.current_url
                 for source in sources_name:
                     if source in verification_link:
                         is_already_extracted = False
-                        for file in already_extracted_bibtex:
-                            if file[11:-7] == format_link(link):
-                                print("bibtex déjà extrait")
-                                is_already_extracted = True
-                                break
+                        # for file in already_extracted_bibtex:
+                        #     if file[11:-7] == format_link(link):
+                        #         print("bibtex déjà extrait")
+                        #         is_already_extracted = True
+                        #         break
                         if not is_already_extracted:
                             print('extraction...')
                             print(self.get_metadata_from_link(link, source, link))
@@ -610,13 +627,17 @@ class ManualWebScraper:
             metadata.update(new_metadata)
             # TODO: extract bibtex
 
-        elif source == arXiv:
+        elif source == arXiv or source == 'arxiv':
             html = self.get_html_from_link(link)
             save_extracted_html(title + "_09", html)
             save_link(title, link)
             new_metadata = htmlParser.get_metadata_from_html_arxiv(html)
             metadata.update(new_metadata)
-            # TODO: extract bibtex
+            self.searcher.extract_bibtex_in_arXiv(title, link)
+            parser = bibtex_parser.Parser()
+            bib_data = parser.parse_file(
+                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_09.bib')
+            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         else:
             print(f'Source "{source}" not valid')
@@ -661,7 +682,7 @@ if __name__ == '__main__':
     web_scraper = ManualWebScraper()
     # print(web_scraper.get_metadata_from_title(title, PubMedCentral, link))
     # web_scraper.get_bibtex_from_already_extracted()
-    # web_scraper.get_bibtex_from_source_link()
+    web_scraper.get_bibtex_from_source_link("TestNN")
     # web_scraper.search_missing_links_for_articles()
-    web_scraper.add_articles_manually()
+    # web_scraper.add_articles_manually()
     web_scraper.close()
