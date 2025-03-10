@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import os
 # import cudf.pandas
 # cudf.pandas.install()
 import sys
@@ -7,6 +7,7 @@ import sys
 from Scripts.DatasetsScripts.Demo import Demo
 from Scripts.DatasetsScripts.IFT3710 import IFT3710
 
+# sys.stdout = open(os.devnull, 'w')
 sys.path.extend(['/home/ggenois/PycharmProjects/IFT3150-ProjetCurationMetadonnees'])
 
 import chardet
@@ -112,26 +113,41 @@ def ExportToCSV(sr_project):
     final_data_frame.to_csv(sr_project.export_path, sep="\t", index_label="key", encoding='utf-8')
 
 
+def pre_process_sr_project(sr_project):
+    title_counts = {}
+
+    def make_unique(title):
+        if title in title_counts:
+            title_counts[title] += 1
+            print(title)
+            return f"{title} {title_counts[title]}"
+        else:
+            title_counts[title] = 1
+            return title
+
+    sr_project.df["title"] = sr_project.df["title"].apply(make_unique)
+
+
 def main(args=None):
     if args is None or not len(args) > 0:
-        # args = ["ArchiML", 'CodeCompr', 'ModelingAssist', 'CodeClone']
-        args = ['Demo']
+        # args = ['ModelGuidance', "ArchiML", 'CodeCompr', 'ModelingAssist', 'CodeClone']
+        args = ['SmellReprod']
     sr_project = None
 
     for arg in args:
-        if arg == "ArchiML":  #
+        if arg == "ArchiML":  # missing
             sr_project = ArchiML()
-        elif arg == "Behave":  # final cleaning needed
+        elif arg == "Behave":  # complete
             sr_project = Behave()
-        elif arg == "CodeClone":  #
+        elif arg == "CodeClone":  # missing
             sr_project = CodeClone()
-        elif arg == "CodeCompr":  #
+        elif arg == "CodeCompr":  # missing
             sr_project = CodeCompr()
         elif arg == "DTCPS":  # complete
             sr_project = DTCPS()
         elif arg == "ESM_2":  # complete
             sr_project = ESM_2()
-        elif arg == "ESPLE":  # 62 (77 science direct)
+        elif arg == "ESPLE":  # complete
             sr_project = ESPLE()
         elif arg == "GameSE":  # complete
             sr_project = GameSE()
@@ -141,17 +157,17 @@ def main(args=None):
             sr_project = GameSE_abstract()
         elif arg == "ModelGuidance":  # 914 missing
             sr_project = ModelGuidance()
-        elif arg == "ModelingAssist":  # 749
+        elif arg == "ModelingAssist":  # 749 missing
             sr_project = ModelingAssist()
-        elif arg == "OODP":  # 183 missing
+        elif arg == "OODP":  # 91 missing
             sr_project = OODP()
-        elif arg == "SecSelfAdapt":  # started
+        elif arg == "SecSelfAdapt":  # complete
             sr_project = SecSelfAdapt()
-        elif arg == "SmellReprod":  #
+        elif arg == "SmellReprod":  # complete
             sr_project = SmellReprod()
         elif arg == "TestNN":  # complete
             sr_project = TestNN()
-        elif arg == "TrustSE":  # 97 missing
+        elif arg == "TrustSE":  # complete
             sr_project = TrustSE()
         elif arg == "Demo":
             sr_project = Demo()
@@ -161,6 +177,7 @@ def main(args=None):
             print("Not a valid argument")
             continue
 
+        pre_process_sr_project(sr_project)
         sr_project.df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}_pre-extract.xlsx")
         # printEncoding(sr_project.path)  # to make sure we use the right encoding if necessary
         completed_df = findMissingMetadata.main(sr_project.df, True, 999)
@@ -168,6 +185,7 @@ def main(args=None):
         sr_project.df = cleaned_df
 
         ExportToCSV(sr_project)
+        # sys.stdout = sys.__stdout__127
         postProcessing(sr_project)
 
         # cleaned_df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}.xlsx")
