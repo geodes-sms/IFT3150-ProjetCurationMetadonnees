@@ -58,11 +58,18 @@ def clean_publisher(publisher: str):
     if publisher[-1] == '.': publisher = publisher[:-1]
     return publisher
 
+def clean_title(title: str):
+    if not title:
+        return title
+    title = unidecode(title)
+    title = re.sub(f"^(Original Article|RETRACTED ARTICLE:|Technical Note|^Review(?=[A-Z])|^Article(?=[A-Z])|Demo:|Original article|REVIEW)\s*", "", title)
+    return title
+
 
 def assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher, source):
     # Return the metadata
     metadata = metadata_base.copy()
-    metadata['Title'] = title
+    metadata['Title'] = clean_title(title)
     metadata['Venue'] = venue
     metadata['Pages'] = pages
     metadata['Authors'] = "; ".join(clean_authors(authors)) if authors is not None else None
