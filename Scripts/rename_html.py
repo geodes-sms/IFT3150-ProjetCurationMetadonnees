@@ -295,8 +295,8 @@ bibtex_string = """
 def test_opening_dataset(tsv):
     df = pandas.read_csv(tsv, sep='\t', encoding='utf-8')
     return df
-test_df = test_opening_dataset(f'{MAIN_PATH}/Datasets/_Datasets Sent/ESPLE.tsv')
-print(test_df.shape)
+# test_df = test_opening_dataset(f'{MAIN_PATH}/Datasets/_Datasets Sent/ESPLE.tsv')
+# print(test_df.shape)
 # print(test_df.columns)
 # test_df = test_opening_dataset(f'{MAIN_PATH}/Datasets/_Datasets Sent/ESPLE.tsv')
 # print(test_df.shape)
@@ -349,3 +349,28 @@ def convert_bib_to_tsv():
 
     print(f"Conversion complete! TSV file saved as: {output_tsv_file}")
 # convert_bib_to_tsv()
+
+def rename_bib_from_doi_to_title():
+    # Load data efficiently
+    links_already_searched = pd.read_csv(f'{MAIN_PATH}/Scripts/articles_source_links.tsv', sep='\t',
+                                         encoding='windows-1252', encoding_errors='ignore')
+
+    # Convert DataFrame to a dictionary for fast lookups
+    link_to_title = {format_link(str(row['Link'])): format_link(str(row['Title'])) for idx, row in
+                     links_already_searched.iterrows()}
+
+    # Define the path using pathlib
+    bibtex_path = f"{EXTRACTED_PATH}/Bibtex"
+
+    # Iterate over files in reverse order
+    for file in reversed(os.listdir(bibtex_path)):
+        file_key = file[11:-7]
+        if file_key in link_to_title:
+            new_name = file[:11] + link_to_title[file_key] + file[-7:]
+            old_path = bibtex_path + '/' + file
+            new_path = bibtex_path + '/' + new_name
+            os.rename(old_path, new_path)
+            print(f"{file} renamed to {new_name}")
+
+
+rename_bib_from_doi_to_title()
