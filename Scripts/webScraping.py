@@ -399,12 +399,13 @@ class ManualWebScraper:
     def get_bibtex_from_source_link(self, sr_project):
         source_link = pd.read_csv(f"{MAIN_PATH}/Datasets/{sr_project}/{sr_project}.tsv", sep='\t')
         source_link = source_link.loc[pd.isna(source_link['bibtex'])]
+        print(source_link)
         already_extracted_bibtex = os.listdir(f"{EXTRACTED_PATH}/Bibtex")
-        input()
         for idx, row in source_link.iterrows():
             print(row[['doi']])
             try:
-                link = row['doi']
+                link = str(row['doi'])
+                title = row['meta_title']
                 verification_link = link
                 if 'doi' in link:
                     self.driver.get(link)
@@ -420,7 +421,7 @@ class ManualWebScraper:
                         #         break
                         if not is_already_extracted:
                             print('extraction...')
-                            print(self.get_metadata_from_link(link, source, link))
+                            print(self.get_metadata_from_link(title, row['source'], link))
                             time.sleep(2)
             except Exception as e:
                 print(e)
@@ -674,15 +675,16 @@ if __name__ == '__main__':
     # title = "Second generation systems and software product line engineering"  # IEEE
     # title = "Android Malware Detection Based On System Calls Analysis And Cnn Classification"  # IEEE au 2e
     # title = "The explanatory power of playability heuristics"  # WoS
-    title = 'Let’s Play: Exploring literacy practices in an emerging videogame paratext'
+    # title = 'Let’s Play: Exploring literacy practices in an emerging videogame paratext'
     # web_scraper = WebScraper()
     # print(web_scraper.get_metadata_from_title(title, None, ScopusSignedIn))
     # title = "ME3CA: A cognitive assistant for physical exercises that monitors emotions and the environment"
     # link = "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7039382/"
-    web_scraper = ManualWebScraper()
-    # print(web_scraper.get_metadata_from_title(title, PubMedCentral, link))
-    # web_scraper.get_bibtex_from_already_extracted()
-    web_scraper.get_bibtex_from_source_link("TestNN")
-    # web_scraper.search_missing_links_for_articles()
-    # web_scraper.add_articles_manually()
-    web_scraper.close()
+    for sr in ['TestNN', 'SmellReprod']:
+        web_scraper = ManualWebScraper()
+        # print(web_scraper.get_metadata_from_title(title, PubMedCentral, link))
+        # web_scraper.get_bibtex_from_already_extracted()
+        web_scraper.get_bibtex_from_source_link(sr)
+        # web_scraper.search_missing_links_for_articles()
+        # web_scraper.add_articles_manually()
+        web_scraper.close()
