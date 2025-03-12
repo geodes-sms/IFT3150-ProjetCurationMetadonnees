@@ -29,35 +29,41 @@ def get_link_from_articles_source_links(title):
 def get_from_already_extract(formated_name, already_extracted_files, source=None):
     metadata = None
     print("formated_name", formated_name)
-    for file in already_extracted_files:
-        try:
-            new_metadata = None
+    for formated_name in [formated_name, formated_name.strip()]:
+        for file in already_extracted_files:
+            # file = file.lower()
+            # formated_name = formated_name.lower()
+
             try:
-                tmp_source = code_source[file[-7:-5]]
-            except:
+                new_metadata = None
                 try:
-                    tmp_source = code_source[file[-6:-4]]
+                    tmp_source = code_source[file[-7:-5]]
                 except:
-                    tmp_source = source
-            if tmp_source == IEEE:
-                if file[11:-8] == formated_name + "%2Freferences#references":
+                    try:
+                        tmp_source = code_source[file[-6:-4]]
+                    except:
+                        tmp_source = source
+                if tmp_source == IEEE:
+                    if file[11:-8] == formated_name + "%2Freferences#references":
+                        print(file)
+                        new_metadata = htmlParser.get_metadata_from_already_extract(file, IEEE)
+                    elif file[11:-8] == formated_name + "%2Fkeywords#keywords":
+                        print(file)
+                        new_metadata = htmlParser.get_metadata_from_already_extract(file, IEEE)
+                    elif file[-3:] == 'bib' and file[11:-7] == formated_name:
+                        new_metadata = htmlParser.get_metadata_from_already_extract(file, IEEE)
+                elif tmp_source is not None and (file[11:-8] == formated_name or file[11:-7] == formated_name):
                     print(file)
-                    new_metadata = htmlParser.get_metadata_from_already_extract(file, IEEE)
-                elif file[11:-8] == formated_name + "%2Fkeywords#keywords":
-                    print(file)
-                    new_metadata = htmlParser.get_metadata_from_already_extract(file, IEEE)
-            elif tmp_source is not None and (file[11:-8] == formated_name or file[11:-7] == formated_name):
-                print(file)
-                new_metadata = htmlParser.get_metadata_from_already_extract(file, tmp_source)
-            if new_metadata:
-                if metadata:
-                    update_metadata(metadata, new_metadata)
-                else:
-                    metadata = new_metadata
-                print(metadata)
-        except Exception as e:
-            print("Error", e)
-            raise Exception(e)
+                    new_metadata = htmlParser.get_metadata_from_already_extract(file, tmp_source)
+                if new_metadata:
+                    if metadata:
+                        update_metadata(metadata, new_metadata)
+                    else:
+                        metadata = new_metadata
+                    print(metadata)
+            except Exception as e:
+                print("Error", e)
+                raise Exception(e)
     return metadata
 
 
@@ -113,7 +119,7 @@ def extract_without_link(row, already_extracted_files, web_scraper):
             metadata['DOI'] = metadata['Link']
 
     # need to extract without link
-    if not metadata or metadata['DOI'] is None or metadata['DOI'] == "":
+    if not metadata or metadata['DOI'] is None or metadata['DOI'] == "" or metadata['Bibtex'] is None or metadata['Bibtex'] == "":
 
         print("no metadata")
         print("title", row['title'])
@@ -157,7 +163,7 @@ def extract_with_link(row, already_extracted_files, web_scraper: WebScraper):
         print("already extracted from link")
 
     # if not already extracted
-    if not metadata:
+    if not metadata or metadata['Bibtex'] is None or metadata['Bibtex'] == "":
         if web_scraper:
             for i in range(5):
                 try:
@@ -175,7 +181,7 @@ def extract_with_link(row, already_extracted_files, web_scraper: WebScraper):
             else: print("no article found from link")
             # time.sleep(60*5)
 
-    if not metadata or not metadata['Title']:
+    if not metadata or not metadata['Title'] or metadata['Bibtex'] is None or metadata['Bibtex'] == "":
         metadata = extract_without_link(row, already_extracted_files, web_scraper)
 
     return metadata
@@ -239,7 +245,7 @@ def main(sr_df, do_web_scraping=False, run=999):
             print(idx)
             if run < parts and not (n * run <= idx <= n * (run+1)):
                 continue  # seulement partition
-            if run == 111 and not (idx == 407):
+            if run == 111 and not (idx == 31):
                 continue  # on veut extraire sans link
             # if row['source'] in ["IEEE", "ACM", "Web of Science", "Scopus"]:
             #     continue
