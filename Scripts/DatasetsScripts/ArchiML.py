@@ -37,17 +37,16 @@ convert_dict = {"Title": convert}  # TODO: add other columns
 
 class ArchiML(SRProject):
     """
-    Behaviour driven development: A systematic mapping study
+    Architecting ML-enabled systems: Challenges, best practices, and design decisions
     https://doi.org/10.1016/j.jss.2023.111749
-    Size: 601
-    Included: 148
-    Excluded: 453
-    Inclusion rate: 25%%
+    Size: 2,766
+    Included: 34
+    Excluded: 2,732
+    Inclusion rate: 1%
     Has Conflict data: No
-    Criteria labeled: No
-    Has abstract text: Some
-    Comment: For some articles, full-text needed
-    Need to subtract the two lists to get excluded articles
+    Criteria labeled: Yes
+    Has abstract text: No
+    Comment: Inclusion includes full-text screening as well
     """
 
     def __init__(self):
@@ -58,7 +57,7 @@ class ArchiML(SRProject):
         # converters = {"Title": lambda x: x.encode('utf-8')}
         # All sheets
         with open(self.path, 'rb') as f:
-            sheet_all = pd.read_excel(f, sheet_name="Selection Criteria", header=1)  # 601 rows
+            sheet_all = pd.read_excel(f, sheet_name="Selection Criteria", header=1)  # 2766 rows
             print(sheet_all)
             print(sheet_all.columns)
             # sheet_final = pd.read_excel(f, sheet_name="final_data_from_database_search")  # 148 rows
