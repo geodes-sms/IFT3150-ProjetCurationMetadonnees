@@ -14,6 +14,14 @@ excl_crit_desc = {
     'YES': '',
 }
 
+"""
+Special characters conversion for data source of CodeClone
+"Â", ""
+"â€™", "'"
+"â€œ", '"'
+'â€“', '-'
+'â€', '"'
+"""
 
 class CodeClone(SRProject):
     """
