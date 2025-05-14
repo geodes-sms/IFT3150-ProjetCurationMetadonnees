@@ -70,6 +70,12 @@ class CodeCompr(SRProject):
         # self.df["keywords"] = sheet_all["keywords"]
         self.df["authors"] = sheet_all["Author"]
         # self.df['venue'] = sheet_all["journal"]
+        def convert_IEEE_link(url):
+            match = re.search(r"arnumber=(\d+)", str(url))
+            if match:
+                number = match.group(1)
+                return "https://ieeexplore.ieee.org/document/" + number
+            return url
         self.df["doi"] = sheet_all["SCOPUS"]
         # self.df['link'] = sheet_all['ACM'].where(sheet_all['ACM'] != pd.NA, sheet_all['IEEE']).where(sheet_all['ACM'] != pd.NA, sheet_all['SCOPUS'])
         # self.df["year"] = sheet_all["Year"]

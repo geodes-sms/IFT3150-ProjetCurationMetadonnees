@@ -6,9 +6,10 @@ import sys
 
 from Scripts.DatasetsScripts.Demo import Demo
 from Scripts.DatasetsScripts.IFT3710 import IFT3710
+from Scripts.os_path import MAIN_PATH
 
 # sys.stdout = open(os.devnull, 'w')
-sys.path.extend(['/home/ggenois/PycharmProjects/IFT3150-ProjetCurationMetadonnees'])
+sys.path.extend([MAIN_PATH])
 
 import chardet
 from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
@@ -31,7 +32,6 @@ from Scripts.DatasetsScripts.SmellReprod import SmellReprod
 from Scripts.DatasetsScripts.TestNN import TestNN
 from Scripts.DatasetsScripts.TrustSE import TrustSE
 from SRProject import *
-from os_path import MAIN_PATH
 
 # Author : Guillaume Genois, 20248507
 # This script is for importing and uniformising data from multiple datasets of SR.
@@ -128,10 +128,14 @@ def pre_process_sr_project(sr_project):
     sr_project.df["title"] = sr_project.df["title"].apply(make_unique)
 
 
+def read_sr_project(arg):
+    return pd.read_csv(f"{MAIN_PATH}/Datasets/{arg}/{arg}.tsv", delimiter="\t")
+
+
 def main(args=None):
     if args is None or not len(args) > 0:
-        # args = ['ModelGuidance', "ArchiML", 'CodeCompr', 'ModelingAssist', 'CodeClone']
-        args = ['SmellReprod']
+        args = ['CodeCompr', "ArchiML", 'ModelingAssist', 'CodeClone']
+        # args = ['CodeCompr']
     sr_project = None
 
     for arg in args:
@@ -179,8 +183,19 @@ def main(args=None):
 
         pre_process_sr_project(sr_project)
         sr_project.df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}_pre-extract.xlsx")
+
+        do_extraction = False
+        if do_extraction:
+            sr_compiled_project = read_sr_project(arg)
+            # Keep only the rows that still need processing (meta_title is null/empty)
+            unprocessed = sr_compiled_project[sr_compiled_project['meta_title'].isnull()]
+            # Filter the original dataframe to only keep those rows
+            titles_to_process = unprocessed['title']
+            sr_project.df = sr_project.df[sr_project.df['title'].isin(titles_to_process)]
+            sr_project.export_path = f"{MAIN_PATH}/Datasets/{arg}/{arg}_unprocessed.xlsx"
+
         # printEncoding(sr_project.path)  # to make sure we use the right encoding if necessary
-        completed_df = findMissingMetadata.main(sr_project.df, True, 999)
+        completed_df = findMissingMetadata.main(sr_project.df, do_extraction, 999)
         cleaned_df = cleanDataFrame(completed_df)
         sr_project.df = cleaned_df
 

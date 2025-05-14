@@ -64,7 +64,7 @@ class SecSelfAdapt(SRProject):
 
         # Find all screened decisions
         self.find_decision_on_articles(sheet_final)
-        self.df['final_decision'] = self.df['screened_decision']
+        self.df['final_decision'] = self.df['screened_decision']  # TODO: no, take where number of include = 4
         # self.find_decision_on_articles(sheet_screen_title_and_abstract, sheet_without_duplicates, 'Not fulfilled inclusion/exclusion criteria')
 
         # Find all final decisions based on which articles are included in different sheets

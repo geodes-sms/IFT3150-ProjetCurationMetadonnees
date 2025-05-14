@@ -2,6 +2,8 @@ import glob
 import os
 import shutil
 
+from sympy.abc import lamda
+
 import htmlParser
 from SRProject import *
 from selenium.webdriver.common.by import By
@@ -218,90 +220,91 @@ class SearcherInSource:
         # self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         web_element = self.driver.find_element(By.XPATH, '//*[@data-title="Export Citation"]')
         # self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
-        time.sleep(1)
         web_element.click()
+
+        wait = WebDriverWait(self.driver, 10)
         web_element = self.driver.find_element(By.XPATH, '//*[@title="Download citation"]')
+        wait.until(lambda _: "disabled" not in web_element.get_attribute("class"))
         web_element.click()
 
         time.sleep(2)
-        self.save_bibtex(title, '02')
 
-        try:
-            # Cite
-            web_element = self.driver.find_element(By.XPATH,
-                                                   '/html/body/div[1]/div/div[1]/main/article/header/div/div/div[2]/div[3]/div[2]/div[1]/div[3]/button')
-
-            self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
-            time.sleep(2)
-            web_element.click()
-            time.sleep(1)
-
-            # download
-            web_element = self.driver.find_element(By.XPATH,
-                                                   '/html/body/div[1]/div/div[1]/div[2]/div/div/div[2]/div/div[2]/form/ul/li[2]/div/div[2]/ul/li[1]/a')
-            web_element.click()
-
-            time.sleep(2)
-        except:
-            try:
-                # Cite
-                web_element = self.driver.find_element(By.XPATH,
-                                                       '/html/body/div[1]/div/div[1]/main/article/header/div/div[7]/div[2]/div[3]/button')
-                self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
-                time.sleep(2)
-                web_element.click()
-                time.sleep(1)
-
-                # download
-                web_element = self.driver.find_element(By.XPATH,
-                                                       '/html/body/div[1]/div/div[1]/div[2]/div/div/div[2]/div/div[2]/form/ul/li[2]/div/div[2]/ul/li[1]/a')
-                web_element.click()
-
-                time.sleep(2)
-            except:
-                try:
-                    # Cite
-                    web_element = self.driver.find_element(By.XPATH,
-                                                           '/html/body/div[1]/div/div[1]/main/div[1]/div/div[2]/div[2]/div[2]/div/div[1]/a[2]')
-                    self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
-                    web_element.click()
-                    time.sleep(1)
-
-                    # download
-                    web_element = self.driver.find_element(By.XPATH,
-                                                           '/html/body/div[1]/div/div[1]/div[3]/div/div/div[2]/div/div[2]/form/ul/li[2]/div/div[2]/ul/li[1]/a')
-                    web_element.click()
-
-                    time.sleep(2)
-                except:
-                    try:
-                        # Cite
-                        web_element = self.driver.find_element(By.XPATH,
-                                                               '/html/body/div[1]/div/div[1]/main/article/header/div/div[7]/div[2]/div[3]/button')
-                        self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
-                        web_element.click()
-                        time.sleep(1)
-
-                        # download
-                        web_element = self.driver.find_element(By.XPATH,
-                                                               '/html/body/div[1]/div/div[1]/div[2]/div/div/div[2]/div/div[2]/form/ul/li[2]/div/div[2]/ul/li[1]/a')
-                        web_element.click()
-
-                        time.sleep(2)
-                    except:
-                        # Cite
-                        web_element = self.driver.find_element(By.XPATH,
-                                                               '/html/body/div[1]/div/div[1]/main/div[1]/div/div[2]/div[2]/div[2]/div/div[1]/a[2]')
-                        # self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
-                        web_element.click()
-                        time.sleep(1)
-
-                        # download
-                        web_element = self.driver.find_element(By.XPATH,
-                                                               '/html/body/div[1]/div/div[1]/div[2]/div/div/div[2]/div/div[2]/form/ul/li[2]/div/div[2]/ul/li[1]/a')
-                        web_element.click()
-
-                        time.sleep(2)
+        # try:
+        #     # Cite
+        #     web_element = self.driver.find_element(By.XPATH,
+        #                                            '/html/body/div[1]/div/div[1]/main/article/header/div/div/div[2]/div[3]/div[2]/div[1]/div[3]/button')
+        #
+        #     self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
+        #     time.sleep(2)
+        #     web_element.click()
+        #     time.sleep(1)
+        #
+        #     # download
+        #     web_element = self.driver.find_element(By.XPATH,
+        #                                            '/html/body/div[1]/div/div[1]/div[2]/div/div/div[2]/div/div[2]/form/ul/li[2]/div/div[2]/ul/li[1]/a')
+        #     web_element.click()
+        #
+        #     time.sleep(2)
+        # except:
+        #     try:
+        #         # Cite
+        #         web_element = self.driver.find_element(By.XPATH,
+        #                                                '/html/body/div[1]/div/div[1]/main/article/header/div/div[7]/div[2]/div[3]/button')
+        #         self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
+        #         time.sleep(2)
+        #         web_element.click()
+        #         time.sleep(1)
+        #
+        #         # download
+        #         web_element = self.driver.find_element(By.XPATH,
+        #                                                '/html/body/div[1]/div/div[1]/div[2]/div/div/div[2]/div/div[2]/form/ul/li[2]/div/div[2]/ul/li[1]/a')
+        #         web_element.click()
+        #
+        #         time.sleep(2)
+        #     except:
+        #         try:
+        #             # Cite
+        #             web_element = self.driver.find_element(By.XPATH,
+        #                                                    '/html/body/div[1]/div/div[1]/main/div[1]/div/div[2]/div[2]/div[2]/div/div[1]/a[2]')
+        #             self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
+        #             web_element.click()
+        #             time.sleep(1)
+        #
+        #             # download
+        #             web_element = self.driver.find_element(By.XPATH,
+        #                                                    '/html/body/div[1]/div/div[1]/div[3]/div/div/div[2]/div/div[2]/form/ul/li[2]/div/div[2]/ul/li[1]/a')
+        #             web_element.click()
+        #
+        #             time.sleep(2)
+        #         except:
+        #             try:
+        #                 # Cite
+        #                 web_element = self.driver.find_element(By.XPATH,
+        #                                                        '/html/body/div[1]/div/div[1]/main/article/header/div/div[7]/div[2]/div[3]/button')
+        #                 self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
+        #                 web_element.click()
+        #                 time.sleep(1)
+        #
+        #                 # download
+        #                 web_element = self.driver.find_element(By.XPATH,
+        #                                                        '/html/body/div[1]/div/div[1]/div[2]/div/div/div[2]/div/div[2]/form/ul/li[2]/div/div[2]/ul/li[1]/a')
+        #                 web_element.click()
+        #
+        #                 time.sleep(2)
+        #             except:
+        #                 # Cite
+        #                 web_element = self.driver.find_element(By.XPATH,
+        #                                                        '/html/body/div[1]/div/div[1]/main/div[1]/div/div[2]/div[2]/div[2]/div/div[1]/a[2]')
+        #                 # self.driver.execute_script("arguments[0].scrollIntoView(true);", web_element)
+        #                 web_element.click()
+        #                 time.sleep(1)
+        #
+        #                 # download
+        #                 web_element = self.driver.find_element(By.XPATH,
+        #                                                        '/html/body/div[1]/div/div[1]/div[2]/div/div/div[2]/div/div[2]/form/ul/li[2]/div/div[2]/ul/li[1]/a')
+        #                 web_element.click()
+        #
+        #                 time.sleep(2)
         
         self.save_bibtex(title, '01')
 
@@ -977,8 +980,9 @@ class SearcherInSource:
         time.sleep(1)
         web_element.click()
         web_element = self.driver.find_element(By.XPATH, '//*[@id="bib-cite-target"]')
+        time.sleep(3)
         with open(f"{DOWNLOAD_PATH}/tmp_title_for_arxiv_bibtex.bib", "w", encoding="utf-8") as file:
-            file.write(web_element.text)
+            file.write(web_element.get_attribute("value"))
 
         time.sleep(2)
         self.save_bibtex(title, '09')

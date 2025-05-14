@@ -127,7 +127,7 @@ def extract_without_link(row, already_extracted_files, web_scraper):
         print("author", authors)
         print("year", year)
         if web_scraper:
-            metadata = web_scraper.get_metadata_from_title(row['title'], authors, source)  #### source here if want to specify
+            metadata = web_scraper.get_metadata_from_title(row['title'], authors, ScopusSignedIn)  #### source here if want to specify
             if metadata: print("extracted without link")
             else: print("no article found without link")
             # time.sleep(60)
@@ -228,24 +228,30 @@ def update_dataset(row, metadata):
 
 def main(sr_df, do_web_scraping=False, run=999):
     completed_sr_project = sr_df.copy().reset_index()
-    web_scraper = webScraping.WebScraper() if do_web_scraping else None
+    print(len(pd.isna(completed_sr_project['meta_title'])), "articles to be extracted")
     metadata_cols = ['title', 'venue', 'authors', 'abstract', 'keywords', 'references', 'doi', 'meta_title']
+
+    web_scraper = webScraping.WebScraper() if do_web_scraping else None
 
     # run = 111  # <------- partition [0,1,2,3], only without link [111] or complete [999]
     parts = 6
     n = len(list(sr_df.iterrows()))//parts
     erreurs = []
+
+    # Get already extracted files from HTML and Bibtex
     already_extracted_files = []
     already_extracted_html = os.listdir(f"{EXTRACTED_PATH}/HTML extracted")
     already_extracted_bibtex = os.listdir(f"{EXTRACTED_PATH}/Bibtex")
     already_extracted_files.extend(already_extracted_html)
     already_extracted_files.extend(already_extracted_bibtex)
+
+    # Extract files
     for idx, row in completed_sr_project.iterrows():
         try:
             print(idx)
             if run < parts and not (n * run <= idx <= n * (run+1)):
                 continue  # seulement partition
-            if run == 111 and not (idx == 31):
+            if run == 111 and not (idx == 152):
                 continue  # on veut extraire sans link
             # if row['source'] in ["IEEE", "ACM", "Web of Science", "Scopus"]:
             #     continue
@@ -253,12 +259,12 @@ def main(sr_df, do_web_scraping=False, run=999):
             # check if it is missing at least one metadata
             url = str(row['doi'])
             # if url[:4] != 'http':continue
-            need_web_scraping = False
-            for col in metadata_cols:
-                if pd.isna(row[col]):
-                    need_web_scraping = True
-                    break
-            
+            need_web_scraping = True
+            # for col in metadata_cols:
+            #     if pd.isna(row[col]):
+            #         need_web_scraping = True
+            #         break
+
             # there is missing at least one metadata
             if need_web_scraping:
                 metadata = None

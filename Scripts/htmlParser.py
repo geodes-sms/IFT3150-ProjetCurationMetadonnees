@@ -180,6 +180,8 @@ def get_metadata_from_already_extract(file, source=None):
             else:
                 print(f'Venue "{source}" not valid')
     elif file[-3:] == "bib":
+        if file[-6:-4] == '09':
+            print(code_source[file[-6:-4]])
         parser = bibtex_parser.Parser()
         bib_data = parser.parse_file(f'{EXTRACTED_PATH}/Bibtex/{file}')
         metadata = get_metadata_from_bibtex(bib_data)

@@ -109,17 +109,20 @@ class WebScraper:
         elif "pubmed.ncbi.nlm.nih.gov" in current_url:
             return PubMedCentral
 
-    def get_html_from_link(self, link):
-        print(link)
-        self.driver.get(link)
-        time.sleep(2)
+    def get_html_from_link(self, link=None):
+        if link:
+            print(link)
+            self.driver.get(link)
+            time.sleep(2)
         html = self.driver.page_source
         return html
 
     def get_metadata_from_link(self, title, link, source=None):
         # TODO: éviter 2e requête lorsque source is None
+        link_opened = False
         if source is None:  # is DOI
             source = self.get_source_from_doi_with_url(link)
+            link_opened = True
             if source is None:
                 source = htmlParser.get_source_from_doi_with_crossref(self.get_html_from_link("http://api.crossref.org/works/" + link[16:]))
         metadata = metadata_base.copy()
@@ -148,14 +151,14 @@ class WebScraper:
             save_extracted_html(title + "/references#references" + "_00", html)
             new_metadata = htmlParser.get_metadata_from_html_ieee(html)
             update_metadata(metadata, new_metadata)
-            self.searcher.extract_bibtex_in_IEEE(title, link)
+            self.searcher.extract_bibtex_in_IEEE(title)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
                 f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_00.bib')
             update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == ScienceDirect or source == 'sciencedirect' or 'Elsevier' in source:
-            html = self.get_html_from_link(link)
+            html = self.get_html_from_link(link if not link_opened else None)
             new_metadata = htmlParser.get_metadata_from_html_sciencedirect(html)
             if not check_if_right_link(new_metadata, title):
                 return
@@ -169,26 +172,26 @@ class WebScraper:
 
         elif source == ACM or source in ['acm', "Association for Computing Machinery (ACM)", "ACM Press",
                                        "Society for Computer Simulation International"] or "ACM" in source:
-            html = self.get_html_from_link(link)
+            html = self.get_html_from_link(link if not link_opened else None)
             new_metadata = htmlParser.get_metadata_from_html_ACM(html)
             # if not check_if_right_link(new_metadata, title):
             #     return
             save_extracted_html(title + "_01", html)
             metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_ACM(title, link)
+            self.searcher.extract_bibtex_in_ACM(title)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
                 f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_01.bib')
             update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == SpringerLink or 'Springer' in source or source == 'springer':
-            html = self.get_html_from_link(link)
+            html = self.get_html_from_link(link if not link_opened else None)
             new_metadata = htmlParser.get_metadata_from_html_springerlink(html)
             if not check_if_right_link(new_metadata, title):
                 return
             save_extracted_html(title + "_03", html)
             metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_SpringerLink(title, link)
+            self.searcher.extract_bibtex_in_SpringerLink(title)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
                 f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_03.bib')
@@ -196,16 +199,16 @@ class WebScraper:
 
         elif source == Scopus or source == 'scopus':
             # i.e.: "https://www.scopus.com/record/display.uri?eid=2-s2.0-85083744459&doi=10.1089%2fg4h.2019.0067&origin=inward&txGid=0d477ca65acc675d5e5d53dc3edac470"
-            html = self.get_html_from_link(link)
+            html = self.get_html_from_link(link if not link_opened else None)
             new_metadata = htmlParser.get_metadata_from_html_scopus(html)
             if not check_if_right_link(new_metadata, title):
                 return
-            save_extracted_html(title + "_04", html)
+            save_extracted_html(title + "_07", html)
             metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_scopus_signed_in(title, link)
+            self.searcher.extract_bibtex_in_scopus_signed_in(title)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_04.bib')
+                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_07.bib')
             update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
             if all(new_metadata[k] is None for k in new_metadata.keys()):
@@ -219,33 +222,33 @@ class WebScraper:
                 metadata.update(new_metadata)
 
         elif source == WoS or source == 'wos':
-            html = self.get_html_from_link(link)
+            html = self.get_html_from_link(link if not link_opened else None)
             save_extracted_html(title + "_05", html)
             new_metadata = htmlParser.get_metadata_from_html_wos(html)
             if not check_if_right_link(new_metadata, title):
                 return
             metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_WoS(title, link)
+            self.searcher.extract_bibtex_in_WoS(title)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
                 f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_05.bib')
             update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == PubMedCentral:
-            html = self.get_html_from_link(link)
+            html = self.get_html_from_link(link if not link_opened else None)
             new_metadata = htmlParser.get_metadata_from_html_pub_med_central(html)
             if not check_if_right_link(new_metadata, title):
                 return
             save_extracted_html(title + "_08", html)
             metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_PubMedCentral(title, link)
+            self.searcher.extract_bibtex_in_PubMedCentral(title)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
                 f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_08.bib')
             update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
 
         elif source == arXiv or source == 'arxiv':
-            html = self.get_html_from_link(link)
+            html = self.get_html_from_link(link if not link_opened else None)
             new_metadata = htmlParser.get_metadata_from_html_arxiv(html)
             if not check_if_right_link(new_metadata, title):
                 return
@@ -397,14 +400,14 @@ class ManualWebScraper:
                 pass
 
     def get_bibtex_from_source_link(self, sr_project):
-        source_link = pd.read_csv(f"{MAIN_PATH}/Datasets/{sr_project}/{sr_project}.tsv", sep='\t')
-        source_link = source_link.loc[pd.isna(source_link['bibtex'])]
+        source_link = pd.read_csv(f"{MAIN_PATH}/Datasets/{sr_project}/tmp.tsv", sep='\t')
+        # source_link = source_link.loc[pd.isna(source_link['bibtex']) & pd.notnull(source_link['doi'])]
         print(source_link)
         already_extracted_bibtex = os.listdir(f"{EXTRACTED_PATH}/Bibtex")
         for idx, row in source_link.iterrows():
             print(row[['doi']])
             try:
-                link = str(row['doi'])
+                link = str(row['link'])
                 title = row['meta_title']
                 verification_link = link
                 if 'doi' in link:
@@ -421,7 +424,7 @@ class ManualWebScraper:
                         #         break
                         if not is_already_extracted:
                             print('extraction...')
-                            print(self.get_metadata_from_link(title, row['source'], link))
+                            print(self.get_metadata_from_link(title, source, link))
                             time.sleep(2)
             except Exception as e:
                 print(e)
@@ -545,7 +548,7 @@ class ManualWebScraper:
             new_metadata = htmlParser.get_metadata_from_html_ieee(html)
             update_metadata(metadata, new_metadata)
             save_link(title, link)
-            self.searcher.extract_bibtex_in_IEEE(title, link)
+            self.searcher.extract_bibtex_in_IEEE(title)
             parser = bibtex_parser.Parser()
             bib_data = parser.parse_file(
                 f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_00.bib')
@@ -680,7 +683,7 @@ if __name__ == '__main__':
     # print(web_scraper.get_metadata_from_title(title, None, ScopusSignedIn))
     # title = "ME3CA: A cognitive assistant for physical exercises that monitors emotions and the environment"
     # link = "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7039382/"
-    for sr in ['TestNN', 'SmellReprod']:
+    for sr in ['CodeCompr']:
         web_scraper = ManualWebScraper()
         # print(web_scraper.get_metadata_from_title(title, PubMedCentral, link))
         # web_scraper.get_bibtex_from_already_extracted()
