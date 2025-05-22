@@ -43,6 +43,11 @@ class OODP(SRProject):
             print(sheet_all)
             sheet_final = pd.read_excel(f, sheet_name="Included")  # 34 rows
             print(sheet_final)
+            sheet_final.drop(['Number', 'Type', 'Subjects', 'Subject Type', 'Venue Type'], inplace=True, axis=1)
+            sheet_final.rename(columns={'Name': 'Title', 'Year': 'Publication year', 'Publication Venue': 'Source'}, inplace=True)
+            sheet_all = pd.concat([sheet_all, sheet_final], ignore_index=True)
+            sheet_all.drop_duplicates(subset=['Title'], inplace=True)
+            print(sheet_all)
 
         # Add columns
         # self.df["key"]
@@ -84,7 +89,7 @@ class OODP(SRProject):
     def find_decision_on_articles(self, sheet_included, is_final=False):
         decision = 'screened_decision' if not is_final else 'final_decision'
         for article_title in self.df['title'].values:
-            if article_title in sheet_included["Name"].values:
+            if article_title in sheet_included["Title"].values:
                 self.df.loc[self.df['title'] == article_title, decision] = "Included"
             else:
                 self.df.loc[self.df['title'] == article_title, decision] = "Excluded"
@@ -110,5 +115,5 @@ class OODP(SRProject):
 
 if __name__ == '__main__':
     sr_project = OODP()
-    print(sr_project.df['doi'])
+    print(sr_project.df['screened_decision'].value_counts())
     # sr_project.df.to_csv(sr_project.export_path, sep='\t')
