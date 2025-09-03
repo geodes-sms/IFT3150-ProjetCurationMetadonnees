@@ -111,34 +111,34 @@ python Scripts/main.py
 
 | Dataset | Domain | Articles | Status | Description |
 |---------|---------|----------|---------|-------------|
-| **ArchiML** | ML Architecture | 2,766 | ✅ Complete | Architecture and Machine Learning integration |
-| **CodeClone** | Code Analysis | 10,454 | ✅ Complete | Code clone detection and management |
-| **CodeCompr** | Code Understanding | 1,508 | ✅ Complete | Source code comprehension techniques |
-| **GameSE** | Gaming | 1,520 | ✅ Complete | Game software engineering practices |
-| **ModelingAssist** | Modeling Tools | 3,002 | ✅ Complete | Model-driven development assistance |
-| **Behave** | Behavioral SE | 1,043 | ✅ Complete | Behavioral software engineering |
-| **DTCPS** | Cyber-Physical | 4,007 | ✅ Complete | Digital twin cyber-physical systems |
-| **ESM_2** | Empirical Methods | 1,134 | ✅ Complete | Experience sampling methodology |
-| **ESPLE** | Empirical SE | 991 | ✅ Complete | Empirical software engineering |
-| **ModelGuidance** | Model-Driven | 2,105 | ✅ Complete | Model-driven development guidance |
-| **OODP** | Design Patterns | 1,826 | ✅ Complete | Object-oriented design patterns |
-| **SecSelfAdapt** | Security | 1,962 | ✅ Complete | Security in self-adaptive systems |
-| **SmellReprod** | Code Quality | 2,067 | ✅ Complete | Code smell reproduction studies |
-| **TestNN** | Neural Testing | 2,533 | ✅ Complete | Neural network testing approaches |
-| **TrustSE** | Trust & Security | 2,564 | ✅ Complete | Trust in software engineering |
+| **ArchiML** | ML Architecture | 2,766 | Complete | Architecture and Machine Learning integration |
+| **CodeClone** | Code Analysis | 10,454 | Complete | Code clone detection and management |
+| **CodeCompr** | Code Understanding | 1,508 | Complete | Source code comprehension techniques |
+| **GameSE** | Gaming | 1,520 | Complete | Game software engineering practices |
+| **ModelingAssist** | Modeling Tools | 3,002 | Complete | Model-driven development assistance |
+| **Behave** | Behavioral SE | 1,043 | Complete | Behavioral software engineering |
+| **DTCPS** | Cyber-Physical | 4,007 | Complete | Digital twin cyber-physical systems |
+| **ESM_2** | Empirical Methods | 1,134 | Complete | Experience sampling methodology |
+| **ESPLE** | Empirical SE | 991 | Complete | Empirical software engineering |
+| **ModelGuidance** | Model-Driven | 2,105 | Complete | Model-driven development guidance |
+| **OODP** | Design Patterns | 1,826 | Complete | Object-oriented design patterns |
+| **SecSelfAdapt** | Security | 1,962 | Complete | Security in self-adaptive systems |
+| **SmellReprod** | Code Quality | 2,067 | Complete | Code smell reproduction studies |
+| **TestNN** | Neural Testing | 2,533 | Complete | Neural network testing approaches |
+| **TrustSE** | Trust & Security | 2,564 | Complete | Trust in software engineering |
 
 ## Academic Database Support
 
 Our RPA pipeline extracts metadata from 8 major academic databases:
 
-- **IEEE Xplore** - Technical publications and conferences
-- **ACM Digital Library** - Computing and information technology  
-- **ScienceDirect** - Elsevier's multidisciplinary publications
-- **SpringerLink** - Academic books and journals
-- **Scopus** - Citation and abstract database
-- **Web of Science** - Multidisciplinary citation database
-- **arXiv** - Preprint repository for STEM fields
-- **PubMed Central** - Biomedical literature archive
+- **[IEEE Xplore](https://ieeexplore.ieee.org/)** - Technical publications and conferences
+- **[ACM Digital Library](https://dl.acm.org/)** - Computing and information technology  
+- **[ScienceDirect](https://www.sciencedirect.com/)** - Elsevier's multidisciplinary publications
+- **[SpringerLink](https://link.springer.com/)** - Academic books and journals
+- **[Scopus](https://www.scopus.com/search/form.uri?display=basic&zone=header&origin=recordpage#basic)** - Citation and abstract database
+- **[Web of Science](https://www.webofscience.com/wos/woscc/basic-search)** - Multidisciplinary citation database
+- **[arXiv](https://arxiv.org/)** - Preprint repository for STEM fields
+- **[PubMed Central](https://pubmed.ncbi.nlm.nih.gov/)** - Biomedical literature archive
 
 ## Configuration
 
@@ -198,7 +198,7 @@ All datasets follow this standardized schema:
 |-------|------|-------------|
 | `source` | String | Academic database source |
 | `year` | String | Publication year |
-| `meta_title` | String | Extracted metadata title |
+| `meta_title` | String | Source dataset title |
 | `link` | String | Source URL |
 | `publisher` | String | Publisher information |
 | `metadata_missing` | String | Missing metadata indicators |
