@@ -1,0 +1,9 @@
+\\www-ens.iro.umontreal.ca\genoisgu\public_html
+hdMk6.v):GuYx1
+
+Hôte : arcade.iro.umontreal.ca
+Identifiant : genoisgu
+Mot de passe : hdMk6.v):GuYx1
+Port : 22
+
+/www/ens/aut/genoisgu/public_html
