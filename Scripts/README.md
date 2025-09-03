@@ -1,1 +1,0 @@
-# IFT3150-ProjetCurationMetadonnees

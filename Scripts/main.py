@@ -1,37 +1,55 @@
 # -*- coding: utf-8 -*-
+"""
+Systematic Review Metadata Curation Pipeline
+
+This module provides the main processing pipeline for systematic literature review
+datasets. It handles the complete workflow from raw source data to cleaned,
+standardized datasets ready for machine learning applications.
+
+Key Features:
+- Automated metadata extraction from multiple academic sources
+- Web scraping integration for missing metadata retrieval
+- Data cleaning and standardization
+- Quality assessment and reporting
+- Support for 15+ systematic review datasets
+
+Author: Guillaume Genois, 20248507
+Purpose: Metadata curation for LLM-assisted systematic literature reviews
+"""
+
 import os
 # import cudf.pandas
 # cudf.pandas.install()
 import sys
 
-from Scripts.DatasetsScripts.Demo import Demo
-from Scripts.DatasetsScripts.IFT3710 import IFT3710
-from Scripts.os_path import MAIN_PATH
+from Scripts.specialized.Demo import Demo
+from Scripts.specialized.IFT3710 import IFT3710
+from Scripts.core.os_path import MAIN_PATH
 
 # sys.stdout = open(os.devnull, 'w')
 sys.path.extend([MAIN_PATH])
 
 import chardet
 from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
-import findMissingMetadata
-from Scripts.DatasetsScripts.ArchiML import ArchiML
-from Scripts.DatasetsScripts.Behave import Behave
-from Scripts.DatasetsScripts.CodeClone import CodeClone
-from Scripts.DatasetsScripts.CodeCompr import CodeCompr
-from Scripts.DatasetsScripts.DTCPS import DTCPS
-from Scripts.DatasetsScripts.ESM_2 import ESM_2
-from Scripts.DatasetsScripts.ESPLE import ESPLE
-from Scripts.DatasetsScripts.GameSE import GameSE
-from Scripts.DatasetsScripts.GameSE_abstract import GameSE_abstract
-from Scripts.DatasetsScripts.GameSE_title import GameSE_title
-from Scripts.DatasetsScripts.ModelGuidance import ModelGuidance
-from Scripts.DatasetsScripts.ModelingAssist import ModelingAssist
-from Scripts.DatasetsScripts.OODP import OODP
-from Scripts.DatasetsScripts.SecSelfAdapt import SecSelfAdapt
-from Scripts.DatasetsScripts.SmellReprod import SmellReprod
-from Scripts.DatasetsScripts.TestNN import TestNN
-from Scripts.DatasetsScripts.TrustSE import TrustSE
-from SRProject import *
+from Scripts.extraction import findMissingMetadata
+from Scripts.datasets.ArchiML import ArchiML
+from Scripts.datasets.Behave import Behave
+from Scripts.datasets.CodeClone import CodeClone
+from Scripts.datasets.CodeCompr import CodeCompr
+from Scripts.datasets.DTCPS import DTCPS
+from Scripts.datasets.ESM_2 import ESM_2
+from Scripts.datasets.ESPLE import ESPLE
+from Scripts.datasets.GameSE import GameSE
+from Scripts.specialized.GameSE_abstract import GameSE_abstract
+from Scripts.specialized.GameSE_title import GameSE_title
+from Scripts.datasets.ModelGuidance import ModelGuidance
+from Scripts.datasets.ModelingAssist import ModelingAssist
+from Scripts.datasets.OODP import OODP
+from Scripts.datasets.SecSelfAdapt import SecSelfAdapt
+from Scripts.datasets.SmellReprod import SmellReprod
+from Scripts.datasets.TestNN import TestNN
+from Scripts.datasets.TrustSE import TrustSE
+from Scripts.core.SRProject import *
 
 # Author : Guillaume Genois, 20248507
 # This script is for importing and uniformising data from multiple datasets of SR.
@@ -56,23 +74,62 @@ from SRProject import *
 """
 
 
-# Function to detect the encoding in a file
 def printEncoding(file_path):
+    """
+    Detects and prints the character encoding of a file.
+    
+    This utility function reads a file in binary mode and uses the chardet library
+    to automatically detect its character encoding. Useful for debugging encoding
+    issues with input data files that may contain special characters.
+    
+    Args:
+        file_path (str): Path to the file whose encoding should be detected
+        
+    Returns:
+        None: Prints the detected encoding information to console
+    """
     with open(file_path, 'rb') as file:
         print(chardet.detect(file.read()))
 
 
-# Function for postprocessing
 def postProcessing(sr_project):
+    """
+    Performs quality assurance checks on the processed systematic review data.
+    
+    This function analyzes the exported TSV file to provide statistics about:
+    - Missing/empty values for each metadata field
+    - Presence of undesirable Unicode characters
+    - Overall dataset completeness metrics
+    
+    The function helps identify data quality issues and provides insights into
+    the success rate of the metadata extraction process.
+    
+    Args:
+        sr_project (SRProject): The systematic review project object containing
+                               export path and dataframe information
+                               
+    Returns:
+        None: Prints quality assessment statistics to console
+        
+    Side Effects:
+        - Reads the exported TSV file from sr_project.export_path
+        - Prints various statistics about data completeness
+    """
+    # Initialize counters for missing values in each field
     empty_counts = {"key": 0, "project": 0, "title": 0, "abstract": 0, "keywords": 0, "authors": 0, "venue": 0, "doi": 0,
        "references": 0, "bibtex": 0, "screened_decision": 0, "final_decision": 0, "mode": 0,
        "inclusion_criteria": 0, "exclusion_criteria": 0, "reviewer_count": 0}
+    
+    # Pattern to detect problematic Unicode characters that may cause issues
     undesirable_pattern = (
         r'[\u0000-\u001F\u007F\u0080-\u009F\u200B\u200C\u200D\u200E\u200F'
         r'\u202A\u202B\u202C\u202D\u202E\uFEFF\uFFFD\0xE2\0x80\0x99]'
     )
 
+    # Read the exported file to analyze its contents
     file = pd.read_csv(sr_project.export_path, delimiter="\t")
+    
+    # Count missing values and check for undesirable characters
     for line in file.iterrows():
         row = line[1]
         for key in empty_counts:
@@ -81,6 +138,8 @@ def postProcessing(sr_project):
             elif re.search(undesirable_pattern, str(row[key])):
                 continue
                 print("Error:", line[0], row[key])
+    
+    # Output quality assessment statistics
     print(sr_project.df['project'].values[0])
     print("Number of blanks/NaN:", empty_counts)
     print("Number of articles:", len(file))
@@ -93,49 +152,183 @@ def postProcessing(sr_project):
 
 
 def cleanDataFrame(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Cleans and standardizes data in a pandas DataFrame for export.
+    
+    This function performs several cleaning operations to ensure data quality
+    and consistency:
+    - Replaces problematic Unicode characters with standard equivalents
+    - Removes copyright symbols and other unwanted characters
+    - Standardizes delimiter usage in multi-value fields
+    - Strips whitespace from string values
+    - Handles NaN values and empty strings consistently
+    - Removes illegal characters that could cause Excel/CSV issues
+    
+    Args:
+        df (pd.DataFrame): The DataFrame to be cleaned
+        
+    Returns:
+        pd.DataFrame: A cleaned copy of the input DataFrame
+        
+    Note:
+        The function uses openpyxl's ILLEGAL_CHARACTERS_RE to ensure
+        compatibility with Excel exports.
+    """
+    # Replace problematic Unicode dash with standard ASCII dash
     new_df = df.replace("–", "-")
+    
+    # Remove copyright symbols that may cause encoding issues
     new_df = new_df.replace("©", '')
+    
+    # Standardize double semicolons to single semicolons
     new_df = new_df.replace(";;", ';')
-    # new_df = new_df['keywords'].replace(",", ';')
+    
+    # Strip whitespace from all string values
     new_df = new_df.map(lambda x: x.strip() if isinstance(x, str) else x)
+    
+    # Replace string "nan" with empty string
     new_df = new_df.replace("nan", '')
+    
+    # Fill actual NaN values with empty strings
     new_df = new_df.fillna('')
+    
+    # Remove characters that are illegal in Excel/OpenPyXL
     new_df = new_df.map(lambda x: ILLEGAL_CHARACTERS_RE.sub(r'',x) if isinstance(x, str) else x)
+    
     return new_df
 
 
-# Function to export to CSV the SRProject object
 def ExportToCSV(sr_project):
-
+    """
+    Exports the systematic review project data to a TSV file.
+    
+    This function takes the processed DataFrame from a systematic review project
+    and exports it to a tab-separated values (TSV) file. The function:
+    - Removes internal tracking columns (index, key)
+    - Uses tab separation for better handling of text with commas
+    - Sets UTF-8 encoding to preserve special characters
+    - Uses the row index as the primary key column
+    
+    Args:
+        sr_project (SRProject): The systematic review project object containing
+                               the processed DataFrame and export path
+                               
+    Returns:
+        None: Writes the data to the file specified in sr_project.export_path
+        
+    Side Effects:
+        - Creates/overwrites the TSV file at sr_project.export_path
+        - File format: TSV with UTF-8 encoding and row index as 'key' column
+    """
     final_data_frame = sr_project.df
 
+    # Remove internal columns that shouldn't be in the final export
     final_data_frame = final_data_frame.drop(columns=["index",'key'])
+    
+    # Export to TSV with UTF-8 encoding and row index as key
     final_data_frame.to_csv(sr_project.export_path, sep="\t", index_label="key", encoding='utf-8')
 
 
 def pre_process_sr_project(sr_project):
+    """
+    Preprocesses the systematic review project data to handle duplicate titles.
+    
+    This function ensures that all titles in the dataset are unique by appending
+    a numeric suffix to duplicate titles. This is important for:
+    - Preventing data loss during processing
+    - Ensuring each article can be uniquely identified
+    - Avoiding conflicts in downstream processing steps
+    
+    Args:
+        sr_project (SRProject): The systematic review project object whose
+                               DataFrame will be modified
+                               
+    Returns:
+        None: Modifies sr_project.df in place
+        
+    Side Effects:
+        - Modifies the 'title' column in sr_project.df
+        - Prints duplicate titles as they are found
+        - Appends numeric suffixes to duplicate titles (e.g., "Title 2", "Title 3")
+    """
     title_counts = {}
 
     def make_unique(title):
+        """
+        Inner function to generate unique titles by adding numeric suffixes.
+        
+        Args:
+            title (str): The original title
+            
+        Returns:
+            str: Unique title (original or with numeric suffix)
+        """
         if title in title_counts:
             title_counts[title] += 1
-            print(title)
+            print(title)  # Alert user to duplicate
             return f"{title} {title_counts[title]}"
         else:
             title_counts[title] = 1
             return title
 
+    # Apply uniqueness transformation to all titles
     sr_project.df["title"] = sr_project.df["title"].apply(make_unique)
 
 
 def read_sr_project(arg):
+    """
+    Reads a previously processed systematic review project from its TSV file.
+    
+    This utility function loads a systematic review dataset that has already
+    been processed and exported. Used primarily for incremental processing
+    or when resuming work on a partially completed dataset.
+    
+    Args:
+        arg (str): The name of the systematic review project/dataset
+        
+    Returns:
+        pd.DataFrame: The loaded systematic review data
+        
+    Note:
+        Assumes the TSV file follows the standard naming convention:
+        {MAIN_PATH}/Datasets/{project_name}/{project_name}.tsv
+    """
     return pd.read_csv(f"{MAIN_PATH}/Datasets/{arg}/{arg}.tsv", delimiter="\t")
 
 
 def main(args=None):
+    """
+    Main processing function for systematic review datasets.
+    
+    This function orchestrates the complete processing pipeline for one or more
+    systematic review projects. It handles:
+    - Dataset initialization and loading
+    - Preprocessing (duplicate handling, data cleaning)
+    - Metadata extraction (optional web scraping)
+    - Data cleaning and standardization
+    - Export to TSV format
+    - Quality assessment reporting
+    
+    The function processes multiple datasets sequentially, applying the same
+    standardized pipeline to each one.
+    
+    Args:
+        args (list, optional): List of dataset names to process. If None or empty,
+                              defaults to ['CodeCompr', 'ArchiML', 'ModelingAssist', 'CodeClone']
+                              
+    Returns:
+        None: Processes datasets and exports results to files
+        
+    Side Effects:
+        - Creates/updates TSV files for each processed dataset
+        - Creates Excel files with preprocessing data
+        - Prints processing statistics and quality metrics
+        - May perform web scraping if extraction is enabled
+    """
+    # Set default datasets to process if none provided
     if args is None or not len(args) > 0:
         args = ['CodeCompr', "ArchiML", 'ModelingAssist', 'CodeClone']
-        # args = ['CodeCompr']
+        # args = ['CodeCompr']  # Alternative single dataset for testing
     sr_project = None
 
     for arg in args:
@@ -195,7 +388,7 @@ def main(args=None):
             sr_project.export_path = f"{MAIN_PATH}/Datasets/{arg}/{arg}_unprocessed.xlsx"
 
         # printEncoding(sr_project.path)  # to make sure we use the right encoding if necessary
-        completed_df = findMissingMetadata.main(sr_project.df, do_extraction, 999)
+        completed_df = findMissingMetadata.main(sr_project.df, do_extraction, 999, arg)
         cleaned_df = cleanDataFrame(completed_df)
         sr_project.df = cleaned_df
 
