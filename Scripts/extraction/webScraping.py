@@ -1,10 +1,27 @@
+"""
+Web Scraping Module for Systematic Literature Review Metadata Extraction
+
+This module provides automated web scraping capabilities for extracting metadata
+from academic databases using Selenium WebDriver. It supports multiple platforms
+(Windows/Linux) and handles authentication for institutional access.
+
+Key Features:
+- Cross-platform Firefox configuration (Windows/Linux)
+- Institutional authentication for ScienceDirect and Scopus
+- Multi-database support (IEEE, ACM, Springer, ScienceDirect, etc.)
+- Metadata extraction from HTML and BibTeX sources
+
+Author: Guillaume Genois, 20248507
+Purpose: Automated metadata extraction for systematic literature reviews
+"""
+
 import os
+import platform
 import time
+from datetime import datetime
 
 import pandas as pd
 from lxml.etree import XPath
-# from fake_useragent import UserAgent
-# import selenium_stealth
 from selenium import webdriver
 from pybtex.database.input import bibtex as bibtex_parser
 from selenium.webdriver import ActionChains
@@ -15,318 +32,393 @@ from . import searchInSource
 from ..core.SRProject import *
 from ..core.os_path import MAIN_PATH, FIREFOX_PROFILE_PATH
 
+# Global connection state
 ALREADY_CONNECTED = False
 
-class WebScraper:
-    def __init__(self):
-        global ALREADY_CONNECTED
-        install_dir = "/snap/firefox/current/usr/lib/firefox"
-        driver_loc = os.path.join(install_dir, "geckodriver")
-        binary_loc = os.path.join(install_dir, "firefox")
+# Institutional credentials (should be moved to environment variables)
+INSTITUTIONAL_EMAIL = "guillaume.genois@umontreal.ca"
+INSTITUTIONAL_PASSWORD = "Guigui-031!"
 
-        service = webdriver.FirefoxService(driver_loc)
-        # https://askubuntu.com/questions/870530/how-to-install-geckodriver-in-ubuntu
-        # ua = UserAgent()
-        profile = webdriver.FirefoxProfile(FIREFOX_PROFILE_PATH)
+class WebScraper:
+    """
+    Main web scraper class for automated metadata extraction from academic databases.
+    
+    Handles browser initialization, authentication, and metadata extraction from
+    multiple academic sources including IEEE, ACM, Springer, ScienceDirect, etc.
+    """
+    
+    def __init__(self):
+        """Initialize the web scraper with platform-specific Firefox configuration."""
+        global ALREADY_CONNECTED
+        
+        # Configure Firefox based on operating system
         options = webdriver.FirefoxOptions()
-        options.profile = profile
-        options.binary_location = binary_loc
+        
+        # Common configuration for both systems
         options.set_preference('network.proxy.type', 0)
-        options.set_preference("general.useragent.override", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0)1 Firefox/130.0")
-        # options.set_preference("general.useragent.override", ua.random)
-        # options.add_argument("-headless")
-        # self.driver = webdriver.Firefox(options=options)
-        self.driver = webdriver.Firefox(options=options, service=service)
-        self.driver.get("https://www.webofscience.com/wos/woscc/basic-search")  # WoS
+        options.set_preference("general.useragent.override", 
+                             "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0")
+        
+        if platform.system() == "Linux":
+            # Linux configuration (for Ubuntu/server environments)
+            install_dir = "/snap/firefox/current/usr/lib/firefox"
+            driver_loc = os.path.join(install_dir, "geckodriver")
+            binary_loc = os.path.join(install_dir, "firefox")
+            
+            # Set up service and binary location for Linux
+            service = webdriver.FirefoxService(driver_loc)
+            options.binary_location = binary_loc
+            # options.add_argument("-headless")  # Uncomment for headless mode on server
+            
+            # Initialize driver with service for Linux
+            self.driver = webdriver.Firefox(options=options, service=service)
+        else:
+            # Windows configuration (development environment)
+            profile = webdriver.FirefoxProfile(FIREFOX_PROFILE_PATH)
+            options.profile = profile
+            
+            # Initialize driver without service for Windows
+            self.driver = webdriver.Firefox(options=options)
+        
+        # Initialize academic database connections
+        self._initialize_database_connections()
+        
+        # Initialize the search engine
+        self.searcher = searchInSource.SearcherInSource(self.driver)
+
+    def _initialize_database_connections(self):
+        """Initialize connections to various academic databases."""
+        global ALREADY_CONNECTED
+        
+        # Navigate to main academic databases
+        self.driver.get("https://www.webofscience.com/wos/woscc/basic-search")  # Web of Science
         self.driver.get("https://ieeexplore.ieee.org/Xplore/home.jsp")  # IEEE
         self.driver.get("https://dl.acm.org/")  # ACM
-        # self.driver.get("https://www.scopus.com/search/form.uri?display=basic#basic")  # ScopusSignedIn
-        # time.sleep(2)
-
-        self.driver.get("https://www.sciencedirect.com/")  # ScienceDirect + auth
-        time.sleep(2)
-        web_element = self.driver.find_element(By.XPATH, '//*[@id="gh-institutionalsignin-btn"]')
-        web_element.click()
-        time.sleep(2)
-        web_element = self.driver.find_element(By.XPATH, '//*[@id="bdd-email"]')
-        web_element.send_keys("guillaume.genois@umontreal.ca")
-        time.sleep(2)
-        web_element = self.driver.find_element(By.XPATH, '//*[@id="bdd-els-searchBtn"]')
-        web_element.click()
-        time.sleep(2)
-        web_element = self.driver.find_element(By.XPATH, '//*[@id="bdd-password"]')
-        web_element.send_keys("Guigui-031!")
-        time.sleep(2)
-        web_element = self.driver.find_element(By.XPATH, '//*[@id="bdd-elsPrimaryBtn"]')
-        web_element.click()
-        time.sleep(2)
+        
+        # Authenticate with ScienceDirect
+        self._authenticate_sciencedirect()
+        
+        # Navigate to Scopus
         self.driver.get("https://www.scopus.com/")
         time.sleep(2)
 
-
         if not ALREADY_CONNECTED:
-            # input("Continue?")
             ALREADY_CONNECTED = True
-        # web_element = self.driver.find_element(By.XPATH, '//*[@id="qs"]')
-        # web_element.send_keys("systematic review")
-        # web_element = self.driver.find_element(By.XPATH,
-        #                                        '/html/body/div[1]/div/div[1]/div[2]/div[1]/div/div/form/div[2]/button')
-        # web_element.click()
-        # web_element = self.driver.find_element(By.XPATH,
-        #                                        '//*[@id="bdd-email"]')
-        # web_element.send_keys("guillaume.genois@umontreal.ca")
-        # web_element = self.driver.find_element(By.XPATH,
-        #                                        '//*[@id="bdd-email"]')
-        # web_element.send_keys("guillaume.genois@umontreal.ca")
-        # web_element = self.driver.find_element(By.XPATH,
-        #                                        '//*[@id="bdd-els-searchBtn"]')
-        # web_element.click()
-        # prendre courriel et copier le lien dans le navigateur robot
 
-        self.searcher = searchInSource.SearcherInSource(self.driver)
+    def _authenticate_sciencedirect(self):
+        """Handle institutional authentication for ScienceDirect."""
+        self.driver.get("https://www.sciencedirect.com/")
+        time.sleep(2)
+        
+        try:
+            # Click institutional sign-in
+            sign_in_btn = self.driver.find_element(By.XPATH, '//*[@id="gh-institutionalsignin-btn"]')
+            sign_in_btn.click()
+            time.sleep(2)
+            
+            # Enter email
+            email_field = self.driver.find_element(By.XPATH, '//*[@id="bdd-email"]')
+            email_field.send_keys(INSTITUTIONAL_EMAIL)
+            time.sleep(2)
+            
+            # Search for institution
+            search_btn = self.driver.find_element(By.XPATH, '//*[@id="bdd-els-searchBtn"]')
+            search_btn.click()
+            time.sleep(2)
+            
+            # Enter password
+            password_field = self.driver.find_element(By.XPATH, '//*[@id="bdd-password"]')
+            password_field.send_keys(INSTITUTIONAL_PASSWORD)
+            time.sleep(2)
+            
+            # Submit login
+            login_btn = self.driver.find_element(By.XPATH, '//*[@id="bdd-elsPrimaryBtn"]')
+            login_btn.click()
+            time.sleep(2)
+            
+        except Exception as e:
+            print(f"Authentication failed: {e}")
 
     def close(self):
+        """Close the browser and reset connection state."""
         global ALREADY_CONNECTED
         ALREADY_CONNECTED = False
         self.driver.close()
 
     def get_source_from_doi_with_url(self, link):
+        """
+        Determine the academic source from a DOI link.
+        
+        Args:
+            link (str): The DOI or URL to analyze
+            
+        Returns:
+            str: The identified source name
+        """
         self.driver.get(link)
         time.sleep(5)
         current_url = self.driver.current_url
-        if "sciencedirect.com" in current_url:
-            return ScienceDirect
-        elif "link.springer.com" in current_url:
-            return SpringerLink
-        elif "dl.acm.org" in current_url:
-            return ACM
-        elif "ieeexplore.ieee.org" in current_url:
-            return IEEE
-        elif "scopus.com" in current_url:
-            return Scopus
-        elif "arxiv.org" in current_url:
-            return arXiv
-        elif "pubmed.ncbi.nlm.nih.gov" in current_url:
-            return PubMedCentral
+        
+        source_mapping = {
+            "sciencedirect.com": ScienceDirect,
+            "link.springer.com": SpringerLink,
+            "dl.acm.org": ACM,
+            "ieeexplore.ieee.org": IEEE,
+            "scopus.com": Scopus,
+            "arxiv.org": arXiv,
+            "pubmed.ncbi.nlm.nih.gov": PubMedCentral
+        }
+        
+        for domain, source in source_mapping.items():
+            if domain in current_url:
+                return source
+        
+        return None
 
     def get_html_from_link(self, link=None):
+        """
+        Retrieve HTML content from a given link.
+        
+        Args:
+            link (str, optional): URL to fetch. If None, uses current page.
+            
+        Returns:
+            str: HTML content of the page
+        """
         if link:
-            print(link)
+            print(f"Navigating to: {link}")
             self.driver.get(link)
             time.sleep(2)
-        html = self.driver.page_source
-        return html
+        return self.driver.page_source
 
     def get_metadata_from_link(self, title, link, source=None):
-        # TODO: éviter 2e requête lorsque source is None
+        """
+        Extract metadata from a specific link based on the academic source.
+        
+        Args:
+            title (str): Article title for validation
+            link (str): URL or DOI to extract from
+            source (str, optional): Academic source identifier
+            
+        Returns:
+            dict: Extracted metadata dictionary
+        """
         link_opened = False
-        if source is None:  # is DOI
+        
+        # Determine source if not provided
+        if source is None:
             source = self.get_source_from_doi_with_url(link)
             link_opened = True
             if source is None:
-                source = htmlParser.get_source_from_doi_with_crossref(self.get_html_from_link("http://api.crossref.org/works/" + link[16:]))
+                crossref_html = self.get_html_from_link(f"http://api.crossref.org/works/{link[16:]}")
+                source = htmlParser.get_source_from_doi_with_crossref(crossref_html)
+        
         metadata = metadata_base.copy()
         metadata['Link'] = link
 
-        if not source:
-            print("searching in all options")
-            for name in sources_name:
-                new_metadata = self.get_metadata_from_title(title, None, name, None)
-                if check_if_right_link(new_metadata, title):
-                    update_metadata(metadata, new_metadata)
-                    break
-        if source == IEEE or source == 'ieee' or 'Institute of Electrical and Electronics Engineers' in source:
-            if 'doi' in link:
-                self.driver.get(link)
-                link = self.driver.current_url
+        # Route to appropriate metadata extraction method based on source
+        extraction_methods = {
+            IEEE: self._extract_ieee_metadata,
+            ScienceDirect: self._extract_sciencedirect_metadata,
+            ACM: self._extract_acm_metadata,
+            SpringerLink: self._extract_springer_metadata,
+            Scopus: self._extract_scopus_metadata,
+            WoS: self._extract_wos_metadata,
+            PubMedCentral: self._extract_pubmed_metadata,
+            arXiv: self._extract_arxiv_metadata
+        }
 
-            html = self.get_html_from_link(link + "/keywords#keywords")
-            new_metadata = htmlParser.get_metadata_from_html_ieee(html)
-            if not check_if_right_link(new_metadata, title):
-                return
-            save_extracted_html(title + "/keywords#keywords" + "_00", html)
-            update_metadata(metadata, new_metadata)
-
-            html = self.get_html_from_link(link + "/references#references")
-            save_extracted_html(title + "/references#references" + "_00", html)
-            new_metadata = htmlParser.get_metadata_from_html_ieee(html)
-            update_metadata(metadata, new_metadata)
-            self.searcher.extract_bibtex_in_IEEE(title)
-            parser = bibtex_parser.Parser()
-            bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_00.bib')
-            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
-
-        elif source == ScienceDirect or source == 'sciencedirect' or 'Elsevier' in source:
-            html = self.get_html_from_link(link if not link_opened else None)
-            new_metadata = htmlParser.get_metadata_from_html_sciencedirect(html)
-            if not check_if_right_link(new_metadata, title):
-                return
-            save_extracted_html(title + "_02", html)
-            update_metadata(metadata, new_metadata)
-            self.searcher.extract_bibtex_in_ScienceDirect(title)
-            parser = bibtex_parser.Parser()
-            bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_02.bib')
-            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
-
-        elif source == ACM or source in ['acm', "Association for Computing Machinery (ACM)", "ACM Press",
-                                       "Society for Computer Simulation International"] or "ACM" in source:
-            html = self.get_html_from_link(link if not link_opened else None)
-            new_metadata = htmlParser.get_metadata_from_html_ACM(html)
-            # if not check_if_right_link(new_metadata, title):
-            #     return
-            save_extracted_html(title + "_01", html)
-            metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_ACM(title)
-            parser = bibtex_parser.Parser()
-            bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_01.bib')
-            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
-
-        elif source == SpringerLink or 'Springer' in source or source == 'springer':
-            html = self.get_html_from_link(link if not link_opened else None)
-            new_metadata = htmlParser.get_metadata_from_html_springerlink(html)
-            if not check_if_right_link(new_metadata, title):
-                return
-            save_extracted_html(title + "_03", html)
-            metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_SpringerLink(title)
-            parser = bibtex_parser.Parser()
-            bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_03.bib')
-            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
-
-        elif source == Scopus or source == 'scopus':
-            # i.e.: "https://www.scopus.com/record/display.uri?eid=2-s2.0-85083744459&doi=10.1089%2fg4h.2019.0067&origin=inward&txGid=0d477ca65acc675d5e5d53dc3edac470"
-            html = self.get_html_from_link(link if not link_opened else None)
-            new_metadata = htmlParser.get_metadata_from_html_scopus(html)
-            if not check_if_right_link(new_metadata, title):
-                return
-            save_extracted_html(title + "_07", html)
-            metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_scopus_signed_in(title)
-            parser = bibtex_parser.Parser()
-            bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_07.bib')
-            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
-
-            if all(new_metadata[k] is None for k in new_metadata.keys()):
-                last_half = link[link.find("doi"):]
-                doi_not_formated = last_half[:last_half.find("&")]
-                doi = "https://" + doi_not_formated.replace("=", ".org/").replace("%2f", "/")
-                html = self.get_html_from_link(doi)
-                save_extracted_html(doi + "_06", html)
-                new_source = htmlParser.get_source_from_doi_with_crossref(html)
-                new_metadata = self.get_metadata_from_link(title, doi, new_source)
-                metadata.update(new_metadata)
-
-        elif source == WoS or source == 'wos':
-            html = self.get_html_from_link(link if not link_opened else None)
-            save_extracted_html(title + "_05", html)
-            new_metadata = htmlParser.get_metadata_from_html_wos(html)
-            if not check_if_right_link(new_metadata, title):
-                return
-            metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_WoS(title)
-            parser = bibtex_parser.Parser()
-            bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_05.bib')
-            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
-
-        elif source == PubMedCentral:
-            html = self.get_html_from_link(link if not link_opened else None)
-            new_metadata = htmlParser.get_metadata_from_html_pub_med_central(html)
-            if not check_if_right_link(new_metadata, title):
-                return
-            save_extracted_html(title + "_08", html)
-            metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_PubMedCentral(title)
-            parser = bibtex_parser.Parser()
-            bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_08.bib')
-            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
-
-        elif source == arXiv or source == 'arxiv':
-            html = self.get_html_from_link(link if not link_opened else None)
-            new_metadata = htmlParser.get_metadata_from_html_arxiv(html)
-            if not check_if_right_link(new_metadata, title):
-                return
-            save_extracted_html(title + "_09", html)
-            metadata.update(new_metadata)
+        if source in extraction_methods:
+            return extraction_methods[source](title, link, metadata, link_opened)
         else:
-            print(f'source "{source}" not valid')
-            print("searching in all options")
-            for name in sources_name:
-                new_metadata = self.get_metadata_from_title(title, None, name, None)
-                if check_if_right_link(new_metadata, title):
-                    update_metadata(metadata, new_metadata)
-                    break
-        if metadata: metadata["Link"] = link
+            print(f'Source "{source}" not recognized, searching all options')
+            return self._search_all_sources(title, metadata)
+
+    def _extract_ieee_metadata(self, title, link, metadata, link_opened):
+        """Extract metadata from IEEE source."""
+        if 'doi' in link:
+            self.driver.get(link)
+            link = self.driver.current_url
+
+        # Extract keywords
+        html = self.get_html_from_link(f"{link}/keywords#keywords")
+        new_metadata = htmlParser.get_metadata_from_html_ieee(html)
+        if not check_if_right_link(new_metadata, title):
+            return None
+        save_extracted_html(f"{title}/keywords#keywords_00", html)
+        update_metadata(metadata, new_metadata)
+
+        # Extract references
+        html = self.get_html_from_link(f"{link}/references#references")
+        save_extracted_html(f"{title}/references#references_00", html)
+        new_metadata = htmlParser.get_metadata_from_html_ieee(html)
+        update_metadata(metadata, new_metadata)
+        
+        # Extract BibTeX
+        self.searcher.extract_bibtex_in_IEEE(title)
+        self._process_bibtex(title, "00", metadata)
+        
+        return metadata
+
+    def _extract_sciencedirect_metadata(self, title, link, metadata, link_opened):
+        """Extract metadata from ScienceDirect source."""
+        html = self.get_html_from_link(link if not link_opened else None)
+        new_metadata = htmlParser.get_metadata_from_html_sciencedirect(html)
+        if not check_if_right_link(new_metadata, title):
+            return None
+        save_extracted_html(f"{title}_02", html)
+        update_metadata(metadata, new_metadata)
+        
+        self.searcher.extract_bibtex_in_ScienceDirect(title)
+        self._process_bibtex(title, "02", metadata)
+        
+        return metadata
+
+    def _extract_acm_metadata(self, title, link, metadata, link_opened):
+        """Extract metadata from ACM source."""
+        html = self.get_html_from_link(link if not link_opened else None)
+        new_metadata = htmlParser.get_metadata_from_html_ACM(html)
+        save_extracted_html(f"{title}_01", html)
+        metadata.update(new_metadata)
+        
+        self.searcher.extract_bibtex_in_ACM(title)
+        self._process_bibtex(title, "01", metadata)
+        
+        return metadata
+
+    def _extract_springer_metadata(self, title, link, metadata, link_opened):
+        """Extract metadata from Springer source."""
+        html = self.get_html_from_link(link if not link_opened else None)
+        new_metadata = htmlParser.get_metadata_from_html_springerlink(html)
+        if not check_if_right_link(new_metadata, title):
+            return None
+        save_extracted_html(f"{title}_03", html)
+        metadata.update(new_metadata)
+        
+        self.searcher.extract_bibtex_in_SpringerLink(title)
+        self._process_bibtex(title, "03", metadata)
+        
+        return metadata
+
+    def _extract_scopus_metadata(self, title, link, metadata, link_opened):
+        """Extract metadata from Scopus source."""
+        html = self.get_html_from_link(link if not link_opened else None)
+        new_metadata = htmlParser.get_metadata_from_html_scopus(html)
+        if not check_if_right_link(new_metadata, title):
+            return None
+        save_extracted_html(f"{title}_07", html)
+        metadata.update(new_metadata)
+        
+        self.searcher.extract_bibtex_in_scopus_signed_in(title)
+        self._process_bibtex(title, "07", metadata)
+        
+        return metadata
+
+    def _extract_wos_metadata(self, title, link, metadata, link_opened):
+        """Extract metadata from Web of Science source."""
+        html = self.get_html_from_link(link if not link_opened else None)
+        save_extracted_html(f"{title}_05", html)
+        new_metadata = htmlParser.get_metadata_from_html_wos(html)
+        if not check_if_right_link(new_metadata, title):
+            return None
+        metadata.update(new_metadata)
+        
+        self.searcher.extract_bibtex_in_WoS(title)
+        self._process_bibtex(title, "05", metadata)
+        
+        return metadata
+
+    def _extract_pubmed_metadata(self, title, link, metadata, link_opened):
+        """Extract metadata from PubMed Central source."""
+        html = self.get_html_from_link(link if not link_opened else None)
+        new_metadata = htmlParser.get_metadata_from_html_pub_med_central(html)
+        if not check_if_right_link(new_metadata, title):
+            return None
+        save_extracted_html(f"{title}_08", html)
+        metadata.update(new_metadata)
+        
+        self.searcher.extract_bibtex_in_PubMedCentral(title)
+        self._process_bibtex(title, "08", metadata)
+        
+        return metadata
+
+    def _extract_arxiv_metadata(self, title, link, metadata, link_opened):
+        """Extract metadata from arXiv source."""
+        html = self.get_html_from_link(link if not link_opened else None)
+        new_metadata = htmlParser.get_metadata_from_html_arxiv(html)
+        if not check_if_right_link(new_metadata, title):
+            return None
+        save_extracted_html(f"{title}_09", html)
+        metadata.update(new_metadata)
+        
+        return metadata
+
+    def _process_bibtex(self, title, source_code, metadata):
+        """Process BibTeX file and update metadata."""
+        try:
+            parser = bibtex_parser.Parser()
+            bib_file = f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_{source_code}.bib'
+            bib_data = parser.parse_file(bib_file)
+            bibtex_metadata = htmlParser.get_metadata_from_bibtex(bib_data)
+            update_metadata(metadata, bibtex_metadata)
+        except Exception as e:
+            print(f"Failed to process BibTeX for {title}: {e}")
+
+    def _search_all_sources(self, title, metadata):
+        """Search all available sources when source is unknown."""
+        print("Searching in all available sources")
+        for source_name in sources_name:
+            new_metadata = self.get_metadata_from_title(title, None, source_name, None)
+            if check_if_right_link(new_metadata, title):
+                update_metadata(metadata, new_metadata)
+                break
         return metadata
 
     def get_metadata_from_title(self, title, author=None, source=None, year=None):
-        # TODO: mettre link website si pas doi
-        global driver
-        tries = 0
-        # research to find link and get metadata
-        print("source", source)
-        if source not in all_sources_name and source is not None:
+        """
+        Search for and extract metadata using article title.
+        
+        Args:
+            title (str): Article title to search for
+            author (str, optional): Author name for refined search
+            source (str, optional): Specific academic source to search
+            year (str, optional): Publication year for refined search
+            
+        Returns:
+            dict: Extracted metadata dictionary
+        """
+        print(f"Searching for: {title}")
+        print(f"Source: {source}, Author: {author}, Year: {year}")
+        
+        # Normalize source name
+        if source and source not in all_sources_name:
             for name in all_sources_name:
                 if name in str(source):
                     source = name
-        print("title", title)
-        print("new source", source)
-        print("author", author)
-        print("year", year)
+                    break
 
         metadata = metadata_base.copy()
-        # driver.get("https://www.crossref.org/guestquery/")
-        if source == IEEE or source == 'ieee':
-            new_metadata = self.searcher.search_in_IEEE(title)
-            if not new_metadata: new_metadata = metadata_base.copy()
-            update_metadata(metadata, new_metadata)
 
-        elif source == ScienceDirect or source in ['sciencedirect', 'ScienceDirect']:
-            new_metadata = self.searcher.search_in_ScienceDirect(title)
-            if not new_metadata: new_metadata = metadata_base.copy()
-            update_metadata(metadata, new_metadata)
+        # Route to appropriate search method
+        search_methods = {
+            IEEE: self.searcher.search_in_IEEE,
+            ScienceDirect: self.searcher.search_in_ScienceDirect,
+            ACM: self.searcher.search_in_ACM,
+            SpringerLink: self.searcher.search_in_SpringerLink,
+            Scopus: self.searcher.search_in_Scopus,
+            ScopusSignedIn: self.searcher.search_in_Scopus_signed_in,
+            WoS: self.searcher.search_in_WoS,
+            PubMedCentral: self.searcher.search_in_PubMedCentral
+        }
 
-        elif source == ACM or source in ['acm', "Association for Computing Machinery (ACM)", "ACM Press"]:
-            new_metadata = self.searcher.search_in_ACM(title)
-            if not new_metadata: new_metadata = metadata_base.copy()
-            update_metadata(metadata, new_metadata)
-
-        elif source == SpringerLink or source in ['springer', 'Springer', 'SpringerLink']:
-            new_metadata = self.searcher.search_in_SpringerLink(title)
-            if not new_metadata: new_metadata = metadata_base.copy()
-            update_metadata(metadata, new_metadata)
-
-        elif source == Scopus:
-            new_metadata = self.searcher.search_in_Scopus(title)
-            if not new_metadata: new_metadata = metadata_base.copy()
-            update_metadata(metadata, new_metadata)
-
-        elif source == ScopusSignedIn or source == 'scopus':
-            new_metadata = self.searcher.search_in_Scopus_signed_in(title)
-            if not new_metadata: new_metadata = metadata_base.copy()
-            update_metadata(metadata, new_metadata)
-
-        elif source == WoS or source == 'wos':
-            new_metadata = self.searcher.search_in_WoS(title)
-            if not new_metadata: new_metadata = metadata_base.copy()
-            update_metadata(metadata, new_metadata)
-
-        elif source == PubMedCentral:
-            new_metadata = self.searcher.search_in_PubMedCentral(title)
-            if not new_metadata: new_metadata = metadata_base.copy()
-            update_metadata(metadata, new_metadata)
-
+        if source in search_methods:
+            new_metadata = search_methods[source](title)
+            if new_metadata:
+                update_metadata(metadata, new_metadata)
         else:
-            print(f'Source "{source}" not valid')
-            print("searching in all options")
-            for name in sources_name:
-                new_metadata = self.get_metadata_from_title(title, author, name, year)
+            print(f'Source "{source}" not valid, searching all options')
+            for source_name in sources_name:
+                new_metadata = self.get_metadata_from_title(title, author, source_name, year)
                 if check_if_right_link(new_metadata, title):
                     update_metadata(metadata, new_metadata)
                     break
@@ -335,359 +427,109 @@ class WebScraper:
 
 
 class ManualWebScraper:
+    """
+    Manual web scraper for interactive metadata extraction and testing.
+    
+    This class provides manual control over the scraping process and is primarily
+    used for debugging, testing, and manual metadata extraction tasks.
+    """
+    
     def __init__(self):
-        # ua = UserAgent()
+        """Initialize manual web scraper with Linux-specific configuration."""
+        # Note: This class assumes Linux environment - should be updated for cross-platform
         install_dir = "/snap/firefox/current/usr/lib/firefox"
         driver_loc = os.path.join(install_dir, "geckodriver")
         binary_loc = os.path.join(install_dir, "firefox")
+        
         service = webdriver.FirefoxService(driver_loc)
         profile = webdriver.FirefoxProfile(FIREFOX_PROFILE_PATH)
         options = webdriver.FirefoxOptions()
         options.profile = profile
         options.binary_location = binary_loc
         options.set_preference('network.proxy.type', 0)
-        # options.set_preference("general.useragent.override", ua.random)
-        options.set_preference("general.useragent.override", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0)1 Firefox/130.0")
-        # options.set_preference("general.useragent.override", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0")
-        # options.add_argument("-headless")
+        options.set_preference("general.useragent.override", 
+                             "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Firefox/130.0")
 
         self.driver = webdriver.Firefox(options=options, service=service)
-        self.driver.get("https://www.sciencedirect.com/")  # ScienceDirect + auth
-        time.sleep(2)
-        web_element = self.driver.find_element(By.XPATH, '//*[@id="gh-institutionalsignin-btn"]')
-        web_element.click()
-        time.sleep(2)
-        web_element = self.driver.find_element(By.XPATH, '//*[@id="bdd-email"]')
-        web_element.send_keys("guillaume.genois@umontreal.ca")
-        time.sleep(2)
-        web_element = self.driver.find_element(By.XPATH, '//*[@id="bdd-els-searchBtn"]')
-        web_element.click()
-        time.sleep(2)
-        web_element = self.driver.find_element(By.XPATH, '//*[@id="bdd-password"]')
-        web_element.send_keys("Guigui-031!")
-        time.sleep(2)
-        web_element = self.driver.find_element(By.XPATH, '//*[@id="bdd-elsPrimaryBtn"]')
-        web_element.click()
-        time.sleep(2)
+        
+        # Authenticate with databases
+        self._authenticate_sciencedirect()
+        
         self.driver.get("https://www.scopus.com/")
         time.sleep(2)
-
+        
         self.searcher = searchInSource.SearcherInSource(self.driver)
 
+    def _authenticate_sciencedirect(self):
+        """Handle institutional authentication for ScienceDirect."""
+        self.driver.get("https://www.sciencedirect.com/")
+        time.sleep(2)
+        
+        try:
+            sign_in_btn = self.driver.find_element(By.XPATH, '//*[@id="gh-institutionalsignin-btn"]')
+            sign_in_btn.click()
+            time.sleep(2)
+            
+            email_field = self.driver.find_element(By.XPATH, '//*[@id="bdd-email"]')
+            email_field.send_keys(INSTITUTIONAL_EMAIL)
+            time.sleep(2)
+            
+            search_btn = self.driver.find_element(By.XPATH, '//*[@id="bdd-els-searchBtn"]')
+            search_btn.click()
+            time.sleep(2)
+            
+            password_field = self.driver.find_element(By.XPATH, '//*[@id="bdd-password"]')
+            password_field.send_keys(INSTITUTIONAL_PASSWORD)
+            time.sleep(2)
+            
+            login_btn = self.driver.find_element(By.XPATH, '//*[@id="bdd-elsPrimaryBtn"]')
+            login_btn.click()
+            time.sleep(2)
+            
+        except Exception as e:
+            print(f"Authentication failed: {e}")
+
     def get_bibtex_from_already_extracted(self):
+        """Extract BibTeX from previously found links."""
         links_already_searched = pd.read_csv(
             f'{MAIN_PATH}/Scripts/data/articles_source_links.tsv',
             sep='\t', encoding='windows-1252')
         already_extracted_bibtex = os.listdir(f"{EXTRACTED_PATH}/Bibtex")
+        
         for idx, row in links_already_searched.iterrows():
             try:
                 title = row['Title']
                 link = row['Link']
-                print(title, link)
+                print(f"Processing: {title}, {link}")
+                
                 for source in sources_name:
                     if source in link:
-                        is_already_extracted = False
-                        for file in already_extracted_bibtex:
-                            if file[11:-7] == format_link(title):
-                                print("bibtex déjà extrait")
-                                is_already_extracted = True
-                                break
+                        is_already_extracted = any(
+                            file[11:-7] == format_link(title) 
+                            for file in already_extracted_bibtex
+                        )
+                        
                         if not is_already_extracted:
-                            print('extraction...')
+                            print('Extracting...')
                             print(self.get_metadata_from_link(title, source, link))
             except Exception as e:
-                print(e)
-                pass
-
-    def get_bibtex_from_source_link(self, sr_project):
-        source_link = pd.read_csv(f"{MAIN_PATH}/Datasets/{sr_project}/tmp.tsv", sep='\t')
-        # source_link = source_link.loc[pd.isna(source_link['bibtex']) & pd.notnull(source_link['doi'])]
-        print(source_link)
-        already_extracted_bibtex = os.listdir(f"{EXTRACTED_PATH}/Bibtex")
-        for idx, row in source_link.iterrows():
-            print(row[['doi']])
-            try:
-                link = str(row['link'])
-                title = row['meta_title']
-                verification_link = link
-                if 'doi' in link:
-                    self.driver.get(link)
-                    time.sleep(3)
-                    verification_link = self.driver.current_url
-                for source in sources_name:
-                    if source in verification_link:
-                        is_already_extracted = False
-                        # for file in already_extracted_bibtex:
-                        #     if file[11:-7] == format_link(link):
-                        #         print("bibtex déjà extrait")
-                        #         is_already_extracted = True
-                        #         break
-                        if not is_already_extracted:
-                            print('extraction...')
-                            print(self.get_metadata_from_link(title, source, link))
-                            time.sleep(2)
-            except Exception as e:
-                print(e)
-                pass
-
-    def search_missing_links_for_articles(self):
-        extracted_articles = pd.read_csv(f"{MAIN_PATH}/Datasets/GameSE/GameSE.tsv", sep='\t', encoding='utf-8')
-        for idx, row in extracted_articles.iterrows():
-            try:
-                if (pd.isna(row['doi']) or pd.isna(row['link'])) and not pd.isna(row['meta_title']):
-                    self.get_metadata_from_title(row['meta_title'], source=row['source'])
-                elif pd.isna(row['meta_title']):
-                    self.get_metadata_from_title(row['title'])
-            except Exception as e:
-                print(e. __traceback__)
-
-    def add_articles_manually(self):
-        while True:
-            try:
-                title = input('title:\n')
-                link = input('link:\n')
-                source = None
-                for src in sources_name:
-                    if src in link:
-                        source = src
-                source = input('source:\n') if not source else source
-                print(self.get_metadata_from_link(title, source, link))
-            except Exception as e:
-                print(e, e.__traceback__)
-
-    def get_metadata_from_title(self, title, author=None, source=None, year=None):
-        # TODO: mettre link website si pas doi
-        tries = 0
-        # research to find link and get metadata
-        print("source", source)
-        if source not in all_sources_name and source is not None:
-            for name in all_sources_name:
-                if name in str(source):
-                    source = name
-        print("title", title)
-        print("new source", source)
-        print("author", author)
-        print("year", year)
-
-        metadata = metadata_base.copy()
-        # driver.get("https://www.crossref.org/guestquery/")
-        if source == IEEE or source == 'ieee':
-            new_metadata = self.searcher.search_in_IEEE(title)
-            if not new_metadata: new_metadata = metadata_base.copy()
-            update_metadata(metadata, new_metadata)
-
-        elif source == ScienceDirect or source in ['sciencedirect', 'ScienceDirect']:
-            new_metadata = self.searcher.search_in_ScienceDirect(title)
-            if not new_metadata: new_metadata = metadata_base.copy()
-            update_metadata(metadata, new_metadata)
-
-        elif source == ACM or source in ['acm', "Association for Computing Machinery (ACM)", "ACM Press"]:
-            new_metadata = self.searcher.search_in_ACM(title)
-            if not new_metadata: new_metadata = metadata_base.copy()
-            update_metadata(metadata, new_metadata)
-
-        elif source == SpringerLink or source in ['springer', 'Springer', 'SpringerLink']:
-            new_metadata = self.searcher.search_in_SpringerLink(title)
-            if not new_metadata: new_metadata = metadata_base.copy()
-            update_metadata(metadata, new_metadata)
-
-        elif source == Scopus or source == 'scopus':
-            new_metadata = self.searcher.search_in_Scopus(title)
-            if not new_metadata: new_metadata = metadata_base.copy()
-            update_metadata(metadata, new_metadata)
-
-        elif source == ScopusSignedIn:
-            new_metadata = self.searcher.search_in_Scopus_signed_in(title)
-            if not new_metadata: new_metadata = metadata_base.copy()
-            update_metadata(metadata, new_metadata)
-
-        elif source == WoS or source == 'wos':
-            new_metadata = self.searcher.search_in_WoS(title)
-            if not new_metadata: new_metadata = metadata_base.copy()
-            update_metadata(metadata, new_metadata)
-
-        elif source == PubMedCentral:
-            new_metadata = self.searcher.search_in_PubMedCentral(title)
-            if not new_metadata: new_metadata = metadata_base.copy()
-            update_metadata(metadata, new_metadata)
-
-        else:
-            print(f'Source "{source}" not valid')
-            print("searching in all options")
-            for name in sources_name:
-                new_metadata = self.get_metadata_from_title(title, author, name)
-                if check_if_right_link(new_metadata, title):
-                    update_metadata(metadata, new_metadata)
-                    break
-
-        return metadata
-        
-    def get_metadata_from_link(self, title, source, link):
-        # TODO: mettre link website si pas doi
-        global driver
-        tries = 0
-        # research to find link and get metadata
-        print("source", source)
-        if source not in all_sources_name and source is not None:
-            for name in all_sources_name:
-                if name in str(source):
-                    source = name
-        print("title", title)
-        print("new source", source)
-
-        metadata = metadata_base.copy()
-        # driver.get("https://www.crossref.org/guestquery/")
-        if source == IEEE or source == 'ieee':
-            html = self.get_html_from_link(link + "/keywords#keywords")
-            save_extracted_html(title + "/keywords#keywords" + "_00", html)
-            new_metadata = htmlParser.get_metadata_from_html_ieee(html)
-            update_metadata(metadata, new_metadata)
-
-            html = self.get_html_from_link(link + "/references#references")
-            save_extracted_html(title + "/references#references" + "_00", html)
-            new_metadata = htmlParser.get_metadata_from_html_ieee(html)
-            update_metadata(metadata, new_metadata)
-            save_link(title, link)
-            self.searcher.extract_bibtex_in_IEEE(title)
-            parser = bibtex_parser.Parser()
-            bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_00.bib')
-            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
-
-        elif source == ScienceDirect or source == 'sciencedirect':
-            html = self.get_html_from_link(link)
-            save_extracted_html(title + "_02", html)
-            save_link(title, link)
-            new_metadata = htmlParser.get_metadata_from_html_sciencedirect(html)
-            update_metadata(metadata, new_metadata)
-            self.searcher.extract_bibtex_in_ScienceDirect(title, link)
-            parser = bibtex_parser.Parser()
-            bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_02.bib')
-            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
-
-        elif source == ACM or source in ['acm', "Association for Computing Machinery (ACM)", "ACM Press",
-                                       "Society for Computer Simulation International"] or "ACM" in source:
-            html = self.get_html_from_link(link)
-            save_extracted_html(title + "_01", html)
-            save_link(title, link)
-            new_metadata = htmlParser.get_metadata_from_html_ACM(html)
-            metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_ACM(title, link)
-            parser = bibtex_parser.Parser()
-            bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_01.bib')
-            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
-
-        elif source == SpringerLink or source == 'springer':
-            html = self.get_html_from_link(link)
-            save_extracted_html(title + "_03", html)
-            save_link(title, link)
-            new_metadata = htmlParser.get_metadata_from_html_springerlink(html)
-            metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_SpringerLink(title, link)
-            parser = bibtex_parser.Parser()
-            bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_03.bib')
-            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
-
-        # elif source == Scopus or source == 'scopus':
-        #     # i.e.: "https://www.scopus.com/record/display.uri?eid=2-s2.0-85083744459&doi=10.1089%2fg4h.2019.0067&origin=inward&txGid=0d477ca65acc675d5e5d53dc3edac470"
-        #     html = self.get_html_from_link(link)
-        #     save_extracted_html(title + "_04", html)
-        #     save_link(title, link)
-        #     new_metadata = htmlParser.get_metadata_from_html_scopus(html)
-        #     metadata.update(new_metadata)
-
-        elif source == ScopusSignedIn or source == 'scopus':
-            html = self.get_html_from_link(link)
-            save_extracted_html(title + "_07", html)
-            save_link(title, link)
-            new_metadata = htmlParser.get_metadata_from_html_scopus_signed_in(html)
-            metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_scopus_signed_in(title, link)
-            parser = bibtex_parser.Parser()
-            bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_07.bib')
-            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
-
-        elif source == WoS or source == 'wos':
-            html = self.get_html_from_link(link)
-            save_extracted_html(title + "_05", html)
-            save_link(title, link)
-            new_metadata = htmlParser.get_metadata_from_html_wos(html)
-            metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_WoS(title, link)
-            parser = bibtex_parser.Parser()
-            bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_05.bib')
-            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
-
-        elif source == PubMedCentral:
-            html = self.get_html_from_link(link)
-            save_extracted_html(title + "_08", html)
-            save_link(title, link)
-            new_metadata = htmlParser.get_metadata_from_html_pub_med_central(html)
-            metadata.update(new_metadata)
-            # TODO: extract bibtex
-
-        elif source == arXiv or source == 'arxiv':
-            html = self.get_html_from_link(link)
-            save_extracted_html(title + "_09", html)
-            save_link(title, link)
-            new_metadata = htmlParser.get_metadata_from_html_arxiv(html)
-            metadata.update(new_metadata)
-            self.searcher.extract_bibtex_in_arXiv(title, link)
-            parser = bibtex_parser.Parser()
-            bib_data = parser.parse_file(
-                f'{EXTRACTED_PATH}/Bibtex/{datetime.today().strftime("%Y-%m-%d")}_{format_link(title)}_09.bib')
-            update_metadata(metadata, htmlParser.get_metadata_from_bibtex(bib_data))
-
-        else:
-            print(f'Source "{source}" not valid')
-
-        return metadata
+                print(f"Error processing {title}: {e}")
 
     def get_html_from_link(self, link):
-        print(link)
+        """Retrieve HTML content from a given link."""
+        print(f"Fetching: {link}")
         self.driver.get(link)
-        html = self.driver.page_source
-        return html
+        return self.driver.page_source
 
     def close(self):
+        """Close the browser."""
         self.driver.close()
 
 
+# Main execution for testing
 if __name__ == '__main__':
-    venues_name = ['ieee', 'springer', 'acm', 'sciencedirect', 'scopus', 'wos']
-    # url = f"https://ieeexplore.ieee.org/document/8712362"
-    # url = f"https://link.springer.com/article/10.1057/s41269-023-00314-6"
-    # url = f"https://dl.acm.org/doi/10.1145/2364412.2364472"
-    # url = f"https://www.sciencedirect.com/science/article/pii/S2090123221001491"
-    # url = "https://www.scopus.com/record/display.uri?eid=2-s2.0-85083744459&doi=10.1089%2fg4h.2019.0067&origin=inward&txGid=0d477ca65acc675d5e5d53dc3edac470"
-    # url = "https://doi.org/10.1145/1486508.1486516"
-    # url = "https://doi.org/10.1145/2662253.2662286"
-    # source = None
-    # for name in sources_name:
-    #     if name in url:
-    #         source = name
-    # results = get_metadata_from_link(url, ACM)
-    # for key in results.keys():
-    #     print(key, results[key])
-    # title = "The task graph pattern"  # ACM
-    # title = "Second generation systems and software product line engineering"  # IEEE
-    # title = "Android Malware Detection Based On System Calls Analysis And Cnn Classification"  # IEEE au 2e
-    # title = "The explanatory power of playability heuristics"  # WoS
-    # title = 'Let’s Play: Exploring literacy practices in an emerging videogame paratext'
-    # web_scraper = WebScraper()
-    # print(web_scraper.get_metadata_from_title(title, None, ScopusSignedIn))
-    # title = "ME3CA: A cognitive assistant for physical exercises that monitors emotions and the environment"
-    # link = "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7039382/"
+    # Example usage and testing
     for sr in ['CodeCompr']:
         web_scraper = ManualWebScraper()
-        # print(web_scraper.get_metadata_from_title(title, PubMedCentral, link))
-        # web_scraper.get_bibtex_from_already_extracted()
         web_scraper.get_bibtex_from_source_link(sr)
-        # web_scraper.search_missing_links_for_articles()
-        # web_scraper.add_articles_manually()
         web_scraper.close()
