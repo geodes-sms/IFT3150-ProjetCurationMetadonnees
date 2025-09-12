@@ -1,3 +1,19 @@
+"""HTML Parser Module for Academic Metadata Extraction
+
+This module provides functions to parse HTML content from various academic databases
+and extract structured metadata including titles, authors, abstracts, keywords, and more.
+
+Supported Academic Sources:
+- IEEE Xplore
+- ACM Digital Library  
+- ScienceDirect (Elsevier)
+- SpringerLink
+- Scopus (both guest and signed-in)
+- Web of Science
+- PubMed Central
+- arXiv
+"""
+
 from ..core.SRProject import *
 from bs4 import BeautifulSoup
 import re
@@ -7,7 +23,19 @@ from unidecode import unidecode
 from ..core.os_path import EXTRACTED_PATH
 
 
+# =============================================================================
+# UTILITY FUNCTIONS
+# =============================================================================
+
 def get_source(link):
+    """Determine the academic source from a link URL.
+    
+    Args:
+        link (str): URL or filename containing source information
+        
+    Returns:
+        str: Source name (e.g., 'IEEE', 'ACM', 'ScienceDirect') or None
+    """
     source = None
     for name in sources_name:
         if str.lower(name) in str.lower(link):
@@ -18,56 +46,140 @@ def get_source(link):
 
 
 def update_metadata(old, new):
+    """Update metadata dictionary with non-None values only.
+    
+    Args:
+        old (dict): Existing metadata dictionary to update
+        new (dict): New metadata values to merge in
+    """
     tmp = {}
     for k, v in new.items():
         if v is not None:
             tmp[k] = v
     old.update(tmp)
 
+# =============================================================================
+# TEXT CLEANING FUNCTIONS
+# =============================================================================
+
 def clean_abstract(abstract):
+    """Clean and normalize abstract text.
+    
+    Removes common prefixes like 'Abstract:' and copyright notices.
+    Converts Unicode characters to ASCII equivalents.
+    
+    Args:
+        abstract (str): Raw abstract text
+        
+    Returns:
+        str: Cleaned abstract text
+    """
     if not abstract:
         return abstract
+    
+    # Convert Unicode to ASCII
     abstract = unidecode(abstract)
+    
+    # Remove common abstract prefixes
     abstract = abstract[len('Abstract:'):] if abstract.startswith('Abstract:') else abstract
     abstract = abstract[len('Abstract'):] if abstract.startswith('Abstract') else abstract
-    abstract = re.sub('(?:\(c\)|\(C\)|Copyright)\s*(.*)', '', abstract)
-    # TODO: attention a ne pas supprimer une partie de l'abstract
+    
+    # Remove copyright notices
+    abstract = re.sub(r'(?:\(c\)|\(C\)|Copyright)\s*(.*)', '', abstract)
+    
     return abstract
     
 def clean_authors(authors):
+    """Clean and normalize author names.
+    
+    Removes numbers, ORCID identifiers, and unwanted punctuation.
+    Filters out connecting words like 'and'.
+    
+    Args:
+        authors (list): List of raw author name strings
+        
+    Returns:
+        list: List of cleaned author names
+    """
     results = []
     for author in authors:
+        # Convert Unicode to ASCII
         author = unidecode(author)
-        if len(author) == 0: continue
+        if len(author) == 0: 
+            continue
+        
+        # Remove unwanted punctuation and identifiers
         author = re.sub(',;', '', author)
-        author = re.sub(r'[0-9]+', '', author)
-        author = re.sub("ORCID:orcid\.org/---", '', author)
+        author = re.sub(r'[0-9]+', '', author)  # Remove numbers
+        author = re.sub(r"ORCID:orcid\.org/---", '', author)  # Remove ORCID IDs
+        
+        # Remove connecting words and extra spaces
         author = " ".join([x for x in author.split() if x != "and" and x != ""])
-        if author[-1] in [',', '&']:
+        
+        # Remove trailing punctuation
+        if author and author[-1] in [',', '&']:
             author = author[:-1]
+        
         results.append(author)
     return results
 
 def clean_publisher(publisher: str):
+    """Clean and normalize publisher name.
+    
+    Removes copyright notices, leading/trailing numbers, and punctuation.
+    
+    Args:
+        publisher (str): Raw publisher name
+        
+    Returns:
+        str: Cleaned publisher name
+    """
     if not publisher:
         return publisher
+    
+    # Convert Unicode to ASCII
     publisher = unidecode(publisher)
+    
+    # Remove copyright notices
     publisher = publisher.replace('All rights reserved.', '')
-    publisher = re.sub('^\d+[-,\d\s]*?(?=[A-Za-z])', '', publisher.strip())  # chiffre avant texte
-    publisher = re.sub('\d+\s*.*$', '', publisher.strip())  # chiffre apres texte
-    if publisher[-1] == '.': publisher = publisher[:-1]
+    
+    # Remove leading numbers and separators
+    publisher = re.sub(r'^\d+[-,\d\s]*?(?=[A-Za-z])', '', publisher.strip())
+    
+    # Remove trailing numbers and content
+    publisher = re.sub(r'\d+\s*.*$', '', publisher.strip())
+    
+    # Remove trailing period
+    if publisher and publisher[-1] == '.':
+        publisher = publisher[:-1]
+    
     return publisher
 
 def clean_title(title: str):
+    """Clean and normalize article title.
+    
+    Removes common article type prefixes and converts Unicode to ASCII.
+    
+    Args:
+        title (str): Raw article title
+        
+    Returns:
+        str: Cleaned title
+    """
     if not title:
         return title
+    
+    # Convert Unicode to ASCII
     title = unidecode(title)
-    title = re.sub(f"^(Original Article|RETRACTED ARTICLE:|Technical Note|^Review(?=[A-Z])|^Article(?=[A-Z])|Demo:|Original article|REVIEW)\s*", "", title)
+    
+    # Remove common article type prefixes
+    title = re.sub(r"^(Original Article|RETRACTED ARTICLE:|Technical Note|^Review(?=[A-Z])|^Article(?=[A-Z])|Demo:|Original article|REVIEW)\s*", "", title)
+    
     return title
 
 
-def assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher, source):
-    # Return the metadata
+# =============================================================================\n# METADATA PROCESSING\n# =============================================================================\n\ndef assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher, source):
+    \"\"\"Create a standardized metadata dictionary from extracted content.\n    \n    Args:\n        title (str): Article title\n        venue (str): Publication venue/journal\n        authors (list): List of author names\n        pages (str): Page numbers or range\n        abstract (str): Article abstract\n        keywords (list): List of keywords\n        references (list): List of references\n        doi (str): Digital Object Identifier\n        publisher (str): Publisher name\n        source (str): Academic database source\n        \n    Returns:\n        dict: Standardized metadata dictionary\n    \"\"\"\n    # Initialize with base metadata structure
     metadata = metadata_base.copy()
     metadata['Title'] = clean_title(title)
     metadata['Venue'] = venue
@@ -89,9 +201,7 @@ def assign_metadata(title, venue, authors, pages, abstract, keywords, references
     return metadata
 
 
-def get_source_from_doi_with_crossref(html):
-    # Parse the HTML content
-    soup = BeautifulSoup(html, 'lxml')
+def get_source_from_doi_with_crossref(html):\n    \"\"\"Extract publisher information from CrossRef API HTML response.\n    \n    Args:\n        html (str): HTML content from CrossRef API\n        \n    Returns:\n        str: Publisher name extracted from CrossRef data\n    \"\"\"\n    soup = BeautifulSoup(html, 'lxml')
     # Extract the venue
     source = None
     source_tag = soup.find('div', {'id': 'json'})
@@ -103,12 +213,10 @@ def get_source_from_doi_with_crossref(html):
         source_tag = soup.find('tr', {'id': '/message/publisher'})
         if source_tag:
             source = source_tag.get_text(strip=True)
-    print(source)
     return source
 
 
-def get_metadata_from_bibtex(bib_data):
-    metadata = metadata_base.copy()
+def get_metadata_from_bibtex(bib_data):\n    \"\"\"Extract metadata from parsed BibTeX data.\n    \n    Args:\n        bib_data: Parsed BibTeX database object from pybtex\n        \n    Returns:\n        dict: Extracted metadata dictionary\n    \"\"\"\n    metadata = metadata_base.copy()
     bib_key = list(bib_data.entries.keys())[0]
     bib_dict = bib_data.entries[bib_key].fields
     metadata['Title'] = bib_dict['title'] if 'title' in bib_dict.keys() else None
@@ -132,23 +240,21 @@ def get_metadata_from_bibtex(bib_data):
     return metadata
 
 
-def get_metadata_from_already_extract(file, source=None):
-    metadata = metadata_base.copy()
-    # if source in [IEEE, 'ieee']:
-    #     print("searching for IEEE file")
-    #     metadata.update(get_metadata_from_already_extract(file + "%2Freferences#references", None))
-    #     metadata.update(get_metadata_from_already_extract(file + "%2Fkeywords#keywords", None))
-    #     return metadata
+def get_metadata_from_already_extract(file, source=None):\n    \"\"\"Extract metadata from previously downloaded HTML or BibTeX files.\n    \n    This function serves as a dispatcher that routes to appropriate parsers\n    based on file type and identified source.\n    \n    Args:\n        file (str): Filename of the cached content\n        source (str, optional): Known source identifier\n        \n    Returns:\n        dict: Extracted metadata dictionary\n    \"\"\"\n    metadata = metadata_base.copy()
     if file[-4:] == "html":
+        # Process HTML files
         with open(f"{EXTRACTED_PATH}/HTML extracted/" + file, 'rb') as f:
             html = unidecode(f.read().decode('utf-8', 'ignore'))
-            # html = f.read().decode('utf-8', 'ignore')
             source = get_source(file) if source is None else source
+            
+            # If source still unknown, try to get it from CrossRef
             if source is None:
                 with open(f"{EXTRACTED_PATH}/HTML extracted/"
                           + file[:11] + "http%3A%2F%2Fapi.crossref.org%2Fworks%2F" + file[file.find("doi.org%2F")+10:-5] + ".html", 'rb') as g:
                     crossref_html = g.read()
                 source = get_source_from_doi_with_crossref(crossref_html)
+            
+            # Route to appropriate parser based on identified source
             if source == IEEE or source == 'ieee':
                 new_metadata = get_metadata_from_html_ieee(html)
                 update_metadata(metadata, new_metadata)
@@ -177,11 +283,8 @@ def get_metadata_from_already_extract(file, source=None):
                 new_metadata = get_metadata_from_html_arxiv(html)
                 metadata.update(new_metadata)
 
-            else:
-                print(f'Venue "{source}" not valid')
     elif file[-3:] == "bib":
-        if file[-6:-4] == '09':
-            print(code_source[file[-6:-4]])
+        # Process BibTeX files
         parser = bibtex_parser.Parser()
         bib_data = parser.parse_file(f'{EXTRACTED_PATH}/Bibtex/{file}')
         metadata = get_metadata_from_bibtex(bib_data)
@@ -189,10 +292,7 @@ def get_metadata_from_already_extract(file, source=None):
     return metadata
 
 
-def get_metadata_from_html_ieee(html):
-    # print(html)
-    # Parse the HTML content
-    soup = BeautifulSoup(html, 'lxml')
+# =============================================================================\n# SOURCE-SPECIFIC HTML PARSERS\n# =============================================================================\n\ndef get_metadata_from_html_ieee(html):\n    \"\"\"Extract metadata from IEEE Xplore HTML content.\n    \n    Args:\n        html (str): Raw HTML content from IEEE Xplore\n        \n    Returns:\n        dict: Extracted metadata dictionary\n    \"\"\"\n    soup = BeautifulSoup(html, 'lxml')
 
     # Extract the title
     title_tag = soup.find('h1', {'class': 'document-title'})
@@ -226,8 +326,6 @@ def get_metadata_from_html_ieee(html):
             abstract = None
 
     # Extract the authors
-    # author_tag = soup.find('meta', {'name': 'parsely-author'})
-    # authors = author_tag['content'] if author_tag else None
     authors = []
     authors_section = soup.find('div', {'class': 'authors-info-container'})
     if authors_section:
@@ -268,14 +366,11 @@ def get_metadata_from_html_ieee(html):
     # Return the metadata
     return assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher, "IEEE")
 
-def get_metadata_from_html_ACM(html):
-    # Parse the HTML content
-    soup = BeautifulSoup(html, 'lxml')
+def get_metadata_from_html_ACM(html):\n    \"\"\"Extract metadata from ACM Digital Library HTML content.\n    \n    Args:\n        html (str): Raw HTML content from ACM Digital Library\n        \n    Returns:\n        dict: Extracted metadata dictionary\n    \"\"\"\n    soup = BeautifulSoup(html, 'lxml')
     # Extract the title
     title_tag = soup.find('h1')
     title = title_tag.get_text(strip=True) if title_tag else None
 
-    # TODO: add space between family name and name
     # Extract the authors
     authors = []
     author_tags = soup.find_all('a', {'class': 'author-name'})
@@ -368,10 +463,7 @@ def get_metadata_from_html_ACM(html):
     return assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher, "ACM")
 
 
-def get_metadata_from_html_sciencedirect(html):
-    # print(html)
-    # Parse the HTML content
-    soup = BeautifulSoup(html, 'lxml')
+def get_metadata_from_html_sciencedirect(html):\n    \"\"\"Extract metadata from ScienceDirect (Elsevier) HTML content.\n    \n    Args:\n        html (str): Raw HTML content from ScienceDirect\n        \n    Returns:\n        dict: Extracted metadata dictionary\n    \"\"\"\n    soup = BeautifulSoup(html, 'lxml')
 
     # Extract the title
     title_tag = soup.find('h1', {'id': 'screen-reader-main-title'})
@@ -423,7 +515,6 @@ def get_metadata_from_html_sciencedirect(html):
         keywords = None
 
     # Extract the references
-    # Assuming references are within a specific section; usually more complex parsing required
     references = []
     reference_section = soup.find('section', {'id': 'references'})
     if reference_section:
@@ -446,14 +537,18 @@ def get_metadata_from_html_sciencedirect(html):
 
 
 def get_metadata_from_html_springerlink(html):
-    # print(html)
-    # Parse the HTML content
+    """Extract metadata from SpringerLink HTML content.
+    
+    Args:
+        html (str): Raw HTML content from SpringerLink
+        
+    Returns:
+        dict: Extracted metadata dictionary
+    """
     soup = BeautifulSoup(html, 'lxml')
 
     # Extract the title
     title_tag = soup.find('h1')
-    # title_tag = soup.find('meta', {'name': 'dc.title'})
-    # title = title_tag['content'].strip() if title_tag else None
     title = title_tag.get_text(strip=True) if title_tag else None
 
     # Extract the authors
@@ -510,7 +605,14 @@ def get_metadata_from_html_springerlink(html):
 
 
 def get_metadata_from_html_scopus(html):
-    # Parse the HTML with BeautifulSoup
+    """Extract metadata from Scopus (guest access) HTML content.
+    
+    Args:
+        html (str): Raw HTML content from Scopus
+        
+    Returns:
+        dict: Extracted metadata dictionary
+    """
     soup = BeautifulSoup(html, 'html.parser')
 
     # Function to extract title
@@ -525,10 +627,6 @@ def get_metadata_from_html_scopus(html):
     venue_section = soup.find('section', {'id': 'articleTitleInfo'})
     venue_tag = venue_section.find('span', {'id': 'guestAccessSourceTitle'}) if venue_section else None
     venue = venue_tag.get_text(strip=True) if venue_tag else None
-    # if not venue:
-    #     venue_tag = soup.find('span', {'id': 'noSourceTitleLink'})
-    #     venue = venue_tag.get_text(strip=True) if venue_tag else None
-    # TODO: prend avant le : de la 3e section
 
     # Extract publisher
     publisher_tag = soup.find('span', {'id': 'guestAccessSourceTitle'})
@@ -590,15 +688,20 @@ def get_metadata_from_html_scopus(html):
         publisher = abstract[abstract.find('(c)')+3:]
     if not publisher and abstract and 'Copyright' in abstract:
         publisher = abstract[abstract.find('Copyright')+len('Copyright'):]
-        # publisher = publisher_candidate if any(src in publisher_candidate.lower() for src in all_sources_name) else None
 
     # Return the metadata
     return assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher, "Scopus")
 
 
 def get_metadata_from_html_scopus_signed_in(html):
-    # print(html)
-    # Parse the HTML content
+    """Extract metadata from Scopus (signed-in) HTML content.
+    
+    Args:
+        html (str): Raw HTML content from Scopus with user authentication
+        
+    Returns:
+        dict: Extracted metadata dictionary
+    """
     soup = BeautifulSoup(html, 'lxml')
 
     # Extract the title
@@ -646,7 +749,6 @@ def get_metadata_from_html_scopus_signed_in(html):
         keywords = None
 
     # Extract the references
-    # Assuming references are within a specific section; usually more complex parsing required
     references = []
     reference_section = soup.find('tbody', {'class': 'referencesUL'})
     if reference_section:
@@ -670,7 +772,14 @@ def get_metadata_from_html_scopus_signed_in(html):
 
 
 def get_metadata_from_html_wos(html):
-    # Parse the HTML content
+    """Extract metadata from Web of Science HTML content.
+    
+    Args:
+        html (str): Raw HTML content from Web of Science
+        
+    Returns:
+        dict: Extracted metadata dictionary
+    """
     soup = BeautifulSoup(html, 'html.parser')
 
     # Extract the title
@@ -713,7 +822,6 @@ def get_metadata_from_html_wos(html):
         keywords = None
 
     # Extract the references
-    # references = [ref.get_text(strip=True) for ref in soup.find_all(class_='reference')]
     references = None
 
     # Extract the DOI
@@ -748,7 +856,14 @@ def get_metadata_from_html_wos(html):
 
 
 def get_metadata_from_html_pub_med_central(html):
-    # Parse the HTML content
+    """Extract metadata from PubMed Central HTML content.
+    
+    Args:
+        html (str): Raw HTML content from PubMed Central
+        
+    Returns:
+        dict: Extracted metadata dictionary
+    """
     soup = BeautifulSoup(html, 'html.parser')
 
     # Extract the title
@@ -781,7 +896,6 @@ def get_metadata_from_html_pub_med_central(html):
     keywords = None
 
     # Extract the references
-    # references = [ref.get_text(strip=True) for ref in soup.find_all(class_='reference')]
     references = None
 
     # Extract the DOI
@@ -801,7 +915,14 @@ def get_metadata_from_html_pub_med_central(html):
 
 
 def get_metadata_from_html_arxiv(html):
-    # Parse the HTML content
+    """Extract metadata from arXiv HTML content.
+    
+    Args:
+        html (str): Raw HTML content from arXiv preprint server
+        
+    Returns:
+        dict: Extracted metadata dictionary
+    """
     soup = BeautifulSoup(html, 'html.parser')
 
     # Extract the title
@@ -823,7 +944,6 @@ def get_metadata_from_html_arxiv(html):
     # Extract the pages
     pages = None
 
-    # TODO: enlever le Abstract:
     # Extract the abstract
     abstract_tag = soup.find('blockquote', {'class': 'abstract'})
     abstract = abstract_tag.get_text(strip=True) if abstract_tag else None
@@ -832,7 +952,6 @@ def get_metadata_from_html_arxiv(html):
     keywords = None
 
     # Extract the references
-    # references = [ref.get_text(strip=True) for ref in soup.find_all(class_='reference')]
     references = None
 
     # Extract the DOI
@@ -847,83 +966,3 @@ def get_metadata_from_html_arxiv(html):
     return assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher,
                            "arXiv")
 
-
-if __name__ == '__main__':
-    print("CrossRef")
-    with open(f"{EXTRACTED_PATH}/HTML extracted/2024-06-09_http%3a%2f%2fapi.crossref.org%2fworks%2f10.1145%2f1486508.1486516.html", 'rb') as f:
-        html = f.read()
-    results = get_source_from_doi_with_crossref(html)
-    print(results)
-
-    print("IEEE")
-    with open("tests/test_keywords.html", 'rb') as f:
-        html = f.read()
-    results = get_metadata_from_html_ieee(html)
-    for key in results.keys():
-        print(key, results[key])
-
-    print()
-    print("ACM")
-    with open("tests/test-acm.html", 'rb') as f:
-        html = f.read()
-    results = get_metadata_from_html_ACM(html)
-    for key in results.keys():
-        print(key, results[key])
-
-    print()
-    print("ScienceDirect")  # TODO: authors, references
-    with open("tests/test-sciencedirect.html", 'rb') as f:
-        html = f.read()
-    results = get_metadata_from_html_sciencedirect(html)
-    for key in results.keys():
-        print(key, results[key])
-
-    print()
-    print("SpringerLink")
-    with open("tests/test-springerlink.html", 'rb') as f:
-        html = f.read()
-    results = get_metadata_from_html_springerlink(html)
-    for key in results.keys():
-        print(key, results[key])
-
-    print()
-    print("Scopus")  # TODO: references
-    with open("tests/test-scopus.html", 'rb') as f:
-        html = f.read()
-    results = get_metadata_from_html_scopus(html)
-    for key in results.keys():
-        print(key, results[key])
-
-    print()
-    print("Scopus_signed_in")  # TODO: references
-    with open(f"{EXTRACTED_PATH}/HTML extracted/2024-08-16_ A framework for testing robust autonomy of UAS during design and certification_07.html", 'rb') as f:
-        html = f.read()
-    results = get_metadata_from_html_scopus_signed_in(html)
-    for key in results.keys():
-        print(key, results[key])
-
-    print()
-    print("Web of Science")  # TODO: references
-    with open("tests/test-wos.html", 'rb') as f:
-        html = f.read()
-    results = get_metadata_from_html_wos(html)
-    for key in results.keys():
-        print(key, results[key])
-
-    print()
-    print("Pub Med Central")  # TODO: references
-    # with open("tests/test-pub-med-central.html", 'rb') as f:
-    with open(f"{EXTRACTED_PATH}/HTML extracted/2024-08-21_I-care-an interaction system for the individual activation of people with dementia_08.html", 'rb') as f:
-        html = f.read()
-    results = get_metadata_from_html_pub_med_central(html)
-    for key in results.keys():
-        print(key, results[key])
-
-    print()
-    print("Bibtex")
-    parser = bibtex_parser.Parser()
-    bib_data = parser.parse_file(
-        f'{EXTRACTED_PATH}/Bibtex/2024-09-05_A Rehabilitation System For Upper Limbs In Adult Patients Using Video Games_00.bib')
-    results = get_metadata_from_bibtex(bib_data)
-    for key in results.keys():
-        print(key, results[key])

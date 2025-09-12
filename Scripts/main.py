@@ -377,7 +377,7 @@ def main(args=None):
         pre_process_sr_project(sr_project)
         sr_project.df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}_pre-extract.xlsx")
 
-        do_extraction = False
+        do_extraction = True
         if do_extraction:
             sr_compiled_project = read_sr_project(arg)
             # Keep only the rows that still need processing (meta_title is null/empty)
