@@ -543,8 +543,134 @@ def main(sr_df, do_web_scraping=False, run=999, sr_name=""):
         Creates error log file in Datasets/{sr_name}_erreurs_{run}.xlsx
         Web scraper is properly closed if initialized
     """
-    # Initialize processing environment\n    completed_sr_project = sr_df.copy().reset_index()\n    articles_to_extract = len(pd.isna(completed_sr_project['meta_title']))\n    print(f\"{articles_to_extract} articles require metadata extraction\")\n    \n    # Define core metadata columns for validation\n    metadata_cols = ['title', 'venue', 'authors', 'abstract', 'keywords', 'references', 'doi', 'meta_title']\n\n    # Initialize web scraper if extraction is enabled\n    web_scraper = webScraping.WebScraper() if do_web_scraping else None\n    if web_scraper:\n        print(\"✅ Web scraper initialized for missing metadata extraction\")\n    else:\n        print(\"ℹ️ Web scraping disabled - using cached files only\")\n\n    # Configure processing partitions\n    parts = 6\n    partition_size = len(list(sr_df.iterrows())) // parts\n    errors_log = []  # Track processing errors\n\n    # Load cache of already extracted files\n    print(\"📁 Loading cached extraction files...\")\n    already_extracted_files = []\n    try:\n        already_extracted_html = os.listdir(f\"{EXTRACTED_PATH}/HTML extracted\")\n        already_extracted_bibtex = os.listdir(f\"{EXTRACTED_PATH}/Bibtex\")\n        already_extracted_files.extend(already_extracted_html)\n        already_extracted_files.extend(already_extracted_bibtex)\n        print(f\"Found {len(already_extracted_html)} HTML files and {len(already_extracted_bibtex)} BibTeX files in cache\")\n    except FileNotFoundError as e:\n        print(f\"⚠️ Cache directory not found: {e}\")"
+    # Initialize processing environment
+    completed_sr_project = sr_df.copy().reset_index()
+    articles_to_extract = len(pd.isna(completed_sr_project['meta_title']))
+    print(f"{articles_to_extract} articles require metadata extraction")
 
-    # =========================================================================\n    # MAIN PROCESSING LOOP\n    # =========================================================================\n    \n    print(f\"\\n🔄 Starting metadata extraction for {len(completed_sr_project)} articles...\")\n    print(f\"📊 Run configuration: {run} ({'Complete' if run == 999 else 'Without link only' if run == 111 else f'Partition {run}'})\")\n    \n    for idx, row in completed_sr_project.iterrows():\n        try:\n            print(f\"\\n--- Processing article {idx} ---\")\n            \n            # Apply run configuration filters\n            if run < parts and not (partition_size * run <= idx <= partition_size * (run + 1)):\n                continue  # Process only specific partition\n                \n            if run == 111 and not (idx == 152):  # Special case for testing\n                continue  # Process only articles without links\n\n            # Determine if metadata extraction is needed\n            url = str(row['doi'])\n            need_extraction = True  # Currently set to always extract\n            \n            # Alternative: Check specific missing fields\n            # need_extraction = any(pd.isna(row[col]) for col in metadata_cols)\n\n            if need_extraction:\n                metadata = None\n                print(f\"📖 Title: {row['title'][:80]}...\" if len(str(row['title'])) > 80 else f\"📖 Title: {row['title']}\")\n\n                # Extraction Strategy Selection\n                # Strategy 1: Extract using existing DOI/URL\n                if not metadata and not pd.isna(url) and str(url)[:4] == 'http':\n                    print(\"🔗 Attempting extraction with existing link\")\n                    metadata = extract_with_link(row, already_extracted_files, web_scraper)\n\n                # Strategy 2: Extract without direct link (title-based search)\n                if not metadata:\n                    print(\"🔍 Attempting extraction without direct link\")\n                    print(f\"Available info - Source: {row.get('source', 'N/A')}, Title: {row['title'][:50]}...\")\n                    metadata = extract_without_link(row, already_extracted_files, web_scraper)\n                \n                print(f\"📝 Extraction result: {'Success' if metadata else 'Failed'}\")\n                \n                # Update dataset with extracted metadata\n                if metadata:\n                    row = update_dataset(row, metadata)\n                    \n                    # Track missing fields for quality assessment\n                    for field_name in metadata.keys():\n                        if metadata[field_name] is None:\n                            errors_log.append((idx, field_name, 'missing_after_extraction'))\n                else:\n                    errors_log.append((idx, \"all_fields\", 'extraction_failed'))\n                    \n        except Exception as e:\n            error_msg = str(e)\n            error_trace = traceback.format_exc()\n            print(f\"❌ Error processing article {idx}: {error_msg}\")\n            print(f\"📋 Traceback: {error_trace}\")\n            errors_log.append((idx, error_msg, error_trace))\n            \n        # Update the main dataset with processed row\n        completed_sr_project.loc[idx] = row\n        \n        if idx % 10 == 0:  # Progress indicator every 10 articles\n            print(f\"📊 Progress: {idx}/{len(completed_sr_project)} articles processed\")"
+    # Define core metadata columns for validation
+    metadata_cols = ['title', 'venue', 'authors', 'abstract', 'keywords', 'references', 'doi', 'meta_title']
 
-    # =========================================================================\n    # CLEANUP AND REPORTING\n    # =========================================================================\n    \n    # Generate error report\n    if errors_log:\n        error_report_path = (\n            f\"{MAIN_PATH}/Datasets/{sr_name}_erreurs_{str(run)}.xlsx\" \n            if sr_name else f\"{MAIN_PATH}/Datasets/erreurs_{str(run)}.xlsx\"\n        )\n        \n        error_df = pd.DataFrame(errors_log, columns=['article_index', 'field_or_error', 'error_details'])\n        error_df.to_excel(error_report_path, index=False)\n        print(f\"📋 Error report saved to: {error_report_path}\")\n        print(f\"⚠️ Total errors logged: {len(errors_log)}\")\n    else:\n        print(\"✅ No errors encountered during processing\")\n    \n    # Clean up web scraper resources\n    if web_scraper:\n        web_scraper.close()\n        print(\"🧹 Web scraper closed successfully\")\n    \n    # Final summary\n    processed_articles = len([idx for idx, row in completed_sr_project.iterrows() if not pd.isna(row.get('meta_title', pd.NA))])\n    print(f\"\\n📊 Processing Summary:\")\n    print(f\"   • Articles processed: {len(completed_sr_project)}\")\n    print(f\"   • Metadata extracted: {processed_articles}\")\n    print(f\"   • Success rate: {(processed_articles/len(completed_sr_project)*100):.1f}%\")\n    print(f\"   • Errors encountered: {len(errors_log)}\")\n    \n    return completed_sr_project"
+    # Initialize web scraper if extraction is enabled
+    web_scraper = webScraping.WebScraper() if do_web_scraping else None
+    if web_scraper:
+        print("✅ Web scraper initialized for missing metadata extraction")
+    else:
+        print("ℹ️ Web scraping disabled - using cached files only")
+
+    # Configure processing partitions
+    parts = 6
+    partition_size = len(list(sr_df.iterrows())) // parts
+    errors_log = []  # Track processing errors
+
+    # Load cache of already extracted files
+    print("📁 Loading cached extraction files...")
+    already_extracted_files = []
+    try:
+        already_extracted_html = os.listdir(f"{EXTRACTED_PATH}/HTML extracted")
+        already_extracted_bibtex = os.listdir(f"{EXTRACTED_PATH}/Bibtex")
+        already_extracted_files.extend(already_extracted_html)
+        already_extracted_files.extend(already_extracted_bibtex)
+        print(f"Found {len(already_extracted_html)} HTML files and {len(already_extracted_bibtex)} BibTeX files in cache")
+    except FileNotFoundError as e:
+        print(f"⚠️ Cache directory not found: {e}")
+
+    # =========================================================================
+    # MAIN PROCESSING LOOP
+    # =========================================================================
+
+    print(f"\n🔄 Starting metadata extraction for {len(completed_sr_project)} articles...")
+    print(f"📊 Run configuration: {run} ({'Complete' if run == 999 else 'Without link only' if run == 111 else f'Partition {run}'})")
+
+    for idx, row in completed_sr_project.iterrows():
+        try:
+            print(f"\n--- Processing article {idx} ---")
+
+            # Apply run configuration filters
+            if run < parts and not (partition_size * run <= idx <= partition_size * (run + 1)):
+                continue  # Process only specific partition
+
+            if run == 111 and not (idx == 152):  # Special case for testing
+                continue  # Process only articles without links
+
+            # Determine if metadata extraction is needed
+            url = str(row['doi'])
+            need_extraction = True  # Currently set to always extract
+
+            # Alternative: Check specific missing fields
+            # need_extraction = any(pd.isna(row[col]) for col in metadata_cols)
+
+            if need_extraction:
+                metadata = None
+                print(f"📖 Title: {row['title'][:80]}..." if len(str(row['title'])) > 80 else f"📖 Title: {row['title']}")
+
+                # Extraction Strategy Selection
+                # Strategy 1: Extract using existing DOI/URL
+                if not metadata and not pd.isna(url) and str(url)[:4] == 'http':
+                    print("🔗 Attempting extraction with existing link")
+                    metadata = extract_with_link(row, already_extracted_files, web_scraper)
+
+                # Strategy 2: Extract without direct link (title-based search)
+                if not metadata:
+                    print("🔍 Attempting extraction without direct link")
+                    print(f"Available info - Source: {row.get('source', 'N/A')}, Title: {row['title'][:50]}...")
+                    metadata = extract_without_link(row, already_extracted_files, web_scraper)
+
+                print(f"📝 Extraction result: {'Success' if metadata else 'Failed'}")
+
+                # Update dataset with extracted metadata
+                if metadata:
+                    row = update_dataset(row, metadata)
+
+                    # Track missing fields for quality assessment
+                    for field_name in metadata.keys():
+                        if metadata[field_name] is None:
+                            errors_log.append((idx, field_name, 'missing_after_extraction'))
+                else:
+                    errors_log.append((idx, "all_fields", 'extraction_failed'))
+
+        except Exception as e:
+            error_msg = str(e)
+            error_trace = traceback.format_exc()
+            print(f"❌ Error processing article {idx}: {error_msg}")
+            print(f"📋 Traceback: {error_trace}")
+            errors_log.append((idx, error_msg, error_trace))
+
+        # Update the main dataset with processed row
+        completed_sr_project.loc[idx] = row
+
+        if idx % 10 == 0:  # Progress indicator every 10 articles
+            print(f"📊 Progress: {idx}/{len(completed_sr_project)} articles processed")
+
+    # =========================================================================
+    # CLEANUP AND REPORTING
+    # =========================================================================
+
+    # Generate error report
+    if errors_log:
+        error_report_path = (
+            f"{MAIN_PATH}/Datasets/{sr_name}_erreurs_{str(run)}.xlsx"
+            if sr_name else f"{MAIN_PATH}/Datasets/erreurs_{str(run)}.xlsx"
+        )
+
+        error_df = pd.DataFrame(errors_log, columns=['article_index', 'field_or_error', 'error_details'])
+        error_df.to_excel(error_report_path, index=False)
+        print(f"📋 Error report saved to: {error_report_path}")
+        print(f"⚠️ Total errors logged: {len(errors_log)}")
+    else:
+        print("✅ No errors encountered during processing")
+
+    # Clean up web scraper resources
+    if web_scraper:
+        web_scraper.close()
+        print("🧹 Web scraper closed successfully")
+
+    # Final summary
+    processed_articles = len([idx for idx, row in completed_sr_project.iterrows() if not pd.isna(row.get('meta_title', pd.NA))])
+    print(f"\n📊 Processing Summary:")
+    print(f"   • Articles processed: {len(completed_sr_project)}")
+    print(f"   • Metadata extracted: {processed_articles}")
+    print(f"   • Success rate: {(processed_articles/len(completed_sr_project)*100):.1f}%")
+    print(f"   • Errors encountered: {len(errors_log)}")
+
+    return completed_sr_project

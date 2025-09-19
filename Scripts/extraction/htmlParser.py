@@ -178,8 +178,29 @@ def clean_title(title: str):
     return title
 
 
-# =============================================================================\n# METADATA PROCESSING\n# =============================================================================\n\ndef assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher, source):
-    \"\"\"Create a standardized metadata dictionary from extracted content.\n    \n    Args:\n        title (str): Article title\n        venue (str): Publication venue/journal\n        authors (list): List of author names\n        pages (str): Page numbers or range\n        abstract (str): Article abstract\n        keywords (list): List of keywords\n        references (list): List of references\n        doi (str): Digital Object Identifier\n        publisher (str): Publisher name\n        source (str): Academic database source\n        \n    Returns:\n        dict: Standardized metadata dictionary\n    \"\"\"\n    # Initialize with base metadata structure
+# =============================================================================
+# METADATA PROCESSING
+# =============================================================================
+
+def assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher, source):
+    """Create a standardized metadata dictionary from extracted content.
+
+    Args:
+        title (str): Article title
+        venue (str): Publication venue/journal
+        authors (list): List of author names
+        pages (str): Page numbers or range
+        abstract (str): Article abstract
+        keywords (list): List of keywords
+        references (list): List of references
+        doi (str): Digital Object Identifier
+        publisher (str): Publisher name
+        source (str): Academic database source
+
+    Returns:
+        dict: Standardized metadata dictionary
+    """
+    # Initialize with base metadata structure
     metadata = metadata_base.copy()
     metadata['Title'] = clean_title(title)
     metadata['Venue'] = venue
@@ -201,7 +222,16 @@ def clean_title(title: str):
     return metadata
 
 
-def get_source_from_doi_with_crossref(html):\n    \"\"\"Extract publisher information from CrossRef API HTML response.\n    \n    Args:\n        html (str): HTML content from CrossRef API\n        \n    Returns:\n        str: Publisher name extracted from CrossRef data\n    \"\"\"\n    soup = BeautifulSoup(html, 'lxml')
+def get_source_from_doi_with_crossref(html):
+    """Extract publisher information from CrossRef API HTML response.
+
+    Args:
+        html (str): HTML content from CrossRef API
+
+    Returns:
+        str: Publisher name extracted from CrossRef data
+    """
+    soup = BeautifulSoup(html, 'lxml')
     # Extract the venue
     source = None
     source_tag = soup.find('div', {'id': 'json'})
@@ -216,7 +246,16 @@ def get_source_from_doi_with_crossref(html):\n    \"\"\"Extract publisher inform
     return source
 
 
-def get_metadata_from_bibtex(bib_data):\n    \"\"\"Extract metadata from parsed BibTeX data.\n    \n    Args:\n        bib_data: Parsed BibTeX database object from pybtex\n        \n    Returns:\n        dict: Extracted metadata dictionary\n    \"\"\"\n    metadata = metadata_base.copy()
+def get_metadata_from_bibtex(bib_data):
+    """Extract metadata from parsed BibTeX data.
+
+    Args:
+        bib_data: Parsed BibTeX database object from pybtex
+
+    Returns:
+        dict: Extracted metadata dictionary
+    """
+    metadata = metadata_base.copy()
     bib_key = list(bib_data.entries.keys())[0]
     bib_dict = bib_data.entries[bib_key].fields
     metadata['Title'] = bib_dict['title'] if 'title' in bib_dict.keys() else None
@@ -240,7 +279,20 @@ def get_metadata_from_bibtex(bib_data):\n    \"\"\"Extract metadata from parsed 
     return metadata
 
 
-def get_metadata_from_already_extract(file, source=None):\n    \"\"\"Extract metadata from previously downloaded HTML or BibTeX files.\n    \n    This function serves as a dispatcher that routes to appropriate parsers\n    based on file type and identified source.\n    \n    Args:\n        file (str): Filename of the cached content\n        source (str, optional): Known source identifier\n        \n    Returns:\n        dict: Extracted metadata dictionary\n    \"\"\"\n    metadata = metadata_base.copy()
+def get_metadata_from_already_extract(file, source=None):
+    """Extract metadata from previously downloaded HTML or BibTeX files.
+
+    This function serves as a dispatcher that routes to appropriate parsers
+    based on file type and identified source.
+
+    Args:
+        file (str): Filename of the cached content
+        source (str, optional): Known source identifier
+
+    Returns:
+        dict: Extracted metadata dictionary
+    """
+    metadata = metadata_base.copy()
     if file[-4:] == "html":
         # Process HTML files
         with open(f"{EXTRACTED_PATH}/HTML extracted/" + file, 'rb') as f:
@@ -292,7 +344,20 @@ def get_metadata_from_already_extract(file, source=None):\n    \"\"\"Extract met
     return metadata
 
 
-# =============================================================================\n# SOURCE-SPECIFIC HTML PARSERS\n# =============================================================================\n\ndef get_metadata_from_html_ieee(html):\n    \"\"\"Extract metadata from IEEE Xplore HTML content.\n    \n    Args:\n        html (str): Raw HTML content from IEEE Xplore\n        \n    Returns:\n        dict: Extracted metadata dictionary\n    \"\"\"\n    soup = BeautifulSoup(html, 'lxml')
+# =============================================================================
+# SOURCE-SPECIFIC HTML PARSERS
+# =============================================================================
+
+def get_metadata_from_html_ieee(html):
+    """Extract metadata from IEEE Xplore HTML content.
+
+    Args:
+        html (str): Raw HTML content from IEEE Xplore
+
+    Returns:
+        dict: Extracted metadata dictionary
+    """
+    soup = BeautifulSoup(html, 'lxml')
 
     # Extract the title
     title_tag = soup.find('h1', {'class': 'document-title'})
@@ -366,7 +431,16 @@ def get_metadata_from_already_extract(file, source=None):\n    \"\"\"Extract met
     # Return the metadata
     return assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher, "IEEE")
 
-def get_metadata_from_html_ACM(html):\n    \"\"\"Extract metadata from ACM Digital Library HTML content.\n    \n    Args:\n        html (str): Raw HTML content from ACM Digital Library\n        \n    Returns:\n        dict: Extracted metadata dictionary\n    \"\"\"\n    soup = BeautifulSoup(html, 'lxml')
+def get_metadata_from_html_ACM(html):
+    """Extract metadata from ACM Digital Library HTML content.
+
+    Args:
+        html (str): Raw HTML content from ACM Digital Library
+
+    Returns:
+        dict: Extracted metadata dictionary
+    """
+    soup = BeautifulSoup(html, 'lxml')
     # Extract the title
     title_tag = soup.find('h1')
     title = title_tag.get_text(strip=True) if title_tag else None
@@ -463,7 +537,16 @@ def get_metadata_from_html_ACM(html):\n    \"\"\"Extract metadata from ACM Digit
     return assign_metadata(title, venue, authors, pages, abstract, keywords, references, doi, publisher, "ACM")
 
 
-def get_metadata_from_html_sciencedirect(html):\n    \"\"\"Extract metadata from ScienceDirect (Elsevier) HTML content.\n    \n    Args:\n        html (str): Raw HTML content from ScienceDirect\n        \n    Returns:\n        dict: Extracted metadata dictionary\n    \"\"\"\n    soup = BeautifulSoup(html, 'lxml')
+def get_metadata_from_html_sciencedirect(html):
+    """Extract metadata from ScienceDirect (Elsevier) HTML content.
+
+    Args:
+        html (str): Raw HTML content from ScienceDirect
+
+    Returns:
+        dict: Extracted metadata dictionary
+    """
+    soup = BeautifulSoup(html, 'lxml')
 
     # Extract the title
     title_tag = soup.find('h1', {'id': 'screen-reader-main-title'})

@@ -21,6 +21,7 @@ import os
 # import cudf.pandas
 # cudf.pandas.install()
 import sys
+import argparse
 
 from Scripts.specialized.Demo import Demo
 from Scripts.specialized.IFT3710 import IFT3710
@@ -296,10 +297,10 @@ def read_sr_project(arg):
     return pd.read_csv(f"{MAIN_PATH}/Datasets/{arg}/{arg}.tsv", delimiter="\t")
 
 
-def main(args=None):
+def main(args=None, do_extraction=True, do_filter=True):
     """
     Main processing function for systematic review datasets.
-    
+
     This function orchestrates the complete processing pipeline for one or more
     systematic review projects. It handles:
     - Dataset initialization and loading
@@ -308,17 +309,21 @@ def main(args=None):
     - Data cleaning and standardization
     - Export to TSV format
     - Quality assessment reporting
-    
+
     The function processes multiple datasets sequentially, applying the same
     standardized pipeline to each one.
-    
+
     Args:
         args (list, optional): List of dataset names to process. If None or empty,
                               defaults to ['CodeCompr', 'ArchiML', 'ModelingAssist', 'CodeClone']
-                              
+        do_extraction (bool, optional): Whether to perform web extraction for missing metadata.
+                                       Defaults to True.
+        do_filter (bool, optional): Whether to filter dataset to only process unprocessed articles.
+                                   Defaults to True.
+
     Returns:
         None: Processes datasets and exports results to files
-        
+
     Side Effects:
         - Creates/updates TSV files for each processed dataset
         - Creates Excel files with preprocessing data
@@ -377,8 +382,8 @@ def main(args=None):
         pre_process_sr_project(sr_project)
         sr_project.df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}_pre-extract.xlsx")
 
-        do_extraction = True
-        if do_extraction:
+        # Use the function parameters instead of hardcoded values
+        if do_filter:
             sr_compiled_project = read_sr_project(arg)
             # Keep only the rows that still need processing (meta_title is null/empty)
             unprocessed = sr_compiled_project[sr_compiled_project['meta_title'].isnull()]
@@ -400,5 +405,56 @@ def main(args=None):
         # sr_project.df.to_excel(f"{MAIN_PATH}/Datasets/{arg}/{arg}_tmp.xlsx")
 
 
+def parse_arguments():
+    """
+    Parse command-line arguments for the systematic review processing pipeline.
+
+    Returns:
+        argparse.Namespace: Parsed command-line arguments containing:
+            - datasets: List of dataset names to process
+            - no_extraction: Flag to disable web extraction
+            - no_filter: Flag to disable filtering for unprocessed articles
+    """
+    parser = argparse.ArgumentParser(
+        description="Systematic Literature Review Metadata Curation Pipeline",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python main.py Demo                           # Process Demo with extraction and filtering
+  python main.py Demo --no-extraction          # Process Demo without web extraction
+  python main.py Demo --no-filter              # Process Demo without filtering
+  python main.py CodeClone ArchiML             # Process multiple datasets
+  python main.py Demo --no-extraction --no-filter  # Process with both options disabled
+        """
+    )
+
+    parser.add_argument(
+        'datasets',
+        nargs='*',
+        default=['CodeCompr', 'ArchiML', 'ModelingAssist', 'CodeClone'],
+        help='Dataset names to process (default: %(default)s)'
+    )
+
+    parser.add_argument(
+        '--no-extraction',
+        action='store_true',
+        help='Disable web extraction for missing metadata (default: extraction enabled)'
+    )
+
+    parser.add_argument(
+        '--no-filter',
+        action='store_true',
+        help='Disable filtering to only process unprocessed articles (default: filtering enabled)'
+    )
+
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    args = parse_arguments()
+
+    # Convert negative flags to positive parameters
+    do_extraction = not args.no_extraction
+    do_filter = not args.no_filter
+
+    main(args.datasets, do_extraction=do_extraction, do_filter=do_filter)
