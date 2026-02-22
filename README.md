@@ -13,8 +13,8 @@ This project addresses a critical challenge in systematic literature reviews: th
 ### Project Results
 
 - **16 systematic review datasets** processed and curated
-- **32,614 total articles** with extracted metadata  
-- **99% article recovery rate** from academic databases
+- **31,548 total articles** with extracted metadata (from 32,646 source records, 1,098 excluded)
+- **96.6% article recovery rate** from academic databases
 - **97% automation success rate** for metadata extraction
 - **8 academic database sources** integrated
 
@@ -44,10 +44,10 @@ Scripts/
 │   ├── os_path.py         # Cross-platform path management
 │   └── __init__.py
 ├── datasets/              # Individual dataset processors (16 datasets)
-│   ├── ArchiML.py         # Architecture & Machine Learning (2,766 articles)
-│   ├── CodeClone.py       # Code Clone Detection (10,454 articles)
-│   ├── GameSE.py          # Game Software Engineering (1,520 articles)
-│   ├── ModelingAssist.py  # Modeling Assistance (3,002 articles)
+│   ├── ArchiML.py         # Architecture & Machine Learning (2,723 articles)
+│   ├── CodeClone.py       # Code Clone Detection (9,700 articles)
+│   ├── GameSE.py          # Game Software Engineering (3,489 + 1,133 articles)
+│   ├── ModelingAssist.py  # Modeling Assistance (2,249 articles)
 │   └── ... (12 more datasets)
 ├── extraction/            # Metadata extraction pipeline
 │   ├── findMissingMetadata.py  # Core extraction logic
@@ -109,30 +109,32 @@ python Scripts/main.py
 
 ## Supported Datasets
 
-| Dataset | Domain | Articles | Status | Description |
-|---------|---------|----------|---------|-------------|
-| **ArchiML** | ML Architecture | 2,766 | Complete | Architecture and Machine Learning integration |
-| **CodeClone** | Code Analysis | 10,454 | Complete | Code clone detection and management |
-| **CodeCompr** | Code Understanding | 1,508 | Complete | Source code comprehension techniques |
-| **GameSE** | Gaming | 1,520 | Complete | Game software engineering practices |
-| **ModelingAssist** | Modeling Tools | 3,002 | Complete | Model-driven development assistance |
-| **Behave** | Behavioral SE | 1,043 | Complete | Behavioral software engineering |
-| **DTCPS** | Cyber-Physical | 4,007 | Complete | Digital twin cyber-physical systems |
-| **ESM_2** | Empirical Methods | 1,134 | Complete | Experience sampling methodology |
-| **ESPLE** | Empirical SE | 991 | Complete | Empirical software engineering |
-| **ModelGuidance** | Model-Driven | 2,105 | Complete | Model-driven development guidance |
-| **OODP** | Design Patterns | 1,826 | Complete | Object-oriented design patterns |
-| **SecSelfAdapt** | Security | 1,962 | Complete | Security in self-adaptive systems |
-| **SmellReprod** | Code Quality | 2,067 | Complete | Code smell reproduction studies |
-| **TestNN** | Neural Testing | 2,533 | Complete | Neural network testing approaches |
-| **TrustSE** | Trust & Security | 2,564 | Complete | Trust in software engineering |
+| Dataset | Domain | Articles | Reviewers | SLR Title |
+|---------|---------|----------|-----------|-----------|
+| **CodeClone** | Code Analysis | 9,700 | -- | A systematic literature review on source code similarity measurement and clone detection: Techniques, applications, and challenges |
+| **CodeCompr** | Code Comprehension | 3,930 | -- | A systematic literature review on the impact of formatting elements on code legibility |
+| **GameSE-title** | Game SE | 3,489 | 2 | The consolidation of game software engineering: A systematic literature review of software engineering for industry-scale computer games (title screening) |
+| **GameSE-abstract** | Game SE | 1,133 | 2 | The consolidation of game software engineering: A systematic literature review of software engineering for industry-scale computer games (abstract screening) |
+| **ArchiML** | ML Architecture | 2,723 | 2 | Architecting ML-enabled systems: Challenges, best practices, and design decisions |
+| **ModelingAssist** | Modeling Tools | 2,249 | 2 | Understanding the landscape of software modelling assistants: A systematic mapping |
+| **ModelGuidance** | Model-Driven | 1,741 | 2 | Modelling guidance in software engineering: A systematic literature review |
+| **SmellReprod** | Code Quality | 1,714 | 2 | How far are we from reproducible research on code smell detection? A systematic literature review |
+| **SecSelfAdapt** | Security | 1,433 | 2 | A systematic review on security and safety of self-adaptive systems |
+| **ESPLE** | Empirical SE | 963 | 2 | Empirical software product line engineering: A systematic literature review |
+| **OODP** | Design Patterns | 708 | 2 | A mapping study of language features improving object-oriented design patterns |
+| **Behave** | BDD | 590 | 2 | Behaviour driven development: A systematic mapping study |
+| **TrustSE** | Trust & Security | 553 | 2 | A systematic literature review on trust in the software ecosystem |
+| **DTCPS** | Cyber-Physical | 403 | 2 | Digital-twin-based testing for cyber-physical systems: A systematic literature review |
+| **ESM\_2** | Adaptive UI | 114 | 2 | Adaptive user interfaces in systems targeting chronic disease: A systematic literature review |
+| **TestNN** | Neural Testing | 105 | 1 | Testing and verification of neural-network-based safety-critical control software: A systematic literature review |
+| **Total** | | **31,548** | | |
 
 ## Academic Database Support
 
 Our RPA pipeline extracts metadata from 8 major academic databases:
 
 - **[IEEE Xplore](https://ieeexplore.ieee.org/)** - Technical publications and conferences
-- **[ACM Digital Library](https://dl.acm.org/)** - Computing and information technology  
+- **[ACM Digital Library](https://dl.acm.org/)** - Computing and information technology
 - **[ScienceDirect](https://www.sciencedirect.com/)** - Elsevier's multidisciplinary publications
 - **[SpringerLink](https://link.springer.com/)** - Academic books and journals
 - **[Scopus](https://www.scopus.com/search/form.uri?display=basic&zone=header&origin=recordpage#basic)** - Citation and abstract database
@@ -151,7 +153,7 @@ do_extraction = True  # Set to False for testing without web scraping
 # Process specific datasets
 args = ['ArchiML', 'CodeClone', 'ModelingAssist']
 
-# Run identifier for batch processing  
+# Run identifier for batch processing
 run = 999
 ```
 
@@ -265,7 +267,7 @@ elif arg == "NewDataset":
 ## Quality Metrics
 
 ### Success Rates
-- **Article Recovery**: 99% of target articles successfully located
+- **Article Recovery**: 96.6% of source records successfully retained (31,548 of 32,646)
 - **Metadata Extraction**: 97% automation success rate
 - **Title Matching Accuracy**: >95% using fuzzy matching algorithms
 
